@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace Mossbound.Script;
 
@@ -98,24 +97,5 @@ public readonly record struct GlyphFigure(uint Links, uint Marks)
                 if (HasLink(a, b)) yield return (a, b);
             }
         }
-    }
-
-    // Human-readable form, e.g. "0-1 arc, 1-6 spoke | 3:Ring". Used by the admin command and tests.
-    public string Describe()
-    {
-        var sb = new StringBuilder();
-        foreach (var (a, b) in LinkPairs())
-        {
-            if (sb.Length > 0) sb.Append(", ");
-            sb.Append($"{a}-{b} {(IsArc(a, b) ? "arc" : "spoke")}");
-        }
-        string sep = " | ";
-        for (int p = 0; p < PointCount; p++)
-        {
-            if (MarkAt(p) == Mark.None) continue;
-            sb.Append(sep).Append($"{(p == Centre ? "c" : p.ToString())}:{MarkAt(p)}");
-            sep = " ";
-        }
-        return sb.ToString();
     }
 }

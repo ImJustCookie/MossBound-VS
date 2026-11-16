@@ -5,7 +5,7 @@ The design is in `design.md`. Each milestone ends with something playable on the
 | # | Milestone | State | Done when |
 |---|---|---|---|
 | M0 | Workspace | done | Template project, dedicated server and client launch, packaging, tests, builds that work in the sandbox |
-| M1 | Script core | done | Rosette glyphs (arcs and spokes, 4 marks), a secret script per world with family marks, element mixing, a bounded circle model and parser, `/mossbound script` |
+| M1 | Script core | done | Rosette glyphs (arcs and spokes, 4 marks), a secret script per world with family marks, element mixing, a bounded circle model and parser |
 | M2 | Inscription window | done | Bark strip (knife and log); canvas and glyph panel with pattern-lock drawing; Gallifreyan-style, pixelated hand-drawn ink on parchment art; inscription validated by the server |
 | M3 | First casting | test scale | Hold to cast, sneak to edit, used up except in creative, cooldown; Touch only; Life, Ember and Wind effects; a coloured burst for every aspect; backfire and fizzle; admin glyph atlas (`/mossbound glyphs`) |
 | M4 | Tiers I and II: making the media | | Work steps with block animations, a knapping-style carving surface (10×10, knife, pattern recipes) and a station. Moss: scrape, lay 5 on stone, flatten in stages, carve, inscribe with a stick. Bark: strip placed logs, build the scribing stump, flatten in stages, carve, charcoal stick. Each medium unlocks its rings in the canvas |

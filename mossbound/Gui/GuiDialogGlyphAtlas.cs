@@ -1,4 +1,3 @@
-using System;
 using Cairo;
 using Mossbound.Script;
 using Vintagestory.API.Client;
@@ -6,22 +5,24 @@ using Vintagestory.API.Client;
 namespace Mossbound.Gui;
 
 // Admin-only window listing this world's glyphs with their names. Opened by `/mossbound glyphs`;
-// its data comes from the server only after the privilege check.
+// its data comes from the server only after the privilege check. Drawn as clean reference figures
+// (exact vector lines, the 7 points shown) rather than in any tier's hand-drawn ink.
 public class GuiDialogGlyphAtlas : GuiDialog
 {
     const int Columns = 4;
-    const double Cell = 128;  // GUI units; the glyph panel art scaled down
+    const double Cell = 128;  // GUI units
     const double Label = 22;
 
+    // No wobble, no colour drift, no grain: every hand-drawn imperfection scales with these to zero.
+    static readonly InkStyle Clean = new(new(0.10, 0.08, 0.07), 0, 0, 1, 1, 0, 1);
+
     readonly GlyphAtlas atlas;
-    readonly ImageSurface? art;
 
     public override string? ToggleKeyCombinationCode => null;
 
     public GuiDialogGlyphAtlas(ICoreClientAPI capi, GlyphAtlas atlas) : base(capi)
     {
         this.atlas = atlas;
-        art = Ink.LoadArt(capi, $"mossbound:textures/gui/{CircleTier.Moss.Art}/glyphpanel.png");
 
         int rows = (atlas.Entries.Count + Columns - 1) / Columns;
         double top = GuiStyle.TitleBarHeight;
@@ -46,28 +47,18 @@ public class GuiDialogGlyphAtlas : GuiDialog
 
     void DrawGrid(Context ctx, ImageSurface surface, ElementBounds bounds)
     {
-        double scale = bounds.InnerWidth / (Columns * Cell), cell = Cell * scale, r = cell * CanvasLayout.PanelGlyphRadius;
-        var style = InkStyle.For(CircleTier.Moss);
-        double px = Ink.PixelSize(scale, style.PanelGrain);
+        double scale = bounds.InnerWidth / (Columns * Cell), cell = Cell * scale, r = cell * 0.3;  // leaves room for ring marks on the rim
         for (int i = 0; i < atlas.Entries.Count; i++)
         {
             var e = atlas.Entries[i];
             ctx.Save();
             ctx.Translate(i % Columns * cell, i / Columns * (Cell + Label) * scale);
-            if (!Ink.PaintArt(ctx, art, cell))
-            {
-                Ink.Use(ctx, Ink.Paper, 1);
-                Ink.FillCircle(ctx, cell / 2, cell / 2, cell * 0.48);
-            }
-            Ink.Pixelated(ctx, cell, px, low => GlyphPainter.Rosette(low, cell / 2, cell / 2, r, 0,
-                new GlyphFigure(e.Links, e.Marks), guides: false, r * 0.07 * style.Weight, Ink.Seed(e.Code), style), style.Noise);
+            Ink.Use(ctx, Ink.Paper, 1);
+            ctx.Rectangle(cell * 0.04, cell * 0.04, cell * 0.92, cell * 0.92);
+            ctx.Fill();
+            GlyphPainter.Rosette(ctx, cell / 2, cell / 2, r, 0, new GlyphFigure(e.Links, e.Marks),
+                guides: true, r * 0.06, 0, Clean, guideAlpha: 0.45, guideDot: 0.035);  // well below a Dot mark (0.07)
             ctx.Restore();
         }
-    }
-
-    public override void OnGuiClosed()
-    {
-        base.OnGuiClosed();
-        art?.Dispose();
     }
 }
