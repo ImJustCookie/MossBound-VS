@@ -11,16 +11,17 @@ namespace Mossbound.Gui;
 //   CanvasGrain / PanelGrain: GUI units per ink pixel; bigger = chunkier pixel-art lines.
 //   Noise:           share of ink pixels knocked out or faded (0–1), like a dry, skipping stroke.
 //   Weight:          multiplier on every stroke width (a finger is broader than a pen).
+//   DoubleBorder:    a second, thinner outer circle; formal media (parchment up) get one.
 readonly record struct InkStyle(Ink.Colour Colour, double ColourVariation, double Roughness,
-    double CanvasGrain, double PanelGrain, double Noise, double Weight)
+    double CanvasGrain, double PanelGrain, double Noise, double Weight, bool DoubleBorder = false)
 {
     public static InkStyle For(CircleTier tier) => tier.Level switch
     {
-        //          colour                   variation rough canvas panel noise weight
-        1 => new(new(0.58, 0.60, 0.44), 0.12, 1.8, 3, 4, 0.18, 1.8), // moss: dry lichen grey-green, finger-drawn
-        2 => new(Ink.Charcoal,           0.06, 1.2, 2, 3, 0.10, 1.3), // bark: charcoal
-        3 => new(new(0.10, 0.11, 0.20), 0.04, 0.7, 1, 3, 0.03, 1.0), // parchment: blue-black ink
-        _ => new(new(0.90, 0.88, 0.82), 0.03, 0.5, 1, 3, 0.10, 1.2), // stone: chalk-white carving
+        //          colour                   variation rough canvas panel noise weight double border
+        1 => new(new(0.58, 0.60, 0.44), 0.12, 1.8, 3, 4, 0.18, 1.8, false), // moss: dry lichen grey-green, finger-drawn
+        2 => new(Ink.Charcoal,           0.06, 1.2, 2, 3, 0.10, 1.3, false), // bark: charcoal
+        3 => new(new(0.10, 0.11, 0.20), 0.04, 0.7, 1, 3, 0.03, 1.0, true),  // parchment: blue-black ink
+        _ => new(new(0.90, 0.88, 0.82), 0.03, 0.5, 1, 3, 0.10, 1.2, true),  // stone: chalk-white carving
     };
 
     // This stroke's colour: the base shade, nudged per stroke (brightness and a slight tint).

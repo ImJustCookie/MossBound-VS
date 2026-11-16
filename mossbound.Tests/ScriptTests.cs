@@ -264,6 +264,32 @@ public class CircleDraftTests
     static readonly GlyphFigure line = new GlyphFigure(0, 0).WithLink(0, 1);
 
     [Fact]
+    public void LinksJoinNeighbouringRingsOrNeighbouringSlots()
+    {
+        var bark = CircleTier.Bark; // heart 3, shape 4
+        Assert.True(CircleDraft.CanLink(c0, new(CircleRing.Inner, 2), bark));      // next ring
+        Assert.True(CircleDraft.CanLink(new(CircleRing.Inner, 0), new(CircleRing.Inner, 3), bark)); // wraps
+        Assert.False(CircleDraft.CanLink(new(CircleRing.Inner, 0), new(CircleRing.Inner, 2), bark)); // across
+        Assert.False(CircleDraft.CanLink(c0, o3, CircleTier.Parchment));          // skips a ring
+        Assert.False(CircleDraft.CanLink(c0, o3, bark));                          // no such slot
+        Assert.False(CircleDraft.CanLink(c0, c0, bark));
+    }
+
+    [Fact]
+    public void LinksBendAroundGlyphsTheyDoNotJoin()
+    {
+        (double x, double y) a = (0, 0), b = (100, 0), centre = (50, 200), blocker = (50, 0);
+        var q = LinkRoute.Control(a, b, centre, new[] { blocker }, clearance: 40); // the usual bow would pass 30 away
+        for (int i = 1; i < 24; i++)
+        {
+            var p = LinkRoute.PointOn(a, q, b, i / 24.0);
+            Assert.True(Math.Sqrt((p.x - blocker.x) * (p.x - blocker.x) + (p.y - blocker.y) * (p.y - blocker.y)) >= 40);
+        }
+        // Nothing in the way: the usual bow toward the centre.
+        Assert.Equal((50.0, 60.0), LinkRoute.Control(a, b, centre, Array.Empty<(double, double)>(), 20));
+    }
+
+    [Fact]
     public void ToggleLinkIsOrderIndependentAndToggles()
     {
         var d = new CircleDraft();
@@ -383,6 +409,8 @@ public class CircleTierTests
         Assert.Equal(new[] { CircleRing.Centre, CircleRing.Inner, CircleRing.Outer, CircleRing.Rim }, CircleTier.Stone.Rings);
         Assert.Equal(2, CircleTier.Moss.SlotCount(CircleRing.Centre));
         Assert.Equal(0, CircleTier.Moss.SlotCount(CircleRing.Inner));
+        Assert.Equal((3, 4), (CircleTier.Bark.SlotCount(CircleRing.Centre), CircleTier.Bark.SlotCount(CircleRing.Inner)));
+        Assert.Equal((4, 6), (CircleTier.Parchment.SlotCount(CircleRing.Centre), CircleTier.Parchment.SlotCount(CircleRing.Inner)));
     }
 
     [Fact]

@@ -59,8 +59,8 @@ Progression is about what a circle can say, not about raw power. Higher tiers ar
 | Tier | Medium | Rings | What you can say | Lifetime |
 |---|---|---|---|---|
 | I | Moss sigil: living moss pressed on stone, written with a stick | Heart (centre, 2 slots) | "Ember", "Life + Water" | One use, wilts in a day |
-| II | Bark strip: stripped from a log, flattened and trimmed, carved at the scribing stump | Heart (3) + Shape (inner ring) | "Ember as a thrown seed" | One use |
-| III | Hide parchment (tanning) or fired clay tablet (pottery) | + Aim (outer ring) | "...at the closest foe", "...on my kin" | Parchment: a few uses. Clay: reusable after a recharge |
+| II | Bark strip: stripped from a log, flattened and trimmed, carved at the scribing stump | Heart (3 slots) + Shape (inner ring, 4) | "Ember as a thrown seed" | One use |
+| III | Hide parchment (tanning) or fired clay tablet (pottery) | Heart (4) + Shape (6) + Aim (outer ring, 8) | "...at the closest foe", "...on my kin" | Parchment: a few uses. Clay: reusable after a recharge |
 | IV | Carved stone or a circle on the ground (chisel, chalk, ash) | + Rim (triggers, nested circles as functions) | "...when something enters, roots burst there" | Permanent, placed in the world |
 
 Tier I is the sandbox for discovery: cheap and quick, for learning what elements and mixes do. The medium limits complexity, not knowledge. You may know a trigger glyph from a ruin long before you can carve stone.
@@ -118,7 +118,7 @@ RIM     the Trigger  when      trigger, then a nested circle          tier IV
 ```
 
 Links are the grammar. A link means "this flows into that".
-1. Links join neighbouring rings, or chain glyphs within one ring.
+1. Links join neighbouring rings, or neighbouring glyphs within one ring. A link never skips a ring, and it bends around glyphs it doesn't join, so you can always tell what is joined to what.
 2. Each branch, a path of linked glyphs from the heart outward, is one cast. Several branches cast together, as in Noita's multicast.
 3. Elements linked together in the centre mix into one heart. Unlinked elements are separate hearts, so different mixes can feed different shapes.
 4. A form carries the heart linked to it. Modifiers bend the form they are linked to.

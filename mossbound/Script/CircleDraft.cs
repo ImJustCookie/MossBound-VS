@@ -14,6 +14,16 @@ public sealed class CircleDraft
     public static (SlotKey, SlotKey) Normalize(SlotKey a, SlotKey b) =>
         (a.Ring, a.Slot).CompareTo((b.Ring, b.Slot)) <= 0 ? (a, b) : (b, a);
 
+    // The grammar's linking rule: a link joins neighbouring rings, or neighbouring slots on one ring
+    // (wrapping around). Links never skip a ring, so they don't run under glyphs they don't join.
+    public static bool CanLink(SlotKey a, SlotKey b, CircleTier tier)
+    {
+        if (!tier.HasSlot(a.Ring, a.Slot) || !tier.HasSlot(b.Ring, b.Slot) || a == b) return false;
+        if (a.Ring != b.Ring) return System.Math.Abs(a.Ring - b.Ring) == 1;
+        int n = tier.SlotCount(a.Ring), d = System.Math.Abs(a.Slot - b.Slot);
+        return d == 1 || d == n - 1;
+    }
+
     public void ToggleLink(SlotKey a, SlotKey b)
     {
         if (a == b) return;

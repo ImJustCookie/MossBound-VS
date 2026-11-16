@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Cairo;
 using Mossbound.Script;
 using Vintagestory.API.Client;
@@ -28,7 +29,7 @@ public class GuiDialogCircleCanvas : GuiDialog
     SlotKey selected = new(CircleRing.Centre, 0);
     SlotKey? dragSlot;         // canvas: glyph a link is being dragged from
     PatternStroke? stroke;     // panel: lines being drawn, or erased if `erasing`
-    bool erasing;
+    bool erasing;              // right button: the panel sweep or the canvas drag removes instead of adds
     int? pressedPoint;         // panel: point under the cursor at press, to tell a click from a stroke
     double mouseX, mouseY;     // local to the pane being dragged in
 
@@ -93,9 +94,10 @@ public class GuiDialogCircleCanvas : GuiDialog
             args.Handled = true;
             return;
         }
-        if (left && canvasBounds.PointInside(args.X, args.Y))
+        if ((left || right) && canvasBounds.PointInside(args.X, args.Y))
         {
             (mouseX, mouseY) = Local(canvasBounds, args);
+            erasing = right;
             dragSlot = layout.SlotAt(mouseX, mouseY, canvasBounds.InnerWidth);
             args.Handled = true;
             return;
@@ -139,8 +141,10 @@ public class GuiDialogCircleCanvas : GuiDialog
             var (x, y) = Local(canvasBounds, args);
             if (layout.SlotAt(x, y, canvasBounds.InnerWidth) is SlotKey end)
             {
-                if (end == start) selected = start;
-                else if (draft.Figures.ContainsKey(start) && draft.Figures.ContainsKey(end)) draft.ToggleLink(start, end);
+                // Left drag adds a link, right drag removes one; a left click selects.
+                if (end == start) { if (!erasing) selected = start; }
+                else if (erasing) draft.Links.Remove(CircleDraft.Normalize(start, end));
+                else if (CanLinkTo(start, end)) draft.Links.Add(CircleDraft.Normalize(start, end));
             }
             dragSlot = null;
             Redraw();
@@ -163,9 +167,13 @@ public class GuiDialogCircleCanvas : GuiDialog
             figure = figure.WithMark(p, erasing ? Mark.None : NextMark(figure.MarkAt(p)));
         }
 
-        if (figure.Links == 0 && figure.Marks == 0) draft.Figures.Remove(selected);
+        if (figure.Links == 0 && figure.Marks == 0) draft.Clear(selected); // drops its links too
         else draft.Figures[selected] = figure;
     }
+
+    // Both ends written, and the grammar allows the pair (neighbouring rings or slots).
+    bool CanLinkTo(SlotKey from, SlotKey to) =>
+        draft.Figures.ContainsKey(from) && draft.Figures.ContainsKey(to) && CircleDraft.CanLink(from, to, layout.Tier);
 
     static Mark NextMark(Mark m) => m == Mark.DoubleRing ? Mark.None : m + 1;
 
@@ -205,39 +213,58 @@ public class GuiDialogCircleCanvas : GuiDialog
 
         Ink.Pixelated(target, size, px, ctx =>
         {
-            // Structure: outer double circle, ring lines and links, erased under every drawn glyph so
-            // lines break around letters. Big circles stay centred: hand-drawn without drifting.
+            // Lines erased in a halo around every written glyph, so they break around letters.
+            void PaintBrokenAroundGlyphs(double halo)
+            {
+                ctx.Operator = Operator.Clear;
+                foreach (var k in draft.Figures.Keys)
+                {
+                    var (x, y) = layout.SlotCentre(k, size);
+                    Ink.FillCircle(ctx, x, y, halo);
+                }
+                ctx.Operator = Operator.Over;
+                ctx.PopGroupToSource();
+                ctx.Paint();
+            }
+
+            // Structure: outer circle (doubled if the tier's style says so) and ring lines, with a wide
+            // halo. Big circles stay centred: hand-drawn without drifting.
             ctx.PushGroup();
             Ink.Use(ctx, style.Stroke(1), 0.9);
             Ink.StrokeCircle(ctx, c, c, size * 0.47, W(5 * u), seed: 1, centred: true, rough: style.Roughness);
-            Ink.Use(ctx, style.Stroke(2), 0.9);
-            Ink.StrokeCircle(ctx, c, c, size * 0.45, W(2.5 * u), seed: 2, centred: true, rough: style.Roughness);
+            if (style.DoubleBorder)
+            {
+                Ink.Use(ctx, style.Stroke(2), 0.9);
+                Ink.StrokeCircle(ctx, c, c, size * 0.45, W(2.5 * u), seed: 2, centred: true, rough: style.Roughness);
+            }
             foreach (var ring in layout.Tier.Rings)
             {
                 Ink.Use(ctx, style.Stroke(10 + (int)ring), 0.35);
                 Ink.StrokeCircle(ctx, c, c, layout.RingRadius(ring) * size, W(2 * u), seed: 10 + (int)ring, centred: true, rough: style.Roughness);
             }
 
+            PaintBrokenAroundGlyphs(gr * 1.25);
+
+            // Links, with a tight halo: they reach right up to the letter circles, so even close
+            // neighbours show what joins what.
+            ctx.PushGroup();
             ctx.LineWidth = W(3.5 * u); // links carry the meaning of a circle: bolder than the ring lines
             foreach (var (a, b) in draft.Links)
             {
-                GlyphPainter.Link(ctx, layout.SlotCentre(a, size), layout.SlotCentre(b, size), c, Ink.Seed(GlyphPainter.SlotSeed(a), GlyphPainter.SlotSeed(b)), style);
+                // Bend around written glyphs this link doesn't join, so it never looks like two links.
+                var avoid = draft.Figures.Keys.Where(k => k != a && k != b).Select(k => layout.SlotCentre(k, size)).ToList();
+                // The selected glyph's own links show in the highlight colour.
+                GlyphPainter.Link(ctx, layout.SlotCentre(a, size), layout.SlotCentre(b, size), c,
+                    Ink.Seed(GlyphPainter.SlotSeed(a), GlyphPainter.SlotSeed(b)), style, avoid, gr * 1.3,
+                    a == selected || b == selected ? Ink.Highlight : null);
             }
             if (dragSlot is SlotKey from)
             {
-                Ink.Use(ctx, Ink.Highlight, 0.8);
+                Ink.Use(ctx, erasing ? Ink.Erase : Ink.Highlight, 0.8);
                 GlyphPainter.Link(ctx, layout.SlotCentre(from, size), (mouseX, mouseY), c, seed: null, style);
             }
 
-            ctx.Operator = Operator.Clear;
-            foreach (var k in draft.Figures.Keys)
-            {
-                var (x, y) = layout.SlotCentre(k, size);
-                Ink.FillCircle(ctx, x, y, gr * 1.25);
-            }
-            ctx.Operator = Operator.Over;
-            ctx.PopGroupToSource();
-            ctx.Paint();
+            PaintBrokenAroundGlyphs(gr * 1.08);
 
             // Glyphs, empty slots (faint, exact) and the selection highlight.
             foreach (var k in layout.AllSlots())
@@ -257,6 +284,15 @@ public class GuiDialogCircleCanvas : GuiDialog
                 {
                     Ink.Use(ctx, Ink.Highlight, 0.9);
                     Ink.StrokeCircle(ctx, x, y, gr * 1.4, W(2 * u));
+                }
+                else if (dragSlot is SlotKey linkFrom
+                    ? (erasing ? draft.Links.Contains(CircleDraft.Normalize(linkFrom, k)) : CanLinkTo(linkFrom, k))
+                    : draft.Links.Contains(CircleDraft.Normalize(selected, k)))
+                {
+                    // Dragging: where a link may be added, or (red) which links may be removed.
+                    // Otherwise: the glyphs the selected one is linked to.
+                    Ink.Use(ctx, dragSlot != null && erasing ? Ink.Erase : Ink.Highlight, 0.45);
+                    Ink.StrokeCircle(ctx, x, y, gr * 1.4, W(1.5 * u));
                 }
             }
         }, style.Noise);

@@ -9,9 +9,9 @@ namespace Mossbound.Script;
 public sealed class CircleTier
 {
     public static readonly CircleTier Moss = new(1, "moss", (CircleRing.Centre, 2));
-    public static readonly CircleTier Bark = new(2, "bark", (CircleRing.Centre, 3), (CircleRing.Inner, 6));
-    public static readonly CircleTier Parchment = new(3, "parchment", (CircleRing.Centre, 3), (CircleRing.Inner, 6), (CircleRing.Outer, 8));
-    public static readonly CircleTier Stone = new(4, "stone", (CircleRing.Centre, 3), (CircleRing.Inner, 6), (CircleRing.Outer, 8), (CircleRing.Rim, 4));
+    public static readonly CircleTier Bark = new(2, "bark", (CircleRing.Centre, 3), (CircleRing.Inner, 4));
+    public static readonly CircleTier Parchment = new(3, "parchment", (CircleRing.Centre, 4), (CircleRing.Inner, 6), (CircleRing.Outer, 8));
+    public static readonly CircleTier Stone = new(4, "stone", (CircleRing.Centre, 4), (CircleRing.Inner, 6), (CircleRing.Outer, 8), (CircleRing.Rim, 4));
 
     static readonly CircleTier[] all = { Moss, Bark, Parchment, Stone };
 

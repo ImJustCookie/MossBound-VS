@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Cairo;
 using Mossbound.Script;
 using static Mossbound.Gui.CanvasLayout;
@@ -16,19 +17,21 @@ static class GlyphPainter
 
     // `guides` = the panel's work view: exact faint letter circle plus the 7 snap points. A written
     // glyph gets a hand-drawn letter circle instead, with its strokes drawn heavier on top.
-    // `style` gives the tier's ink colour, per-stroke colour variation and roughness.
-    public static void Rosette(Context ctx, double cx, double cy, double r, double rotation, GlyphFigure figure, bool guides, double lineWidth, int seed, InkStyle style)
+    // `style` gives the tier's ink colour, per-stroke colour variation and roughness. `guideAlpha` and `guideDot` set
+    // how strongly the guides show (the admin atlas wants them clearer than the panel).
+    public static void Rosette(Context ctx, double cx, double cy, double r, double rotation, GlyphFigure figure, bool guides, double lineWidth, int seed, InkStyle style, double guideAlpha = 0.3, double guideDot = 0.05)
     {
         ctx.PushGroup();
 
-        Ink.Use(ctx, guides ? style.Colour : style.Stroke(Ink.Seed(seed, 99)), guides ? 0.3 : 0.55);
-        Ink.StrokeCircle(ctx, cx, cy, r, guides ? lineWidth * 0.5 : lineWidth, guides ? null : seed, rough: style.Roughness);
+        Ink.Use(ctx, guides ? style.Colour : style.Stroke(Ink.Seed(seed, 99)), guides ? guideAlpha : 0.55);
+        // The letter circle stays thin like an empty slot's outline; the strokes on top carry the weight.
+        Ink.StrokeCircle(ctx, cx, cy, r, lineWidth * 0.5, guides ? null : seed, rough: style.Roughness);
         if (guides)
         {
             for (int k = 0; k < GlyphFigure.PointCount; k++)
             {
                 var (x, y) = RosettePoint(cx, cy, r, rotation, k);
-                Ink.FillCircle(ctx, x, y, r * 0.05);
+                Ink.FillCircle(ctx, x, y, r * guideDot);
             }
         }
 
@@ -88,22 +91,21 @@ static class GlyphPainter
     }
 
     // A link between two glyphs, bowed toward the canvas centre so links don't run along the ring
-    // lines; its ends are hidden under the glyph halos. No seed = exact, in the current colour (the
-    // drag preview); with a seed = hand-drawn in the tier's ink.
-    public static void Link(Context ctx, (double x, double y) a, (double x, double y) b, double centre, int? seed, InkStyle style)
+    // lines, and around any glyph in `avoid` (see LinkRoute); its ends are hidden under the glyph
+    // halos. No seed = exact, in the current colour (the drag preview); with a seed = hand-drawn, in
+    // the tier's ink or in `colour` (a highlighted link keeps its exact hand-drawn shape).
+    public static void Link(Context ctx, (double x, double y) a, (double x, double y) b, double centre, int? seed, InkStyle style,
+        IReadOnlyList<(double x, double y)>? avoid = null, double clearance = 0, Ink.Colour? colour = null)
     {
-        double bow = 0.3, wx = 0, wy = 0;
+        var (qx, qy) = LinkRoute.Control(a, b, (centre, centre), avoid ?? Array.Empty<(double, double)>(), clearance);
         if (seed is int s)
         {
-            Ink.Use(ctx, style.Stroke(s), 1);
+            Ink.Use(ctx, colour ?? style.Stroke(s), 1);
             var rng = new Random(s);
             double len = Math.Sqrt((b.x - a.x) * (b.x - a.x) + (b.y - a.y) * (b.y - a.y));
-            bow += Ink.Jitter(rng, 0.06 * style.Roughness);
-            wx = Ink.Jitter(rng, 0.02 * len * style.Roughness);
-            wy = Ink.Jitter(rng, 0.02 * len * style.Roughness);
+            qx += Ink.Jitter(rng, 0.02 * len * style.Roughness);
+            qy += Ink.Jitter(rng, 0.02 * len * style.Roughness);
         }
-        double mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;
-        double qx = mx + (centre - mx) * bow + wx, qy = my + (centre - my) * bow + wy;
         ctx.NewPath();
         ctx.MoveTo(a.x, a.y);
         ctx.CurveTo(a.x + (qx - a.x) * 2 / 3, a.y + (qy - a.y) * 2 / 3, b.x + (qx - b.x) * 2 / 3, b.y + (qy - b.y) * 2 / 3, b.x, b.y);

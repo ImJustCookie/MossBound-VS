@@ -14,7 +14,7 @@ public class GuiDialogGlyphAtlas : GuiDialog
     const double Label = 22;
 
     // No wobble, no colour drift, no grain: every hand-drawn imperfection scales with these to zero.
-    static readonly InkStyle Clean = new(new(0.93, 0.91, 0.86), 0, 0, 1, 1, 0, 1);
+    static readonly InkStyle Clean = new(new(0.10, 0.08, 0.07), 0, 0, 1, 1, 0, 1);
 
     readonly GlyphAtlas atlas;
 
@@ -53,11 +53,11 @@ public class GuiDialogGlyphAtlas : GuiDialog
             var e = atlas.Entries[i];
             ctx.Save();
             ctx.Translate(i % Columns * cell, i / Columns * (Cell + Label) * scale);
-            ctx.SetSourceRGBA(1, 1, 1, 0.05);
+            Ink.Use(ctx, Ink.Paper, 1);
             ctx.Rectangle(cell * 0.04, cell * 0.04, cell * 0.92, cell * 0.92);
             ctx.Fill();
             GlyphPainter.Rosette(ctx, cell / 2, cell / 2, r, 0, new GlyphFigure(e.Links, e.Marks),
-                guides: true, r * 0.06, 0, Clean);
+                guides: true, r * 0.06, 0, Clean, guideAlpha: 0.45, guideDot: 0.035);  // well below a Dot mark (0.07)
             ctx.Restore();
         }
     }
