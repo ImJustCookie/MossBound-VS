@@ -1,0 +1,21 @@
+{
+    "item-barkstrip": "Bark strip",
+    "itemdesc-barkstrip": "A thin strip of bark. Right-click to inscribe a circle on it, hold right-click to cast what is written, sneak + right-click to edit it.",
+    "item-mosssigil": "Moss sigil",
+    "itemdesc-mosssigil": "A pad of pressed living moss. Right-click to write a small circle on it, hold right-click to cast it, sneak + right-click to edit it.",
+    "medium-blank": "Blank.",
+    "medium-inscribed": "Inscribed with {0} glyph(s).",
+
+    "canvas-title": "Inscription",
+    "canvas-hint": "Circle: click a slot to select it, drag between two glyphs to link them.\nGlyph: hold and sweep across points to draw, sweep with right-click to erase. Click a point to cycle its mark, right-click to clear it.",
+    "canvas-clear": "Clear glyph",
+    "canvas-inscribe": "Inscribe",
+    "canvas-empty": "Draw at least one glyph (with a line) before inscribing.",
+
+    "inscribe-nobark": "Hold what you want to write on.",
+    "inscribe-ok": "You carefully inscribe the bark.",
+
+    "cast-cooldown": "Your hand is still trembling from the last working.",
+    "cast-fizzle": "The bark smoulders and crumbles. Nothing answers.",
+    "cast-backfire": "The inks fight each other and the bark bursts in your hand!"
+}

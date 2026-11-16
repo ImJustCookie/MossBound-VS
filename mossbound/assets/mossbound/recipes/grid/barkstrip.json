@@ -1,0 +1,13 @@
+[
+	{
+		ingredientPattern: "KL",
+		ingredients: {
+			"K": { type: "item", tags: ["tool-knife"], isTool: true },
+			"L": { type: "block", code: "game:log-placed-*-ud" }
+		},
+		width: 2,
+		height: 1,
+		shapeless: true,
+		output: { type: "item", code: "mossbound:barkstrip", quantity: 4 }
+	}
+]

@@ -1,0 +1,31 @@
+{
+	code: "mosssigil",
+	class: "mossbound.ItemCircleMedium",
+	attributes: { circleTier: 1 },
+	maxstacksize: 16,
+	// Placeholder until the moss crafting chain (roadmap M4): creative inventory only, no recipe,
+	// vanilla bark model re-skinned with vanilla moss.
+	shape: { base: "game:item/oakbark" },
+	textures: {
+		bark: { base: "game:block/overlay/moss1" },
+		oak: { base: "game:block/overlay/moss2" }
+	},
+	creativeinventory: { "general": ["*"], "items": ["*"] },
+	materialDensity: 200,
+	guiTransform: {
+		translation: { x: 3, y: 0, z: 0 },
+		rotation: { x: 44, y: 13, z: 24 },
+		origin: { x: 0.5, y: 0.43, z: 0.51 },
+		scale: 2.21
+	},
+	groundTransform: {
+		rotation: { x: -89, y: -11, z: 0 },
+		origin: { x: 0.5, y: 0, z: 0.5 },
+		scale: 2.5
+	},
+	tpHandTransform: {
+		rotation: { x: 10, y: 36, z: 13 },
+		origin: { x: 0.12, y: -0.8, z: 0.074 },
+		scale: 0.52
+	}
+}
