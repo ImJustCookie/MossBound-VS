@@ -40,8 +40,8 @@ static class SpellEffects
             case Aspect.Ember:
                 creature?.ReceiveDamage(Source(caster, EnumDamageType.Fire), 2 * intensity);
                 break;
-            case Aspect.Wind when creature != null:
-                var away = creature.Pos.XYZ.Sub(caster.Entity.Pos.XYZ).Normalize();
+            case Aspect.Wind when creature != null && creature.Pos.XYZ.SquareDistanceTo(caster.Entity.Pos.XYZ) > 0.01:
+                var away = creature.Pos.XYZ.Sub(caster.Entity.Pos.XYZ).Normalize(); // guarded: a zero vector normalises to NaN
                 creature.Pos.Motion.Add(away.X * 0.3 * intensity, 0.15 * intensity, away.Z * 0.3 * intensity);
                 break;
         }
@@ -63,13 +63,12 @@ static class SpellEffects
         }
     }
 
-    static DamageSource Source(IServerPlayer caster, EnumDamageType type) => new()
-    {
-        Source = EnumDamageSource.Player,
-        SourceEntity = caster.Entity,
-        CauseEntity = caster.Entity,
-        Type = type,
-    };
+    // Heals carry no source entity: the game applies knockback even to heals, from the source's
+    // position, and healing yourself makes that direction (you - you).Normalize() = NaN, which
+    // crashes the client.
+    static DamageSource Source(IServerPlayer caster, EnumDamageType type) => type == EnumDamageType.Heal
+        ? new() { Source = EnumDamageSource.Internal, Type = type }
+        : new() { Source = EnumDamageSource.Player, SourceEntity = caster.Entity, CauseEntity = caster.Entity, Type = type };
 
     // Spawned server-side with no "except player": every nearby client sees it.
     static void Burst(ICoreServerAPI sapi, Vec3d at, int colour, int quantity) =>
