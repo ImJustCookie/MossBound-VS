@@ -35,30 +35,7 @@ static class CirclePainter
             return (pts.Average(p => p.x), pts.Average(p => p.y));
         }
 
-        // Drawing from the land: roots behind everything, from the heart out through the border.
-        if (draft.Source == LifeSource.Land) Roots(ctx, layout, style, size, W);
-
-        // Sentence circle: the border (doubled if the tier's style says so), in its own layer so the
-        // bites and the hand's opening cut only the border. Big circles stay centred: hand-drawn
-        // without drifting.
-        ctx.PushGroup();
-        Ink.Use(ctx, style.Stroke(1), 0.9);
-        Ink.StrokeCircle(ctx, c, c, outer, W(5 * u), seed: 1, centred: true, rough: style.Roughness);
-        if (style.DoubleBorder)
-        {
-            Ink.Use(ctx, style.Stroke(2), 0.9);
-            Ink.StrokeCircle(ctx, c, c, inner, W(2.5 * u), seed: 2, centred: true, rough: style.Roughness);
-        }
-
-        // Drawing from yourself: beads threaded along the border, like a pulse.
-        if (draft.Source == LifeSource.Self) Beads(ctx, style, size, W);
-
-        // Words bite the border (beads and all).
-        ctx.Operator = Operator.Clear;
-        foreach (var (wx, wy, wr) in wordCircles) Ink.FillCircle(ctx, wx, wy, wr);
-        ctx.Operator = Operator.Over;
-        ctx.PopGroupToSource();
-        ctx.Paint();
+        Border(ctx, draft.Source, style, size, W, wordCircles);
 
         // Each word's own arc closes the bite it made (clipped to the border).
         ctx.Save();
@@ -103,6 +80,32 @@ static class CirclePainter
         }
     }
 
+    // The sentence circle: the border (doubled if the tier's style says so), with where the life comes
+    // from worked into it (plain for the medium, long thorn-diamonds for your own body, a thorny
+    // bramble for the land), then cut where words bite into it. Drawn in its own layer so the bites
+    // cut only the border. Big circles stay centred: hand-drawn without drifting.
+    public static void Border(Context ctx, LifeSource source, InkStyle style, double size, Func<double, double> W,
+        IEnumerable<(double x, double y, double r)> bites)
+    {
+        double c = size / 2, u = size / CanvasLayout.CanvasSize;
+        ctx.PushGroup();
+        Ink.Use(ctx, style.Stroke(1), 0.9);
+        Ink.StrokeCircle(ctx, c, c, size * Outer, W(5 * u), seed: 1, centred: true, rough: style.Roughness);
+        if (style.DoubleBorder)
+        {
+            Ink.Use(ctx, style.Stroke(2), 0.9);
+            Ink.StrokeCircle(ctx, c, c, size * Inner, W(2.5 * u), seed: 2, centred: true, rough: style.Roughness);
+        }
+        if (source == LifeSource.Self) Diamonds(ctx, style, size, W);
+        if (source == LifeSource.Land) Bramble(ctx, style, size, W);
+
+        ctx.Operator = Operator.Clear;
+        foreach (var (bx, by, br) in bites) Ink.FillCircle(ctx, bx, by, br);
+        ctx.Operator = Operator.Over;
+        ctx.PopGroupToSource();
+        ctx.Paint();
+    }
+
     // A thinner second line inside a circle: the concentric doubling of the references.
     static void Echo(Context ctx, InkStyle style, double x, double y, double r, double width, int seed)
     {
@@ -110,41 +113,59 @@ static class CirclePainter
         Ink.StrokeCircle(ctx, x, y, r, width, seed, centred: true, rough: style.Roughness);
     }
 
-    // Seven roots from near the heart out past the border, each forking once on the way.
-    static void Roots(Context ctx, CanvasLayout layout, InkStyle style, double size, Func<double, double> W)
-    {
-        const int Count = 7;
-        double c = size / 2, u = size / CanvasLayout.CanvasSize;
-        double from = layout.RingRadius(CircleRing.Centre) * size * 0.5, to = size * 0.485, fork = from + (to - from) * 0.62;
-        var rng = new Random(77);
-        ctx.LineWidth = W(1.2 * u);
-        for (int i = 0; i < Count; i++)
-        {
-            double a = 2 * Math.PI * i / Count + Ink.Jitter(rng, 0.25), af = a + Ink.Jitter(rng, 0.08);
-            Ink.Use(ctx, style.Stroke(Ink.Seed(77, i)), 0.6);
-            Line(ctx, Polar(c, from, a), Polar(c, fork, af), rng, style);
-            Line(ctx, Polar(c, fork, af), Polar(c, to, af - 0.13), rng, style);
-            Line(ctx, Polar(c, fork, af), Polar(c, to, af + 0.13), rng, style);
-        }
-    }
-
-    static void Beads(Context ctx, InkStyle style, double size, Func<double, double> W)
+    // Long, pointed diamonds threaded on the border, pointing out on both sides.
+    static void Diamonds(Context ctx, InkStyle style, double size, Func<double, double> W)
     {
         const int Count = 20;
+        const double Along = 0.028, Across = 14; // half-width along the border (radians), reach each side (GUI units)
         double c = size / 2, u = size / CanvasLayout.CanvasSize, outer = size * Outer;
-        Ink.Use(ctx, style.Stroke(78), 0.95);
+        Ink.Use(ctx, style.Stroke(79), 0.95);
         for (int i = 0; i < Count; i++)
         {
-            var (x, y) = Polar(c, outer, 2 * Math.PI * (i + 0.5) / Count);
-            Ink.FillCircle(ctx, x, y, W(6 * u));
+            double a = 2 * Math.PI * (i + 0.5) / Count;
+            var tipOut = Polar(c, outer + Across * u, a);
+            var side1 = Polar(c, outer, a + Along);
+            var tipIn = Polar(c, outer - Across * u, a);
+            var side2 = Polar(c, outer, a - Along);
+            ctx.NewPath();
+            ctx.MoveTo(tipOut.x, tipOut.y); ctx.LineTo(side1.x, side1.y); ctx.LineTo(tipIn.x, tipIn.y); ctx.LineTo(side2.x, side2.y);
+            ctx.ClosePath();
+            ctx.Fill();
         }
     }
 
-    static void Line(Context ctx, (double x, double y) a, (double x, double y) b, Random rng, InkStyle style)
+    // A thin vine weaving across the border, a hooked thorn on every crest, pointing out on the outer
+    // crests and in on the inner ones.
+    static void Bramble(Context ctx, InkStyle style, double size, Func<double, double> W)
     {
+        const int Waves = 16;
+        double c = size / 2, u = size / CanvasLayout.CanvasSize, outer = size * Outer, amp = 7 * u;
+        Ink.Use(ctx, style.Stroke(82), 0.9);
+        ctx.LineWidth = W(2.2 * u);
         ctx.NewPath();
-        Ink.TraceHandLine(ctx, a.x, a.y, b.x, b.y, rng, style.Roughness * 0.5);
+        for (int i = 0; i <= 720; i++)
+        {
+            double a = 2 * Math.PI * i / 720;
+            var (x, y) = Polar(c, outer + amp * Math.Sin(a * Waves), a);
+            if (i == 0) ctx.MoveTo(x, y);
+            else ctx.LineTo(x, y);
+        }
         ctx.Stroke();
+        for (int i = 0; i < Waves; i++)
+        {
+            Thorn(ctx, c, outer + amp - 2 * u, 11 * u, 2 * Math.PI * (i + 0.25) / Waves);   // outer crest, pointing out
+            Thorn(ctx, c, outer - amp + 2 * u, -11 * u, 2 * Math.PI * (i + 0.75) / Waves);  // inner crest, pointing in
+        }
+    }
+
+    // A small hooked thorn rising `height` from radius `r` at angle `a` (negative height points inward).
+    static void Thorn(Context ctx, double c, double r, double height, double a)
+    {
+        var (x0, y0) = Polar(c, r, a - 0.03);
+        var (x1, y1) = Polar(c, r, a + 0.03);
+        var (tx, ty) = Polar(c, r + height, a + 0.045);
+        ctx.NewPath(); ctx.MoveTo(x0, y0); ctx.LineTo(tx, ty); ctx.LineTo(x1, y1); ctx.ClosePath();
+        ctx.Fill();
     }
 
     static (double x, double y) Polar(double c, double r, double a) => (c + Math.Cos(a) * r, c + Math.Sin(a) * r);
