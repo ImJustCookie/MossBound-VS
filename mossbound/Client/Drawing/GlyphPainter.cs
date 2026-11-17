@@ -6,96 +6,64 @@ using static Mossbound.Client.CanvasLayout;
 
 namespace Mossbound.Client;
 
-// How glyphs and links look. Readability rules borrowed from Circular Gallifreyan: strokes are arcs
-// and radial spokes only, every glyph is a letter circle, marks sit on their point and break the lines
-// around them, and line weights go from heavy (outer circle) to light (links).
+// How the circle around a glyph's 7 points is drawn.
+enum LetterCircle
+{
+    Guides, // faint and exact, with the 7 points: the glyph panel and the admin atlas
+    Bold,   // a solid letter, its arcs drawn just inside: a glyph written on the circle
+    None,   // no circle at all: only what was drawn
+}
+
+// How a glyph, its lines and its marks, and the links between glyphs look.
 static class GlyphPainter
 {
-    // Seed for a glyph's hand-drawn wobble: tied to its slot, so it looks the same in both panes and
-    // doesn't change when lines are added.
+    const double InnerArcScale = 0.78; // where arcs go inside a bold letter circle, so they still show
+
+    // Tied to the slot, so a glyph wobbles the same way in both panes and keeps its look as lines are added.
     public static int SlotSeed(SlotKey k) => Ink.Seed((int)k.Ring + 1, k.Slot + 1);
 
-    // `guides` = the panel's work view: exact faint letter circle plus the 7 snap points. A written
-    // glyph gets a hand-drawn letter circle instead, with its strokes drawn heavier on top.
-    // `style` gives the tier's ink colour, per-stroke colour variation and roughness. `guideAlpha` and `guideDot` set
-    // how strongly the guides show (the admin atlas wants them clearer than the panel).
-    // `bold` = a Gallifreyan letter on the circle: a solid letter circle, with rim arcs drawn as an inner
-    // concentric arc so they still show against it.
-    public static void Rosette(Context ctx, double cx, double cy, double r, double rotation, GlyphFigure figure, bool guides, double lineWidth, int seed, InkStyle style, double guideAlpha = 0.3, double guideDot = 0.05, bool bold = false)
+    public static void DrawGlyph(Context ctx, double cx, double cy, double r, double rotation, GlyphFigure figure, double lineWidth,
+        int seed, InkStyle style, LetterCircle letter, double guideAlpha = 0.3, double guideDot = 0.05)
     {
         ctx.PushGroup();
-
-        Ink.Use(ctx, guides ? style.Colour : style.Stroke(Ink.Seed(seed, 99)), guides ? guideAlpha : bold ? 1 : 0.55);
-        // A thin letter circle like an empty slot's outline (strokes on top carry the weight), or a bold one.
-        Ink.StrokeCircle(ctx, cx, cy, r, bold ? lineWidth : lineWidth * 0.5, guides ? null : seed, rough: style.Roughness);
-        if (guides)
-        {
-            for (int k = 0; k < GlyphFigure.PointCount; k++)
-            {
-                var (x, y) = RosettePoint(cx, cy, r, rotation, k);
-                Ink.FillCircle(ctx, x, y, r * guideDot);
-            }
-        }
-
+        DrawLetterCircle(ctx, cx, cy, r, rotation, lineWidth, seed, style, letter, guideAlpha, guideDot);
         ctx.LineWidth = lineWidth;
-        foreach (var (a, b) in figure.LinePairs()) Segment(ctx, cx, cy, r, rotation, a, b, seed, style, arcScale: bold ? 0.78 : 1);
-
-        // Break the lines around each mark, like a Gallifreyan vowel on its line.
-        ctx.Operator = Operator.Clear;
-        for (int k = 0; k < GlyphFigure.PointCount; k++)
-        {
-            var mark = figure.MarkAt(k);
-            if (mark == Mark.None) continue;
-            var (x, y) = RosettePoint(cx, cy, r, rotation, k);
-            Ink.FillCircle(ctx, x, y, MarkRadius(r, mark) + lineWidth);
-        }
-        ctx.Operator = Operator.Over;
-
-        for (int k = 0; k < GlyphFigure.PointCount; k++)
-        {
-            var mark = figure.MarkAt(k);
-            if (mark == Mark.None) continue;
-            var (x, y) = RosettePoint(cx, cy, r, rotation, k);
-            int markSeed = Ink.Seed(seed, k);
-            Ink.Use(ctx, style.Stroke(markSeed), 1);
-            DrawMark(ctx, x, y, r, mark, lineWidth, markSeed, style.Roughness);
-        }
-
+        double arcScale = letter == LetterCircle.Bold ? InnerArcScale : 1;
+        foreach (var (a, b) in figure.LinePairs()) DrawLine(ctx, cx, cy, r, rotation, a, b, seed, style, arcScale: arcScale);
+        CutLinesUnderMarks(ctx, cx, cy, r, rotation, figure, lineWidth);
+        DrawMarks(ctx, cx, cy, r, rotation, figure, lineWidth, seed, style);
         ctx.PopGroupToSource();
         ctx.Paint();
     }
 
-    // One allowed stroke: an arc along the rim between neighbours (or, with `arcScale` < 1, on an inner
-    // concentric circle), or a spoke to the centre. Arcs share the glyph's rim wobble; spokes bow a little.
-    // `ownColour: false` keeps the current source colour (the green or red drawing preview).
-    public static void Segment(Context ctx, double cx, double cy, double r, double rotation, int a, int b, int glyphSeed, InkStyle style, bool ownColour = true, double arcScale = 1)
+    // An arc along the rim between neighbouring points, or a spoke to the middle. `ownColour: false`
+    // keeps the current colour (the highlighted stroke being drawn on the panel).
+    public static void DrawLine(Context ctx, double cx, double cy, double r, double rotation, int a, int b, int glyphSeed, InkStyle style,
+        bool ownColour = true, double arcScale = 1)
     {
         int seed = Ink.Seed(glyphSeed, a, b);
         if (ownColour) Ink.Use(ctx, style.Stroke(seed), 1);
         var rng = new Random(seed);
-        double rough = style.Roughness;
         ctx.NewPath();
         if (GlyphFigure.IsArc(a, b))
         {
-            // Clockwise from the lower point of the pair (5→0 wraps), overshooting a hair at each end.
-            int start = (b == (a + 1) % GlyphFigure.RimPoints) ? a : b;
+            int start = b == (a + 1) % GlyphFigure.RimPoints ? a : b; // arcs run clockwise; 5->0 wraps
             double angle = rotation - Math.PI / 2 + start * Math.PI / 3;
-            double over0 = Ink.Jitter(rng, 0.04 * rough), over1 = Ink.Jitter(rng, 0.04 * rough);
-            Ink.TraceWobblyArc(ctx, cx, cy, r * arcScale, angle - over0, Math.PI / 3 + over0 + over1, glyphSeed, rough: rough);
+            double overStart = Ink.Jitter(rng, 0.04 * style.Roughness), overEnd = Ink.Jitter(rng, 0.04 * style.Roughness);
+            Ink.TraceWobblyArc(ctx, cx, cy, r * arcScale, angle - overStart, Math.PI / 3 + overStart + overEnd, glyphSeed, rough: style.Roughness);
         }
         else
         {
             var (ax, ay) = RosettePoint(cx, cy, r, rotation, a);
             var (bx, by) = RosettePoint(cx, cy, r, rotation, b);
-            Ink.TraceHandLine(ctx, ax, ay, bx, by, rng, rough);
+            Ink.TraceHandLine(ctx, ax, ay, bx, by, rng, style.Roughness);
         }
         ctx.Stroke();
     }
 
-    // A link between two glyphs: straight, bowing only around a glyph in `avoid` (see LinkRoute); its
-    // ends are hidden under the glyph halos. No seed = exact, in the current colour (the drag preview); with a seed = hand-drawn, in
-    // the tier's ink or in `colour` (a highlighted link keeps its exact hand-drawn shape).
-    public static void Link(Context ctx, (double x, double y) a, (double x, double y) b, double centre, int? seed, InkStyle style,
+    // A link between two glyphs (see LinkRoute for its path). Without a seed it is exact and uses the
+    // current colour (the link being dragged); with one it is hand-drawn in the ink, or in `colour`.
+    public static void DrawLink(Context ctx, (double x, double y) a, (double x, double y) b, double centre, int? seed, InkStyle style,
         IReadOnlyList<(double x, double y, double r)>? avoid = null, Ink.Colour? colour = null)
     {
         var (qx, qy) = LinkRoute.Control(a, b, (centre, centre), avoid ?? Array.Empty<(double, double, double)>());
@@ -103,9 +71,9 @@ static class GlyphPainter
         {
             Ink.Use(ctx, colour ?? style.Stroke(s), 1);
             var rng = new Random(s);
-            double len = Math.Sqrt((b.x - a.x) * (b.x - a.x) + (b.y - a.y) * (b.y - a.y));
-            qx += Ink.Jitter(rng, 0.02 * len * style.Roughness);
-            qy += Ink.Jitter(rng, 0.02 * len * style.Roughness);
+            double wobble = 0.02 * Geometry.Distance(a, b) * style.Roughness;
+            qx += Ink.Jitter(rng, wobble);
+            qy += Ink.Jitter(rng, wobble);
         }
         ctx.NewPath();
         ctx.MoveTo(a.x, a.y);
@@ -113,7 +81,57 @@ static class GlyphPainter
         ctx.Stroke();
     }
 
-    // Footprint of each mark (lines are cleared inside it): dot < big dot < ring = double ring (a third of the glyph).
+    static void DrawLetterCircle(Context ctx, double cx, double cy, double r, double rotation, double lineWidth, int seed, InkStyle style,
+        LetterCircle letter, double guideAlpha, double guideDot)
+    {
+        switch (letter)
+        {
+            case LetterCircle.Guides:
+                Ink.Use(ctx, style.Colour, guideAlpha);
+                Ink.StrokeCircle(ctx, cx, cy, r, lineWidth * 0.5);
+                for (int k = 0; k < GlyphFigure.PointCount; k++)
+                {
+                    var (x, y) = RosettePoint(cx, cy, r, rotation, k);
+                    Ink.FillCircle(ctx, x, y, r * guideDot);
+                }
+                break;
+            case LetterCircle.Bold:
+                Ink.Use(ctx, style.Stroke(Ink.Seed(seed, 99)), 1);
+                Ink.StrokeCircle(ctx, cx, cy, r, lineWidth, seed, rough: style.Roughness);
+                break;
+        }
+    }
+
+    // Lines break around each mark, like a Gallifreyan vowel on its line.
+    static void CutLinesUnderMarks(Context ctx, double cx, double cy, double r, double rotation, GlyphFigure figure, double lineWidth)
+    {
+        ctx.Operator = Operator.Clear;
+        foreach (var (point, mark) in MarksOf(figure))
+        {
+            var (x, y) = RosettePoint(cx, cy, r, rotation, point);
+            Ink.FillCircle(ctx, x, y, MarkRadius(r, mark) + lineWidth);
+        }
+        ctx.Operator = Operator.Over;
+    }
+
+    static void DrawMarks(Context ctx, double cx, double cy, double r, double rotation, GlyphFigure figure, double lineWidth, int seed, InkStyle style)
+    {
+        foreach (var (point, mark) in MarksOf(figure))
+        {
+            var (x, y) = RosettePoint(cx, cy, r, rotation, point);
+            int markSeed = Ink.Seed(seed, point);
+            Ink.Use(ctx, style.Stroke(markSeed), 1);
+            DrawMark(ctx, x, y, r, mark, lineWidth, markSeed, style.Roughness);
+        }
+    }
+
+    static IEnumerable<(int point, Mark mark)> MarksOf(GlyphFigure figure)
+    {
+        for (int p = 0; p < GlyphFigure.PointCount; p++)
+            if (figure.MarkAt(p) != Mark.None) yield return (p, figure.MarkAt(p));
+    }
+
+    // The area a mark covers: dot < big dot < ring = double ring (a third of the glyph).
     static double MarkRadius(double r, Mark mark) => r * mark switch { Mark.Dot => 0.07, Mark.BigDot => 0.17, _ => 0.33 };
 
     static void DrawMark(Context ctx, double x, double y, double r, Mark mark, double lineWidth, int seed, double rough)

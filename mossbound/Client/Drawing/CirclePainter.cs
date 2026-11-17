@@ -191,7 +191,7 @@ static class CirclePainter
     static double Distance((double x, double y) a, (double x, double y) b) => Math.Sqrt((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y));
 
     // A click on the border band (not on a slot) picks the source.
-    public static bool OnBorder(double x, double y, double size)
+    public static bool IsOnBorder(double x, double y, double size)
     {
         double d = Distance((x, y), (size / 2, size / 2)) / size;
         return d >= Inner - 0.02 && d <= 0.49;
