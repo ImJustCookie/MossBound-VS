@@ -19,13 +19,15 @@ static class GlyphPainter
     // glyph gets a hand-drawn letter circle instead, with its strokes drawn heavier on top.
     // `style` gives the tier's ink colour, per-stroke colour variation and roughness. `guideAlpha` and `guideDot` set
     // how strongly the guides show (the admin atlas wants them clearer than the panel).
-    public static void Rosette(Context ctx, double cx, double cy, double r, double rotation, GlyphFigure figure, bool guides, double lineWidth, int seed, InkStyle style, double guideAlpha = 0.3, double guideDot = 0.05)
+    // `bold` = a Gallifreyan letter on the circle: a solid letter circle, with rim arcs drawn as an inner
+    // concentric arc so they still show against it.
+    public static void Rosette(Context ctx, double cx, double cy, double r, double rotation, GlyphFigure figure, bool guides, double lineWidth, int seed, InkStyle style, double guideAlpha = 0.3, double guideDot = 0.05, bool bold = false)
     {
         ctx.PushGroup();
 
-        Ink.Use(ctx, guides ? style.Colour : style.Stroke(Ink.Seed(seed, 99)), guides ? guideAlpha : 0.55);
-        // The letter circle stays thin like an empty slot's outline; the strokes on top carry the weight.
-        Ink.StrokeCircle(ctx, cx, cy, r, lineWidth * 0.5, guides ? null : seed, rough: style.Roughness);
+        Ink.Use(ctx, guides ? style.Colour : style.Stroke(Ink.Seed(seed, 99)), guides ? guideAlpha : bold ? 1 : 0.55);
+        // A thin letter circle like an empty slot's outline (strokes on top carry the weight), or a bold one.
+        Ink.StrokeCircle(ctx, cx, cy, r, bold ? lineWidth : lineWidth * 0.5, guides ? null : seed, rough: style.Roughness);
         if (guides)
         {
             for (int k = 0; k < GlyphFigure.PointCount; k++)
@@ -36,7 +38,7 @@ static class GlyphPainter
         }
 
         ctx.LineWidth = lineWidth;
-        foreach (var (a, b) in figure.LinkPairs()) Segment(ctx, cx, cy, r, rotation, a, b, seed, style);
+        foreach (var (a, b) in figure.LinkPairs()) Segment(ctx, cx, cy, r, rotation, a, b, seed, style, arcScale: bold ? 0.78 : 1);
 
         // Break the lines around each mark, like a Gallifreyan vowel on its line.
         ctx.Operator = Operator.Clear;
@@ -63,10 +65,10 @@ static class GlyphPainter
         ctx.Paint();
     }
 
-    // One allowed stroke: an arc along the rim between neighbours, or a spoke to the centre. Arcs
-    // share the glyph's rim wobble (so they sit on its letter circle); spokes bow a little.
+    // One allowed stroke: an arc along the rim between neighbours (or, with `arcScale` < 1, on an inner
+    // concentric circle), or a spoke to the centre. Arcs share the glyph's rim wobble; spokes bow a little.
     // `ownColour: false` keeps the current source colour (the green or red drawing preview).
-    public static void Segment(Context ctx, double cx, double cy, double r, double rotation, int a, int b, int glyphSeed, InkStyle style, bool ownColour = true)
+    public static void Segment(Context ctx, double cx, double cy, double r, double rotation, int a, int b, int glyphSeed, InkStyle style, bool ownColour = true, double arcScale = 1)
     {
         int seed = Ink.Seed(glyphSeed, a, b);
         if (ownColour) Ink.Use(ctx, style.Stroke(seed), 1);
@@ -79,7 +81,7 @@ static class GlyphPainter
             int start = (b == (a + 1) % GlyphFigure.EdgePoints) ? a : b;
             double angle = rotation - Math.PI / 2 + start * Math.PI / 3;
             double over0 = Ink.Jitter(rng, 0.04 * rough), over1 = Ink.Jitter(rng, 0.04 * rough);
-            Ink.TraceWobblyArc(ctx, cx, cy, r, angle - over0, Math.PI / 3 + over0 + over1, glyphSeed, rough: rough);
+            Ink.TraceWobblyArc(ctx, cx, cy, r * arcScale, angle - over0, Math.PI / 3 + over0 + over1, glyphSeed, rough: rough);
         }
         else
         {
@@ -90,14 +92,13 @@ static class GlyphPainter
         ctx.Stroke();
     }
 
-    // A link between two glyphs, bowed toward the canvas centre so links don't run along the ring
-    // lines, and around any glyph in `avoid` (see LinkRoute); its ends are hidden under the glyph
-    // halos. No seed = exact, in the current colour (the drag preview); with a seed = hand-drawn, in
+    // A link between two glyphs: straight, bowing only around a glyph in `avoid` (see LinkRoute); its
+    // ends are hidden under the glyph halos. No seed = exact, in the current colour (the drag preview); with a seed = hand-drawn, in
     // the tier's ink or in `colour` (a highlighted link keeps its exact hand-drawn shape).
     public static void Link(Context ctx, (double x, double y) a, (double x, double y) b, double centre, int? seed, InkStyle style,
-        IReadOnlyList<(double x, double y)>? avoid = null, double clearance = 0, Ink.Colour? colour = null)
+        IReadOnlyList<(double x, double y, double r)>? avoid = null, Ink.Colour? colour = null)
     {
-        var (qx, qy) = LinkRoute.Control(a, b, (centre, centre), avoid ?? Array.Empty<(double, double)>(), clearance);
+        var (qx, qy) = LinkRoute.Control(a, b, (centre, centre), avoid ?? Array.Empty<(double, double, double)>());
         if (seed is int s)
         {
             Ink.Use(ctx, colour ?? style.Stroke(s), 1);

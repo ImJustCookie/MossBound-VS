@@ -12,16 +12,18 @@ namespace Mossbound.Gui;
 //   Noise:           share of ink pixels knocked out or faded (0–1), like a dry, skipping stroke.
 //   Weight:          multiplier on every stroke width (a finger is broader than a pen).
 //   DoubleBorder:    a second, thinner outer circle; formal media (parchment up) get one.
+//   Doubles:         whether doubled lines (long words, triple mixes) can be drawn at all: thin
+//                    paired lines break up into dashes at moss's coarse grain.
 readonly record struct InkStyle(Ink.Colour Colour, double ColourVariation, double Roughness,
-    double CanvasGrain, double PanelGrain, double Noise, double Weight, bool DoubleBorder = false)
+    double CanvasGrain, double PanelGrain, double Noise, double Weight, bool DoubleBorder = false, bool Doubles = false)
 {
     public static InkStyle For(CircleTier tier) => tier.Level switch
     {
-        //          colour                   variation rough canvas panel noise weight double border
-        1 => new(new(0.58, 0.60, 0.44), 0.12, 1.8, 3, 4, 0.18, 1.8, false), // moss: dry lichen grey-green, finger-drawn
-        2 => new(Ink.Charcoal,           0.06, 1.2, 2, 3, 0.10, 1.3, false), // bark: charcoal
-        3 => new(new(0.10, 0.11, 0.20), 0.04, 0.7, 1, 3, 0.03, 1.0, true),  // parchment: blue-black ink
-        _ => new(new(0.90, 0.88, 0.82), 0.03, 0.5, 1, 3, 0.10, 1.2, true),  // stone: chalk-white carving
+        //          colour                   variation rough canvas panel noise weight border doubles
+        1 => new(new(0.58, 0.60, 0.44), 0.12, 1.8, 3, 4, 0.18, 1.8, false, false), // moss: dry lichen grey-green, finger-drawn
+        2 => new(Ink.Charcoal,           0.06, 1.2, 2, 3, 0.10, 1.3, false, true),  // bark: charcoal
+        3 => new(new(0.10, 0.11, 0.20), 0.04, 0.7, 1, 3, 0.03, 1.0, true,  true),  // parchment: blue-black ink
+        _ => new(new(0.90, 0.88, 0.82), 0.03, 0.5, 1, 3, 0.10, 1.2, true,  true),  // stone: chalk-white carving
     };
 
     // This stroke's colour: the base shade, nudged per stroke (brightness and a slight tint).

@@ -2,7 +2,7 @@
 
 Mossbound is a druidic spell-writing mod for Vintage Story. You discover a hidden script in the world, write spells as magic circles in the style of Circular Gallifreyan, and cast them as quiet, grounded folk magic.
 
-What exists today: the hidden script, the circle model and its rules, element mixing, the inscription window and its look, and a first round of casting (Touch only, a few effects, simple mishaps). Everything else here is design that hasn't been built yet. The roadmap tracks it milestone by milestone.
+What exists today: the hidden script, the circle model and its rules, element mixing, the inscription window and its look, and a first round of casting (Touch only, a few effects, simple mishaps). Everything else here is design that hasn't been built yet. The roadmap tracks it milestone by milestone. For a step-by-step guide to writing circles, from a first moss sigil to a full parchment circle, see `writing-guide.md`.
 
 ## 1. The feel
 
