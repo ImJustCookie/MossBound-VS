@@ -48,3 +48,7 @@ Repository layout:
 | `CakeBuild/` | Packaging, run by `build.sh` |
 
 Branches follow git flow: work happens on `feature/*` branches, merges into `dev` by pull request, and is released from `dev` to `main`. CI must pass before a merge. Pushing a `v<version>` tag that matches `modinfo.json` creates a draft GitHub release with the zip.
+
+## Licence
+
+Mossbound (code, art and documentation) is licensed under [Creative Commons Attribution-NonCommercial-ShareAlike 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/): it may be shared and adapted with credit, not for commercial use, and adaptations must use the same licence. Full text: [LICENSE](LICENSE).
