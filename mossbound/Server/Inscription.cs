@@ -17,7 +17,7 @@ class Inscription
         var slot = player.InventoryManager.ActiveHotbarSlot;
         if (slot?.Itemstack?.Collectible is not ItemCircleMedium medium)
         {
-            player.Tell("mossbound:inscribe-nobark");
+            player.Tell("inscribe-no-medium");
             return;
         }
         if (msg.Circle == null || msg.Circle.Glyphs.Count == 0 || !CircleValidation.FitsTier(msg.Circle, medium.Tier))
@@ -33,6 +33,6 @@ class Inscription
         else if (!player.InventoryManager.TryGiveItemstack(inscribed, true)) sapi.World.SpawnItemEntity(inscribed, player.Entity.Pos.XYZ);
         slot.MarkDirty();
 
-        player.Tell("mossbound:inscribe-ok");
+        player.Tell("inscribe-done");
     }
 }

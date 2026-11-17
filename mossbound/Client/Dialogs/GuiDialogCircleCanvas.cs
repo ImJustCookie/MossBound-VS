@@ -2,7 +2,6 @@ using Cairo;
 using Mossbound.Core;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
-using Vintagestory.API.Config;
 using static Mossbound.Client.CanvasLayout;
 
 namespace Mossbound.Client;
@@ -51,12 +50,12 @@ public class GuiDialogCircleCanvas : GuiDialog
         SingleComposer = capi.Gui
             .CreateCompo("mossbound-circlecanvas", ElementStdBounds.AutosizedMainDialog.WithAlignment(EnumDialogArea.CenterMiddle))
             .AddShadedDialogBG(background)
-            .AddDialogTitleBar(Lang.Get("mossbound:canvas-title"), () => TryClose())
+            .AddDialogTitleBar(ModText.Get("canvas-title"), () => TryClose())
             .AddDynamicCustomDraw(canvasBounds, DrawCanvas, "canvas")
             .AddDynamicCustomDraw(panelBounds, DrawPanel, "panel")
-            .AddStaticText(Lang.Get("mossbound:canvas-hint"), CairoFont.WhiteDetailText(), hintBounds)
-            .AddSmallButton(Lang.Get("mossbound:canvas-clear"), OnClear, clearBounds)
-            .AddSmallButton(Lang.Get("mossbound:canvas-inscribe"), OnInscribe, inscribeBounds)
+            .AddStaticText(ModText.Get("canvas-hint"), CairoFont.WhiteDetailText(), hintBounds)
+            .AddSmallButton(ModText.Get("canvas-clear"), OnClear, clearBounds)
+            .AddSmallButton(ModText.Get("canvas-inscribe"), OnInscribe, inscribeBounds)
             .Compose();
     }
 
@@ -121,7 +120,7 @@ public class GuiDialogCircleCanvas : GuiDialog
         var circle = draft.ToCircle();
         if (circle.Glyphs.Count == 0)
         {
-            capi.ShowChatMessage(Lang.Get("mossbound:canvas-empty"));
+            capi.ShowChatMessage(ModText.Get("canvas-empty"));
             return true;
         }
         capi.ModLoader.GetModSystem<MossboundModSystem>().SendInscribe(circle);

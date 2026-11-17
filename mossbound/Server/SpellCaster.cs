@@ -41,7 +41,7 @@ class SpellCaster
         long now = sapi.World.ElapsedMilliseconds;
         if (lastCastMs.TryGetValue(player.PlayerUID, out long last) && now - last < CooldownMs)
         {
-            player.Tell("mossbound:cast-cooldown");
+            player.Tell("cast-cooldown");
             return;
         }
         lastCastMs[player.PlayerUID] = now;

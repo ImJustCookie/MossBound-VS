@@ -4,7 +4,6 @@ using Mossbound.Core;
 using Mossbound.Server;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
-using Vintagestory.API.Config;
 using Vintagestory.API.Server;
 using Vintagestory.API.Util;
 
@@ -69,7 +68,7 @@ public class ItemCircleMedium : Item
         base.GetHeldItemInfo(inSlot, dsc, world, withDebugInfo);
         var circle = ReadCircle(inSlot.Itemstack);
         dsc.AppendLine(circle == null
-            ? Lang.Get("mossbound:medium-blank")
-            : Lang.Get("mossbound:medium-inscribed", circle.Glyphs.Count));
+            ? ModText.Get("medium-blank")
+            : ModText.Get("medium-inscribed", circle.Glyphs.Count));
     }
 }

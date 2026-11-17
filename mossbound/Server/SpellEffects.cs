@@ -55,11 +55,11 @@ static class SpellEffects
         if (mishaps.Contains(Mishap.Opposition) || mishaps.Contains(Mishap.Overload))
         {
             caster.Entity.ReceiveDamage(new DamageSource { Source = EnumDamageSource.Internal, Type = EnumDamageType.Injury }, 1);
-            caster.Tell("mossbound:cast-backfire");
+            caster.Tell("cast-backfire");
         }
         else
         {
-            caster.Tell("mossbound:cast-fizzle");
+            caster.Tell("cast-fizzle");
         }
     }
 

@@ -35,13 +35,13 @@ public class GuiDialogGlyphAtlas : GuiDialog
         var compo = capi.Gui
             .CreateCompo("mossbound-glyphatlas", ElementStdBounds.AutosizedMainDialog.WithAlignment(EnumDialogArea.CenterMiddle))
             .AddShadedDialogBG(bg)
-            .AddDialogTitleBar("Glyph atlas (admin)", () => TryClose())
+            .AddDialogTitleBar(ModText.Get("atlas-title"), () => TryClose())
             .AddDynamicCustomDraw(gridBounds, DrawGrid);
         for (int i = 0; i < atlas.Entries.Count; i++)
         {
             var labelBounds = ElementBounds.Fixed(i % Columns * Cell, top + i / Columns * (Cell + Label) + Cell, Cell, Label);
             bg.WithChildren(labelBounds);
-            compo.AddStaticText(atlas.Entries[i].Code, CairoFont.WhiteSmallText().WithOrientation(EnumTextOrientation.Center), labelBounds);
+            compo.AddStaticText(ModText.Get("glyph-" + atlas.Entries[i].Code), CairoFont.WhiteSmallText().WithOrientation(EnumTextOrientation.Center), labelBounds);
         }
         SingleComposer = compo.Compose();
     }
