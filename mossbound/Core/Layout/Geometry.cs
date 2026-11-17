@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Mossbound.Core;
 
@@ -6,6 +8,12 @@ public static class Geometry
 {
     public static double Distance((double x, double y) a, (double x, double y) b) =>
         Math.Sqrt((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y));
+
+    public static (double x, double y) Centroid(IEnumerable<(double x, double y)> points)
+    {
+        var list = points.ToList();
+        return (list.Average(p => p.x), list.Average(p => p.y));
+    }
 
     public static (double x, double y) OnCircle((double x, double y) centre, double radius, double angle) =>
         (centre.x + Math.Cos(angle) * radius, centre.y + Math.Sin(angle) * radius);

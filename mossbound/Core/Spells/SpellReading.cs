@@ -4,15 +4,6 @@ using System.Linq;
 
 namespace Mossbound.Core;
 
-// What a broken circle does instead of its spell.
-public enum Mishap
-{
-    Overload,   // more than ElementMixer.MaxIntensity of one element in a heart
-    Opposition, // opposite elements in the same heart
-    Misplaced,  // an element written outside the heart
-    NoElement,  // nothing to cast
-}
-
 public sealed record SpellPlan(IReadOnlyList<(Aspect aspect, int intensity)> Aspects, IReadOnlyList<Mishap> Mishaps)
 {
     public bool Fizzles => Mishaps.Count > 0;

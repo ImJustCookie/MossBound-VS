@@ -16,7 +16,7 @@ public static class WordCircle
     public static (double x, double y, double r) Place(IReadOnlyList<(double x, double y)> glyphCentres, double glyphRadius,
         (double x, double y) centre, double border, int extraWeight = 0)
     {
-        (double x, double y) middle = (glyphCentres.Average(p => p.x), glyphCentres.Average(p => p.y));
+        var middle = Geometry.Centroid(glyphCentres);
         double radius = glyphCentres.Max(p => Geometry.Distance(p, middle)) + glyphRadius * 0.6;
         radius *= Margin * (1 + GrowthPerWeight * Math.Clamp(extraWeight, 0, MaxWeight));
         radius = Math.Min(radius, border * MaxShareOfBorder);

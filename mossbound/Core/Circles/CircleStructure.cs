@@ -71,7 +71,7 @@ public static class CircleStructure
     // Groups of glyphs joined by links among themselves, sorted by ring then slot.
     static List<List<SlotKey>> LinkedGroups(IEnumerable<SlotKey> members, IEnumerable<(SlotKey A, SlotKey B)> links)
     {
-        var sorted = members.OrderBy(k => k.Ring).ThenBy(k => k.Slot).ToList();
+        var sorted = members.Order().ToList();
         var inside = sorted.ToHashSet();
         var insideLinks = links.Where(l => inside.Contains(l.A) && inside.Contains(l.B)).ToList();
         var seen = new HashSet<SlotKey>();
@@ -88,7 +88,7 @@ public static class CircleStructure
                 foreach (var n in Neighbours(k, insideLinks))
                     if (seen.Add(n)) todo.Push(n);
             }
-            groups.Add(group.OrderBy(k => k.Ring).ThenBy(k => k.Slot).ToList());
+            groups.Add(group.Order().ToList());
         }
         return groups;
     }

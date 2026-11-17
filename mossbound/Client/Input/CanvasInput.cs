@@ -45,7 +45,6 @@ sealed class CanvasInput
     public CanvasView CanvasView => new(Selected, linkingFrom, removing, cursor);
     public PanelView PanelView => new(stroke, removing, cursor);
 
-    // ---------- canvas ----------
 
     public Redraw PressCanvas(double x, double y, double size, bool right)
     {
@@ -81,7 +80,6 @@ sealed class CanvasInput
         return Redraw.Canvas;
     }
 
-    // ---------- panel ----------
 
     public Redraw PressPanel(double x, double y, double size, bool right)
     {

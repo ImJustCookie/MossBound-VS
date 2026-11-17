@@ -54,6 +54,25 @@ public class CircleValidationTests
     }
 
     [Fact]
+    public void InscribedLinksMustFollowTheGrammar()
+    {
+        var neighbours = new Circle
+        {
+            Glyphs = { Place("water", CircleRing.Heart), Place("life", CircleRing.Shape) },
+            Links = { new CircleLink { From = 0, To = 1 } },
+        };
+        Assert.True(CircleValidation.LinksFollowTheGrammar(neighbours, CircleTier.Parchment));
+
+        var skipsARing = new Circle
+        {
+            Glyphs = { Place("water", CircleRing.Heart), Place("life", CircleRing.Aim) },
+            Links = { new CircleLink { From = 0, To = 1 } },
+        };
+        Assert.True(CircleValidation.FitsTier(skipsARing, CircleTier.Parchment));
+        Assert.False(CircleValidation.LinksFollowTheGrammar(skipsARing, CircleTier.Parchment));
+    }
+
+    [Fact]
     public void StripsWrittenBeforeSizesReadAsSizeOne() =>
         Assert.Equal(1, Place("ember", CircleRing.Heart).EffectiveSize);
 }

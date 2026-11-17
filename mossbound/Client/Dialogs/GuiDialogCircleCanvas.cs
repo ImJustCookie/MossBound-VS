@@ -59,7 +59,6 @@ public class GuiDialogCircleCanvas : GuiDialog
             .Compose();
     }
 
-    // ---------- mouse ----------
 
     public override void OnMouseDown(MouseEvent args)
     {
@@ -106,7 +105,6 @@ public class GuiDialogCircleCanvas : GuiDialog
     double PanelX(double x) => x - panelBounds.absX;
     double PanelY(double y) => y - panelBounds.absY;
 
-    // ---------- buttons ----------
 
     bool OnClear()
     {
@@ -128,7 +126,6 @@ public class GuiDialogCircleCanvas : GuiDialog
         return true;
     }
 
-    // ---------- drawing ----------
 
     void RedrawPanes(Redraw redraw)
     {

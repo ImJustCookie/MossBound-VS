@@ -77,7 +77,7 @@ static class GlyphPainter
         }
         ctx.NewPath();
         ctx.MoveTo(a.x, a.y);
-        ctx.CurveTo(a.x + (qx - a.x) * 2 / 3, a.y + (qy - a.y) * 2 / 3, b.x + (qx - b.x) * 2 / 3, b.y + (qy - b.y) * 2 / 3, b.x, b.y);
+        Ink.QuadraticTo(ctx, a, (qx, qy), b);
         ctx.Stroke();
     }
 

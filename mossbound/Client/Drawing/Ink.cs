@@ -170,10 +170,14 @@ static class Ink
         double dx = bx - ax, dy = by - ay;
         double bow = Jitter(rng, 0.06 * rough), over = Jitter(rng, 0.05 * rough);
         double qx = (ax + bx) / 2 - dy * bow, qy = (ay + by) / 2 + dx * bow;
-        double ex = bx + dx * over, ey = by + dy * over;
         ctx.MoveTo(ax, ay);
-        ctx.CurveTo(ax + (qx - ax) * 2 / 3, ay + (qy - ay) * 2 / 3, ex + (qx - ex) * 2 / 3, ey + (qy - ey) * 2 / 3, ex, ey);
+        QuadraticTo(ctx, (ax, ay), (qx, qy), (bx + dx * over, by + dy * over));
     }
+
+    // Cairo only draws cubic curves; this is the same curve as a quadratic with one control point.
+    public static void QuadraticTo(Context ctx, (double x, double y) from, (double x, double y) control, (double x, double y) to) =>
+        ctx.CurveTo(from.x + (control.x - from.x) * 2 / 3, from.y + (control.y - from.y) * 2 / 3,
+            to.x + (control.x - to.x) * 2 / 3, to.y + (control.y - to.y) * 2 / 3, to.x, to.y);
 
     public static double Jitter(Random rng, double amount) => (rng.NextDouble() * 2 - 1) * amount;
 

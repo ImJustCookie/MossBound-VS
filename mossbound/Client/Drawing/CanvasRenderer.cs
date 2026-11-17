@@ -72,12 +72,9 @@ static class CanvasRenderer
         ctx.LineWidth = pen.Width(2.8 * pen.Unit);
         foreach (var (a, b) in draft.Links)
         {
-            var obstacles = draft.Figures.Keys.Where(k => k != a && k != b)
-                .Select(k => { var (x, y) = layout.SlotCentre(k, size); return (x, y, LetterRadius(draft, layout, k, size) * 1.3); })
-                .ToList();
             bool highlighted = a == view.Selected || b == view.Selected;
             GlyphPainter.DrawLink(ctx, layout.SlotCentre(a, size), layout.SlotCentre(b, size), size / 2,
-                Ink.Seed(GlyphPainter.SlotSeed(a), GlyphPainter.SlotSeed(b)), style, obstacles, highlighted ? Ink.Highlight : null);
+                Ink.Seed(GlyphPainter.SlotSeed(a), GlyphPainter.SlotSeed(b)), style, GlyphsInTheWay(draft, layout, size, a, b), highlighted ? Ink.Highlight : null);
         }
         if (view.LinkingFrom is SlotKey from)
         {
@@ -85,6 +82,16 @@ static class CanvasRenderer
             GlyphPainter.DrawLink(ctx, layout.SlotCentre(from, size), view.Cursor, size / 2, seed: null, style);
         }
     }
+
+    // Every written glyph a link from a to b must bend around: all but its own two ends.
+    static List<(double x, double y, double r)> GlyphsInTheWay(CircleDraft draft, CanvasLayout layout, double size, SlotKey a, SlotKey b) =>
+        draft.Figures.Keys.Where(k => k != a && k != b)
+            .Select(k =>
+            {
+                var (x, y) = layout.SlotCentre(k, size);
+                return (x, y, LetterRadius(draft, layout, k, size) * 1.3);
+            })
+            .ToList();
 
     // Letters cut every line they sit on, like Gallifreyan letters.
     static void CutLinesUnderLetters(Context ctx, CircleDraft draft, CanvasLayout layout, InkStyle style, double size)

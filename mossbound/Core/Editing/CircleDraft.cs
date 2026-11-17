@@ -22,7 +22,6 @@ public sealed class CircleDraft
     public bool HasLink(SlotKey a, SlotKey b) => links.Contains(Ordered(a, b));
     public bool CanLink(SlotKey a, SlotKey b, CircleTier tier) => IsWritten(a) && IsWritten(b) && tier.AllowsLink(a, b);
 
-    // ---------- glyphs ----------
 
     // Writing an empty figure erases the glyph, with its size and links.
     public void Write(SlotKey slot, GlyphFigure figure)
@@ -50,7 +49,6 @@ public sealed class CircleDraft
 
     static Mark NextMark(Mark mark) => mark == Mark.DoubleRing ? Mark.None : mark + 1;
 
-    // ---------- size ----------
 
     public void SetSize(SlotKey slot, int size)
     {
@@ -63,7 +61,6 @@ public sealed class CircleDraft
         if (IsWritten(slot)) SetSize(slot, Math.Clamp(SizeOf(slot) + delta, 1, tier.MaxSize));
     }
 
-    // ---------- links ----------
 
     public void Link(SlotKey a, SlotKey b, CircleTier tier)
     {
@@ -72,10 +69,8 @@ public sealed class CircleDraft
 
     public void Unlink(SlotKey a, SlotKey b) => links.Remove(Ordered(a, b));
 
-    static (SlotKey, SlotKey) Ordered(SlotKey a, SlotKey b) =>
-        (a.Ring, a.Slot).CompareTo((b.Ring, b.Slot)) <= 0 ? (a, b) : (b, a);
+    static (SlotKey, SlotKey) Ordered(SlotKey a, SlotKey b) => a.CompareTo(b) <= 0 ? (a, b) : (b, a);
 
-    // ---------- source ----------
 
     public void CycleSource(CircleTier tier, bool backwards)
     {
@@ -84,12 +79,11 @@ public sealed class CircleDraft
         Source = (LifeSource)(((int)Source + (backwards ? count - 1 : 1)) % count);
     }
 
-    // ---------- saving ----------
 
     // Only valid glyphs are saved; links to anything else are dropped.
     public Circle ToCircle()
     {
-        var keys = figures.Where(f => f.Value.IsValid).Select(f => f.Key).OrderBy(k => k.Ring).ThenBy(k => k.Slot).ToList();
+        var keys = figures.Where(f => f.Value.IsValid).Select(f => f.Key).Order().ToList();
         var indexOf = keys.Select((k, i) => (k, i)).ToDictionary(t => t.k, t => t.i);
         var circle = new Circle { Source = Source };
         foreach (var k in keys)

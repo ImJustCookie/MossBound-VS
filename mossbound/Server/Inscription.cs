@@ -1,7 +1,7 @@
-using Vintagestory.API.Server;
-using Mossbound.Network;
 using Mossbound.Core;
 using Mossbound.Items;
+using Mossbound.Network;
+using Vintagestory.API.Server;
 
 namespace Mossbound.Server;
 
@@ -20,7 +20,8 @@ class Inscription
             player.Tell("inscribe-no-medium");
             return;
         }
-        if (msg.Circle == null || msg.Circle.Glyphs.Count == 0 || !CircleValidation.FitsTier(msg.Circle, medium.Tier))
+        if (msg.Circle is not { Glyphs.Count: > 0 } circle || !CircleValidation.FitsTier(circle, medium.Tier)
+            || !CircleValidation.LinksFollowTheGrammar(circle, medium.Tier))
         {
             sapi.Logger.Warning("[mossbound] rejected malformed inscription from {0}", player.PlayerName);
             return;
@@ -28,7 +29,7 @@ class Inscription
 
         // Inscribe one medium; the rest of the stack stays blank.
         var inscribed = slot.TakeOut(1);
-        ItemCircleMedium.WriteCircle(inscribed, msg.Circle);
+        ItemCircleMedium.WriteCircle(inscribed, circle);
         if (slot.Empty) slot.Itemstack = inscribed;
         else if (!player.InventoryManager.TryGiveItemstack(inscribed, true)) sapi.World.SpawnItemEntity(inscribed, player.Entity.Pos.XYZ);
         slot.MarkDirty();

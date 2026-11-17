@@ -125,11 +125,8 @@ static class CirclePainter
         }
     }
 
-    static (double x, double y) Middle(IEnumerable<SlotKey> slots, CanvasLayout layout, double size)
-    {
-        var centres = slots.Select(k => layout.SlotCentre(k, size)).ToList();
-        return (centres.Average(p => p.x), centres.Average(p => p.y));
-    }
+    static (double x, double y) Middle(IEnumerable<SlotKey> slots, CanvasLayout layout, double size) =>
+        Geometry.Centroid(slots.Select(k => layout.SlotCentre(k, size)));
 
     // The thin second line of a doubled circle.
     static void DrawInnerEcho(Context ctx, InkStyle style, double x, double y, double r, double width, int seed)
