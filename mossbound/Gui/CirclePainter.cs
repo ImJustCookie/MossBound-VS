@@ -88,6 +88,15 @@ static class CirclePainter
         IEnumerable<(double x, double y, double r)> bites)
     {
         double c = size / 2, u = size / CanvasLayout.CanvasSize;
+        var biteList = bites.ToList();
+        // A spot on the border is bitten when it lies within `reach` of a word's bite. Ornaments reach
+        // past the border line, so they are left out near a bite instead of being cut: cutting would
+        // leave their tips sticking out beyond the word's arc.
+        bool Bitten(double angle, double reach)
+        {
+            var p = Polar(c, size * Outer, angle);
+            return biteList.Any(b => Distance(p, (b.x, b.y)) < b.r + reach);
+        }
         ctx.PushGroup();
         Ink.Use(ctx, style.Stroke(1), 0.9);
         Ink.StrokeCircle(ctx, c, c, size * Outer, W(5 * u), seed: 1, centred: true, rough: style.Roughness);
@@ -96,11 +105,11 @@ static class CirclePainter
             Ink.Use(ctx, style.Stroke(2), 0.9);
             Ink.StrokeCircle(ctx, c, c, size * Inner, W(2.5 * u), seed: 2, centred: true, rough: style.Roughness);
         }
-        if (source == LifeSource.Self) Diamonds(ctx, style, size, W);
-        if (source == LifeSource.Land) Bramble(ctx, style, size, W);
+        if (source == LifeSource.Self) Diamonds(ctx, style, size, Bitten);
+        if (source == LifeSource.Land) Bramble(ctx, style, size, W, Bitten);
 
         ctx.Operator = Operator.Clear;
-        foreach (var (bx, by, br) in bites) Ink.FillCircle(ctx, bx, by, br);
+        foreach (var (bx, by, br) in biteList) Ink.FillCircle(ctx, bx, by, br);
         ctx.Operator = Operator.Over;
         ctx.PopGroupToSource();
         ctx.Paint();
@@ -114,7 +123,7 @@ static class CirclePainter
     }
 
     // Long, pointed diamonds threaded on the border, pointing out on both sides.
-    static void Diamonds(Context ctx, InkStyle style, double size, Func<double, double> W)
+    static void Diamonds(Context ctx, InkStyle style, double size, Func<double, double, bool> bitten)
     {
         const int Count = 20;
         const double Along = 0.028, Across = 14; // half-width along the border (radians), reach each side (GUI units)
@@ -123,6 +132,7 @@ static class CirclePainter
         for (int i = 0; i < Count; i++)
         {
             double a = 2 * Math.PI * (i + 0.5) / Count;
+            if (bitten(a, Across * u)) continue;
             var tipOut = Polar(c, outer + Across * u, a);
             var side1 = Polar(c, outer, a + Along);
             var tipIn = Polar(c, outer - Across * u, a);
@@ -136,25 +146,33 @@ static class CirclePainter
 
     // A thin vine weaving across the border, a hooked thorn on every crest, pointing out on the outer
     // crests and in on the inner ones.
-    static void Bramble(Context ctx, InkStyle style, double size, Func<double, double> W)
+    static void Bramble(Context ctx, InkStyle style, double size, Func<double, double> W, Func<double, double, bool> bitten)
     {
         const int Waves = 16;
         double c = size / 2, u = size / CanvasLayout.CanvasSize, outer = size * Outer, amp = 7 * u;
         Ink.Use(ctx, style.Stroke(82), 0.9);
         ctx.LineWidth = W(2.2 * u);
-        ctx.NewPath();
+        // The vine, in runs that stop short of every bite.
+        bool drawing = false;
         for (int i = 0; i <= 720; i++)
         {
             double a = 2 * Math.PI * i / 720;
+            if (bitten(a, amp + 3 * u))
+            {
+                if (drawing) ctx.Stroke();
+                drawing = false;
+                continue;
+            }
             var (x, y) = Polar(c, outer + amp * Math.Sin(a * Waves), a);
-            if (i == 0) ctx.MoveTo(x, y);
+            if (!drawing) { ctx.NewPath(); ctx.MoveTo(x, y); drawing = true; }
             else ctx.LineTo(x, y);
         }
-        ctx.Stroke();
+        if (drawing) ctx.Stroke();
         for (int i = 0; i < Waves; i++)
         {
-            Thorn(ctx, c, outer + amp - 2 * u, 11 * u, 2 * Math.PI * (i + 0.25) / Waves);   // outer crest, pointing out
-            Thorn(ctx, c, outer - amp + 2 * u, -11 * u, 2 * Math.PI * (i + 0.75) / Waves);  // inner crest, pointing in
+            double aOut = 2 * Math.PI * (i + 0.25) / Waves, aIn = 2 * Math.PI * (i + 0.75) / Waves;
+            if (!bitten(aOut, amp + 11 * u)) Thorn(ctx, c, outer + amp - 2 * u, 11 * u, aOut);   // outer crest, pointing out
+            if (!bitten(aIn, amp + 11 * u)) Thorn(ctx, c, outer - amp + 2 * u, -11 * u, aIn);    // inner crest, pointing in
         }
     }
 
