@@ -17,6 +17,7 @@ namespace Mossbound.Client;
 readonly record struct InkStyle(Ink.Colour Colour, double ColourVariation, double Roughness,
     double CanvasGrain, double PanelGrain, double Noise, double Weight, bool DoubleBorder = false, bool Doubles = false)
 {
+#pragma warning disable IDE0055 // a table, aligned by hand
     public static InkStyle For(CircleTier tier) => tier.Level switch
     {
         //          colour                   variation rough canvas panel noise weight border doubles
@@ -25,6 +26,7 @@ readonly record struct InkStyle(Ink.Colour Colour, double ColourVariation, doubl
         3 => new(new(0.10, 0.11, 0.20), 0.04, 0.7, 1, 3, 0.03, 1.0, true,  true),  // parchment: blue-black ink
         _ => new(new(0.90, 0.88, 0.82), 0.03, 0.5, 1, 3, 0.10, 1.2, true,  true),  // stone: chalk-white carving
     };
+#pragma warning restore IDE0055
 
     // This stroke's colour: the base shade, nudged per stroke (brightness and a slight tint).
     public Ink.Colour Stroke(int seed)

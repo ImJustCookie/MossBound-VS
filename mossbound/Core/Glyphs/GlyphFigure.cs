@@ -28,13 +28,13 @@ public readonly record struct GlyphFigure(uint Lines, uint Marks)
     const int MarkBits = 3;
     const uint MarkMask = (1u << MarkBits) - 1;
     const uint AllMarkBits = (1u << (PointCount * MarkBits)) - 1;
-    static readonly uint AllowedLines = AllowedLineBits();
+    static readonly uint allowedLines = AllowedLineBits();
 
     public static GlyphFigure Empty => new(0, 0);
 
     public bool IsEmpty => Lines == 0 && Marks == 0;
 
-    public bool IsValid => !IsEmpty && (Lines & ~AllowedLines) == 0 && (Marks & ~AllMarkBits) == 0 && AllMarksKnown();
+    public bool IsValid => !IsEmpty && (Lines & ~allowedLines) == 0 && (Marks & ~AllMarkBits) == 0 && AllMarksKnown();
 
     public static bool IsArc(int a, int b) =>
         a < RimPoints && b < RimPoints && (Math.Abs(a - b) == 1 || Math.Abs(a - b) == RimPoints - 1);
