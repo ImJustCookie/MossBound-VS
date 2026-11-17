@@ -14,6 +14,10 @@ static class Scenes
     static readonly Assembly mod = typeof(GuiDialogCircleCanvas).Assembly;
     static readonly Type layoutType = mod.GetType("Mossbound.Gui.CanvasLayout")!;
     static readonly Dictionary<string, object> info = new();
+    static readonly Dictionary<string, ImageSurface> arts = new();
+
+    // Each art file is loaded once and reused by every scene.
+    static ImageSurface Art(string file) => arts.TryGetValue(file, out var a) ? a : arts[file] = new ImageSurface(art + file);
     static string art = "";
 
     static SlotKey C(int i) => new(CircleRing.Centre, i);
@@ -70,14 +74,31 @@ static class Scenes
         full.Figures[C(2)] = G("life"); full.Figures[I(4)] = G("ward"); Link(full, C(2), I(4));
         Canvas(CircleTier.Parchment, full, "full");
         Bare(CircleTier.Parchment, full, "full_bare");
-        full.Figures[O(7)] = G("ember"); // the diagram also shows an unlinked typo
-        Canvas(CircleTier.Parchment, full, "diagram", 896, extra: true);
+        var diagram = CircleDraft.FromCircle(full.ToCircle());
+        diagram.Figures[O(7)] = G("ember"); // the diagram also shows an unlinked typo
+        Canvas(CircleTier.Parchment, diagram, "diagram", 896, extra: true);
+
+        // The inscription window on each tier: a typical circle, its first heart glyph selected, and the
+        // glyph panel showing that glyph (docs/images/tier-interfaces.png).
+        {
+            var moss = New(); moss.Figures[C(0)] = G("water"); moss.SetSize(C(0), 2); moss.Figures[C(1)] = G("frost"); Link(moss, C(0), C(1));
+            var bark = New(LifeSource.Self);
+            bark.Figures[C(0)] = G("water"); bark.Figures[C(1)] = G("frost"); Link(bark, C(0), C(1));
+            bark.Figures[I(1)] = G("ember"); bark.SetSize(I(1), 2); Link(bark, C(1), I(1)); bark.Figures[I(2)] = G("wind"); Link(bark, I(1), I(2));
+            bark.Figures[C(2)] = G("life"); bark.Figures[I(3)] = G("ward"); Link(bark, C(2), I(3));
+            foreach (var (tier, d) in new[] { (CircleTier.Moss, moss), (CircleTier.Bark, bark), (CircleTier.Parchment, full) })
+            {
+                Canvas(tier, d, $"window_{tier.Art}", selected: C(0));
+                Panel(tier, d.Figures[C(0)], $"window_{tier.Art}_panel", 256);
+            }
+        }
 
         // 8. The media, empty.
         foreach (var tier in new[] { CircleTier.Moss, CircleTier.Bark, CircleTier.Parchment })
             Canvas(tier, New(), $"empty_{tier.Art}");
 
         File.WriteAllText("out/scenes.json", JsonSerializer.Serialize(info));
+        foreach (var a in arts.Values) a.Dispose();
     }
 
     static object Layout(CircleTier tier) => Activator.CreateInstance(layoutType, tier)!;
@@ -85,15 +106,15 @@ static class Scenes
     static double Letter(object layout, int glyphSize) => (double)layoutType.GetMethod("LetterRadius")!.Invoke(layout, new object[] { glyphSize })!;
     static object Style(CircleTier tier) => mod.GetType("Mossbound.Gui.InkStyle")!.GetMethod("For")!.Invoke(null, new object[] { tier })!;
 
-    static GuiDialogCircleCanvas Dialog(CircleTier tier, CircleDraft d, object layout)
+    static GuiDialogCircleCanvas Dialog(CircleTier tier, CircleDraft d, object layout, SlotKey? selected = null)
     {
         var t = typeof(GuiDialogCircleCanvas);
         var dlg = (GuiDialogCircleCanvas)RuntimeHelpers.GetUninitializedObject(t);
         t.GetField("draft", F)!.SetValue(dlg, d);
         t.GetField("layout", F)!.SetValue(dlg, layout);
         t.GetField("style", F)!.SetValue(dlg, Style(tier));
-        t.GetField("selected", F)!.SetValue(dlg, new SlotKey(CircleRing.Outer, 99)); // nothing selected
-        t.GetField("canvasArt", F)!.SetValue(dlg, new ImageSurface(art + tier.Art + "/canvas.png"));
+        t.GetField("selected", F)!.SetValue(dlg, selected ?? new SlotKey(CircleRing.Outer, 99)); // none by default
+        t.GetField("canvasArt", F)!.SetValue(dlg, Art(tier.Art + "/canvas.png"));
         return dlg;
     }
 
@@ -106,10 +127,10 @@ static class Scenes
     }
 
     // The circle exactly as the inscription window draws it.
-    static void Canvas(CircleTier tier, CircleDraft d, string name, int size = 448, bool extra = false)
+    static void Canvas(CircleTier tier, CircleDraft d, string name, int size = 448, bool extra = false, SlotKey? selected = null)
     {
         var layout = Layout(tier);
-        var dlg = Dialog(tier, d, layout);
+        var dlg = Dialog(tier, d, layout, selected);
         using (var surf = new ImageSurface(Format.Argb32, size, size))
         using (var ctx = new Context(surf))
         {
@@ -150,7 +171,7 @@ static class Scenes
         var t = typeof(GuiDialogCircleCanvas);
         var dlg = Dialog(tier, d, Layout(tier));
         t.GetField("selected", F)!.SetValue(dlg, C(0));
-        t.GetField("panelArt", F)!.SetValue(dlg, new ImageSurface(art + tier.Art + "/glyphpanel.png"));
+        t.GetField("panelArt", F)!.SetValue(dlg, Art(tier.Art + "/glyphpanel.png"));
         using var surf = new ImageSurface(Format.Argb32, size, size);
         using var ctx = new Context(surf);
         t.GetMethod("DrawPanel", F)!.Invoke(dlg, new object[] { ctx, surf, Bounds(size) });
@@ -178,7 +199,7 @@ static class Scenes
 
         using var surf = new ImageSurface(Format.Argb32, size, size);
         using var target = new Context(surf);
-        ink.GetMethod("PaintArt")!.Invoke(null, new object?[] { target, new ImageSurface(art + tier.Art + "/canvas.png"), (double)size });
+        ink.GetMethod("PaintArt")!.Invoke(null, new object?[] { target, Art(tier.Art + "/canvas.png"), (double)size });
         Action<Context> draw = ctx =>
         {
             circlePainter.GetMethod("Border")!.Invoke(null, new object[] { ctx, d.Source, style, (double)size, W, Array.Empty<(double, double, double)>() });

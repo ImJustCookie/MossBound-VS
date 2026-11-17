@@ -299,4 +299,33 @@ def diagram():
 
 
 diagram()
+
+
+# ---------- the inscription window on each tier ----------
+
+def interfaces():
+    tiers = [("moss", "Moss sigil (tier I)", "A heart of 2 slots. Coarse, finger-drawn lichen ink."),
+             ("bark", "Bark strip (tier II)", "A heart of 3 and a shape ring of 4. Charcoal; here drawn from yourself."),
+             ("parchment", "Hide parchment (tier III)", "Heart 4, shape 6, aim 8. A steady pen line and a doubled border.")]
+    C, P = 400, 200
+    W = 3 * C + 4 * PAD
+    top = 130
+    H = top + C + 24 + P + 120
+    s = cairo.ImageSurface(cairo.FORMAT_ARGB32, W, H)
+    g = cairo.Context(s)
+    g.set_source_rgb(*BG); g.paint()
+    text(g, PAD, 58, "The inscription window", 34, TEXT, True)
+    wrapped(g, PAD, 96, "Top: the circle, with the selected glyph ringed in amber. Below: the glyph panel, where that "
+            "glyph is drawn. Each medium has its own art, rings and ink.", W - 2 * PAD, 19)
+    for i, (art, title, caption) in enumerate(tiers):
+        x = PAD + i * (C + PAD)
+        paint_scene(g, f"window_{art}", x, top, C)
+        paint_scene(g, f"window_{art}_panel", x + (C - P) / 2, top + C + 24, P)
+        y = top + C + 24 + P + 40
+        text(g, x + C / 2, y, title, 21, TEXT, True, centre=True)
+        wrapped(g, x + C / 2, y + 30, caption, C - 10, 17, centre=True)
+    s.write_to_png(f"{DOCS}/tier-interfaces.png")
+
+
+interfaces()
 print("wrote docs/images")

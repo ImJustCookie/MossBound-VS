@@ -47,7 +47,7 @@ The script lives on the server only. Clients never receive it, so it can't be da
 - Generated glyphs have 4 to 6 connected lines and 2 or 3 marks.
 
 ### Family marks (built)
-All glyphs of one kind (elements, forms, selectors and so on) share a family mark: the same mark on the same point. It is picked at random per world, differs for each kind, and never changes once a world exists. Players learn to tell a glyph's kind from its shape ("it has the centre dot, so it's an element") while its meaning is still unknown.
+All glyphs of one kind (elements, forms, aim glyphs and so on) share a family mark: the same mark on the same point. It is picked at random per world, differs for each kind, and never changes once a world exists. Players learn to tell a glyph's kind from its shape ("it has the centre dot, so it's an element") while its meaning is still unknown.
 
 ## 4. The circle: tiers and grammar
 
@@ -108,25 +108,75 @@ The scribing stump has visible slots. The top holds the medium being worked, the
 
 All three are server-authoritative. Progress lives on the server, clicks are validated and rate-limited, only one player works a piece at a time, and nothing ticks outside an active hold.
 
-### Reading from the heart outward
+### Names
+One name per part, used the same way in the game, the guide and the code.
+
+**Written** (these change the spell):
+
+| Name | What it is | In code |
+|---|---|---|
+| medium | What a circle is written on: moss sigil, bark strip, hide parchment, carved stone | `ItemCircleMedium` |
+| tier | The medium's level, I to IV. Sets the rings, slots and limits | `CircleTier` |
+| circle | Everything written on one medium | `Circle` (saved, sent), `CircleDraft` (being edited) |
+| ring | A row of slots: the heart, the shape ring, the aim ring, the rim | `CircleRing`: `Centre`, `Inner`, `Outer`, `Rim` |
+| slot | The place for one glyph on a ring | `SlotKey` |
+| glyph | One written word: its lines and marks | `GlyphFigure` |
+| point | One of a glyph's 7 points: 6 on its rim, 1 in its middle | |
+| line | An arc (along the rim, between neighbouring points) or a spoke (to the middle) | `GlyphFigure.Links` |
+| mark | A dot, big dot, ring or double ring on a point | `Mark` |
+| size | How strongly a glyph is written, 1 to 3 | `PlacedGlyph.Size` |
+| link | A connection between two glyphs | `CircleLink` |
+| source | Where the spell takes its life: medium, self or land | `LifeSource` |
+| heart | Heart-ring glyphs linked together. One heart mixes its elements | `CircleShape.Hearts` |
+| cast | A heart plus every glyph reached from it by following links outward | `Word` |
+| form | Shape-ring glyph: how a cast travels (Touch, Seed, Ring...) *(planned)* | |
+| behaviour | Shape-ring glyph linked to a form, changing how it acts (Seeking, Delayed...) *(planned)* | |
+| aim glyph | Aim-ring glyph: what a cast lands on (Me, Foes, Closest...) *(planned)* | |
+| aim chain | A cast's aim glyphs, read link by link | `Word.AimEnd` (its last glyph) |
+| trigger | Rim glyph: when a nested circle fires *(planned)* | |
+| mishap | What a broken circle does instead of its spell | `Mishap` |
+
+**Drawn** by the game from what is written (they never change the spell):
+
+| Name | What it is | In code |
+|---|---|---|
+| border | The circle's outer line. Its style shows the source: plain, diamonds or bramble | `CirclePainter.Border` |
+| letter circle | The bold circle drawn around each written glyph | `GlyphPainter.Rosette` |
+| mix circle | The circle around a heart of two glyphs or more | `CircleShape.MixGroups` |
+| word circle | The big circle around one cast | `CircleShape.WordCircle` |
+| bite | Where a word circle cuts into the border | `CirclePainter.Border` |
+| aim line | The line across the circle for a cast that reaches the aim ring | `CirclePainter` |
+| doubled line | A thin second line beside a strong one | `InkStyle.Doubles` |
+
+### Reading a circle
 
 ```
-CENTRE  the Heart    what      elements; linked elements mix          tier I
-INNER   the Shape    how       forms and modifiers                    tier II
-OUTER   the Aim      at whom   selectors, chained clockwise           tier III
-RIM     the Trigger  when      trigger, then a nested circle          tier IV
+heart       WHAT       elements; linked ones mix       tier I
+shape ring  HOW        forms and their behaviours      tier II
+aim ring    AT WHOM    aim glyphs, read as a chain     tier III
+rim         WHEN       triggers and nested circles     tier IV
+border      WHO PAYS   medium, self or land            tier II
 ```
 
-Links are the grammar. A link means "this flows into that".
-1. Links join neighbouring rings, or neighbouring glyphs within one ring. A link never skips a ring, and it bends around glyphs it doesn't join, so you can always tell what is joined to what.
-2. Each branch, a path of linked glyphs from the heart outward, is one cast. Several branches cast together, as in Noita's multicast.
-3. Elements linked together in the centre mix into one heart. Unlinked elements are separate hearts, so different mixes can feed different shapes.
-4. A form carries the heart linked to it. Modifiers bend the form they are linked to.
-5. Selectors linked to a form aim it. A chain of selectors reads clockwise as a filter: creatures, near, not kin, closest.
-6. A trigger on the rim, linked to a branch, fires its nested circle where that branch landed.
-7. An unlinked glyph is a harmless typo and does nothing.
+The rules:
+1. A link joins neighbouring rings, or neighbouring slots on one ring. It never skips a ring.
+2. Heart glyphs linked together form one heart and mix. Unlinked heart glyphs are separate hearts.
+3. A cast is a heart plus everything reached from it by following links outward. A circle can hold several casts, all cast together.
+4. A glyph's size is its strength. In a heart, a glyph of size N counts as its element written N times.
+5. A glyph in no cast is a harmless typo.
+6. The source is chosen on the border, not written as a glyph: medium (the default, and the only one on moss), self or land.
+7. *(Planned)* A form carries its cast, behaviours change the form they are linked to, the aim chain says what the cast lands on, and a trigger fires a nested circle.
 
-There is no maths and no stack. Amounts come from repeating glyphs, and positions come from pointing words.
+There are no numbers and no stack. Amounts come from sizes (and later modifier marks), positions from aim glyphs.
+
+### What is written, what is drawn
+The server reads only what is written: the glyphs, the rings they sit on, their sizes, the links and the source. Everything in the second table above is drawn by the client from those, so a circle reads at a glance:
+- a word circle grows with its cast's total size and bites the border;
+- a mix circle sits around each heart of two glyphs or more;
+- an aim line runs from a cast's heart through the end of its aim chain, across the circle;
+- doubled lines mark size 3, a three-element mix, a cast of three glyphs or more past its heart, and the border from parchment up. Never on moss, whose coarse ink can't hold them.
+
+`writing-guide.md` shows each of these with pictures.
 
 ### Heart: elements and mixing
 The rules are built; the effects exist only at test scale.
@@ -158,14 +208,14 @@ The rules are built; the effects exist only at test scale.
 | Rot + Wind | Blight: a withering cloud |
 | Life + Water + Stone | Moss: spreads living moss. The mod's signature. |
 
-- Repeating an element sets its intensity, from 1 to 3. More than 3 of one element is a mishap.
-- Opposites cancel into a mishap: Ember and Frost, Wind and Ward. Life and Rot are not opposites; together they make Spore.
-- Each element joins at most one mix. A mix's intensity is the smaller of its counts, and leftovers stay pure.
-- Draw is a special heart glyph, not an element. Linked to a heart, it makes that heart take its life from the land around the circle instead of from you (see section 7). Not built yet.
-- What a mix does is only revealed by casting it (its colour and effect), never while drawing.
+- An element's intensity in a heart is the total size of its glyphs there, 1 to 3. More than 3 is a mishap.
+- Opposites cancel into a mishap when they share a heart: Ember and Frost, Wind and Ward. Life and Rot are not opposites; together they make Spore.
+- Each element joins at most one mix. A mix's intensity is the smaller of its counts; leftovers stay pure.
+- If any heart fails, the whole circle fails.
+- What a mix does is only revealed by casting it, never while writing.
 
-### Shape: forms and modifiers
-Only Touch exists so far, and only implicitly.
+### Shape ring: forms and behaviours *(planned)*
+Only Touch exists so far, implicitly. An element glyph written on the shape ring is a Misplaced mishap.
 
 | Form | How the heart shows up |
 |---|---|
@@ -177,18 +227,17 @@ Only Touch exists so far, and only implicitly.
 | Ward | stays in place and keeps working (tier IV) |
 | Imbue | soaks into an item: a tool, an arrow, food, a door |
 
-| Modifier | Effect |
+| Behaviour | Effect |
 |---|---|
-| Wide / Narrow | area |
-| Long / Brief | duration |
-| Many | splits into several |
 | Seeking | drifts toward the target |
 | Delayed | waits before acting |
 | Echo | repeats a few times |
 | Gentle | weaker but cheaper, safe near friends and crops |
 
-### Aim: selectors
-The freedom of Hex Casting's targeting, but in words.
+**Modifier marks** *(next version)*. Amounts are marks on a form's letter circle, not glyphs: dots for count, short lines for reach, small circles for duration, ticks for speed, 1 to 3 of each. Outside the letter means more, inside means less. They are public, like punctuation. Open decisions are listed in the roadmap.
+
+### Aim ring: aim glyphs *(planned)*
+Hex Casting's freedom of targeting, but in words. Aim glyphs chain link by link: creatures, near, not kin, closest.
 
 | Kind | Glyphs |
 |---|---|
@@ -198,22 +247,22 @@ The freedom of Hex Casting's targeting, but in words.
 | Pronouns (in nested circles) | It (what the caller hit), There (where it landed), Source (the caller's target) |
 | Names | Bound: a place, item or creature you marked earlier, like your home stone or your horse |
 
-### Trigger: nested circles as functions (tier IV)
+### Rim: triggers and nested circles *(tier IV, planned)*
 At tier IV a nested circle works like a function. This is where the Hex Casting kind of depth lives.
 
 - Triggers: on landing, on touch, when entered, when it ends, at dawn or dusk, when it rains, when hurt.
 - Nested circles can have their own triggers and nested circles.
 - A nested circle receives It, There and Source as its parameters.
 - Named circles: bind a circle to a name glyph and call it from other circles, building a spell library carved on your home stone.
-- Control flow in words: If (only when a selector finds something), Echo (repeat), Each (once per target). No variables and no arithmetic.
+- Control flow in words: If (only when an aim glyph finds something), Echo (repeat), Each (once per target). No variables and no arithmetic.
 - Hard limits keep it lag-safe: a maximum nesting depth, a cap on glyph executions and targets per cast, and bounded recursion. A circle over the limit fizzles, and the server never loops.
 
 ## 5. Example spells
 
 **Paying in life essence**
-- Life, Ring, on bark, no Draw: you heal your friends and get hungry.
-- Draw + Life, Ring, Gentle, in a meadow: the grass around you pales a little and nobody goes hungry.
-- Draw + Ember ×3, Seed, Many, in a dry clearing: the fire flies, and the clearing behind you turns grey and dead for a season.
+- Life, Ring, on bark, drawn from yourself: you heal your friends and get hungry.
+- Life, Ring, Gentle, drawn from the land, in a meadow: the grass around you pales a little and nobody goes hungry.
+- Ember at size 3, Seed, many, drawn from the land, in a dry clearing: the fire flies, and the clearing behind you turns grey and dead for a season.
 
 **Tier I: moss sigil** (heart only)
 - Life: a green glow, and your wound closes a little.
@@ -226,7 +275,7 @@ At tier IV a nested circle works like a function. This is where the Hex Casting 
 - Water + Life → Ring → Wide: rain over your field, and the crops drink.
 
 **Tier III: parchment or clay** (adds the aim)
-- Two branches cast together from one circle, as in the image above: Ember → Seed → Many → Foes → Closest throws a handful of fire seeds at the nearest hostile, while Life → Ring → Kin heals the friends around you.
+- Two casts from one circle, cast together: Ember → Seed → Many → Foes → Closest throws a handful of fire seeds at the nearest hostile, while Life → Ring → Kin heals the friends around you.
 - Life + Rot → Mist → Gentle → Foes → Closest: a spore cloud puts the nearest drifter to sleep.
 - Wind → Seed → Seeking → Bound (home stone): a seed that drifts toward home, like a compass.
 
@@ -272,7 +321,7 @@ The field notebook sketches every glyph you have drawn or rubbed, and logs what 
 
 ## 7. Life essence: the cost of magic
 
-A spell costs the same energy as doing the thing by hand, and that energy has to come from somewhere. Every cast has a life-essence cost, worked out once at cast time from what the spell does: intensity, number of branches, area, duration and nesting. Complexity costs more, not only power.
+A spell costs the same energy as doing the thing by hand, and that energy has to come from somewhere. Every cast has a life-essence cost, worked out once at cast time from what the spell does: intensity (glyph sizes), number of casts, area, duration and nesting. Complexity costs more, not only power.
 
 Only mishaps exist so far, at test scale. The rest is design.
 
@@ -282,12 +331,12 @@ Only mishaps exist so far, at test scale. The rest is design.
 |---|---|---|
 | 1. The medium | Living media hold some life: fresh moss the most, bark a little, stone almost none unless charged | It crumbles or wilts as it is spent |
 | 2. Yourself | Satiety first (you grow hungry and weak), then health | Overreaching can knock you down, and can kill you |
-| 3. The land, only with a Draw glyph | Grass, leaves, crops, moss, soil nutrients and nearby animals | The area dies |
+| 3. The land (land source) | Grass, leaves, crops, moss, soil nutrients and nearby animals | The area dies |
 
-Drawing from the land is always a visible choice: the Draw glyph has to be written into the circle and linked to the heart it feeds. Without it, your own body pays.
+Drawing from the land is always a visible choice: it is chosen on the border, which then shows a bramble. Moss can't draw from the land.
 
 ### Treating the land well or badly
-- Done well (Draw with Gentle, a small reach, a lush place), a little is taken from many living things. Grass yellows for a while and animals tire, and then it recovers.
+- Done well (the land source with Gentle, a small reach, a lush place), a little is taken from many living things. Grass yellows for a while and animals tire, and then it recovers.
 - Done badly (a big spell, a barren place, no Gentle), everything is drained. Grass dies back to dirt, leaves wither, crops rot, the soil loses its nutrients, and animals sicken and can die. The place becomes desolate: grey, silent and bare.
 - Recovery takes seasons. A desolate patch heals slowly from its edges through the game's own grass spread and growth, and a druid can help with Life and Moss spells or by replanting. An overused grove stays a visible scar, part of the history of your homestead or server.
 - Rot and Blight are the dark mirror: magic that takes life on purpose. They are allowed, but they leave desolation behind.
@@ -297,7 +346,7 @@ Drawing from the land is always a visible choice: the Draw glyph has to be writt
 - A carved stone at tier IV can be fed over days by the living things around it, then cast without draining anyone. That is how permanent wards work.
 
 ### Overreaching
-A circle that asks for more than its sources can give pulls harder. It drains you past hunger into health, and if Draw is present it bursts out into the land as an uncontrolled wave of rot. A reckless caster can die of it.
+A circle that asks for more than its sources can give pulls harder. It drains you past hunger into health, and if it draws from the land it bursts out into the land as an uncontrolled wave of rot. A reckless caster can die of it.
 
 ### Fair play and performance
 - You can't draw from someone else's land claim, and spells never hurt or push other players, so desolation can't be used for griefing.
@@ -308,18 +357,27 @@ A circle that asks for more than its sources can give pulls harder. It drains yo
 ## 8. The inscription window (built)
 
 **Controls**
-- On the canvas, the main circle: click a slot to select it, and drag between glyphs to link them.
-- On the glyph panel: sweep across points to draw lines, like a phone's pattern lock. Moving back undoes the last snap, and a skipped point is routed along the rim or through the centre. Sweeping with the right button erases. Click a point to cycle its mark, and right-click it to clear the mark.
-- Inscribe sends the circle to the server, which checks it and writes it onto one strip.
-- With the strip in hand, hold right-click to cast, or sneak and right-click to edit. Once the crafting above exists, inscribing moves to the media themselves: a stick on moss lying on stone for tier I, the charcoal stick at the scribing stump for tier II.
+
+| Where | Action | Does |
+|---|---|---|
+| Circle | Left click a slot | Select it |
+| Circle | Left drag / right drag between glyphs | Link / unlink |
+| Circle | Mouse wheel over a glyph | Change its size |
+| Circle | Click / right-click the border | Next / previous source (bark and up) |
+| Panel | Sweep / right-button sweep across points | Draw / erase lines (pattern-lock style; a skipped point is routed along the rim or through the middle) |
+| Panel | Click / right-click a point | Cycle / clear its mark |
+| Buttons | Clear glyph, Inscribe | Wipe the selected glyph; send the circle to the server, which checks it and writes it on the medium |
+| In hand | Hold right-click / sneak + right-click | Cast / edit again |
+
+Once the media are crafted in the world (M4), inscribing moves onto them: a stick on moss lying on stone for tier I, the charcoal stick at the scribing stump for tier II.
 
 **Look**
 
-![The inscription interface for tiers I, II and III](images/tier-interfaces.png)
+![The inscription window on moss, bark and parchment](images/tier-interfaces.png)
 
-*Moss (tier I), bark (tier II) and parchment (tier III). Each medium has its own art, rings and ink.*
+*The same kind of circle on moss (tier I), bark (tier II) and parchment (tier III): each medium has its own art, rings and ink.*
 
-- It reads like Gallifreyan. Strokes are only arcs and spokes, every glyph is a letter circle sitting on its ring line, ring lines break around glyphs, and links are bold, gentle curves. Line weights go from a heavy double outer circle down to faint ring lines.
+- It reads like Circular Gallifreyan: bold letter circles, word circles biting the border, mix circles, straight links that bend only around glyphs they don't join, and doubled lines where they are earned (see "What is written, what is drawn").
 - The ink is pixelated and hand-drawn, with a style per tier (`Gui/InkStyle.cs`). There is no anti-aliasing, and every imperfection is seeded so nothing flickers.
 
   | Tier | Ink | Feel |
@@ -329,13 +387,13 @@ A circle that asks for more than its sources can give pulls harder. It drains yo
   | III, parchment | blue-black ink | a single steady pen line, nearly clean |
   | IV, stone | chalk white | steady, with a chiselled grain |
 
-  Each style sets the base colour, how much the colour varies per stroke, roughness, pixel grain on the canvas and the panel, dry-brush noise and stroke weight.
 - Each tier has its own art: `textures/gui/<moss|bark|parchment|stone>/canvas.png` (112 px) and `glyphpanel.png` (64 px), where 1 art pixel is 4 GUI units. A missing file falls back to a flat colour.
+- Every image in `docs/images/` is rebuilt from the real drawing code by `tools/docs-images/run.sh`.
 
 Later: a casting animation where light runs along the lines in reading order, soft and green-gold; carved circles that slowly gather moss; sounds of creaking wood, soft chimes and wind in leaves. No magic whooshes.
 
 ## 9. Multiplayer (built)
-The server is authoritative. It alone knows the script, and it validates every drawing, resolves targets within reach, applies effects and consumes media. Every input a player controls is bounded: slots, glyphs and links now, and nesting depth and executions later.
+The server is authoritative. It alone knows the script, and it validates every drawing, resolves targets within reach, applies effects and consumes media. Every input a player controls is bounded: slots, glyphs, links, sizes and the source now, and nesting depth and executions later.
 
 ## 10. Open questions
 1. Tier III: hide parchment, fired clay, or both (parchment is portable, clay is reusable)?
