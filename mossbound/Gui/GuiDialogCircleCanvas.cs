@@ -99,6 +99,13 @@ public class GuiDialogCircleCanvas : GuiDialog
             (mouseX, mouseY) = Local(canvasBounds, args);
             erasing = right;
             dragSlot = layout.SlotAt(mouseX, mouseY, canvasBounds.InnerWidth);
+            // A click on the border (not on a slot) cycles where the spell takes its life from.
+            if (dragSlot == null && layout.Tier.ChoosesSource && CirclePainter.OnBorder(mouseX, mouseY, canvasBounds.InnerWidth))
+            {
+                int count = Enum.GetValues<LifeSource>().Length;
+                draft.Source = (LifeSource)(((int)draft.Source + (right ? count - 1 : 1)) % count);
+                Redraw(panel: false);
+            }
             args.Handled = true;
             return;
         }
@@ -123,6 +130,22 @@ public class GuiDialogCircleCanvas : GuiDialog
             return;
         }
         base.OnMouseMove(args);
+    }
+
+    // The wheel over a written glyph on the circle sets how strongly it is written (its size).
+    public override void OnMouseWheel(MouseWheelEventArgs args)
+    {
+        int mx = capi.Input.MouseX, my = capi.Input.MouseY;
+        if (canvasBounds.PointInside(mx, my)
+            && layout.SlotAt(mx - canvasBounds.absX, my - canvasBounds.absY, canvasBounds.InnerWidth) is SlotKey k
+            && draft.Figures.ContainsKey(k))
+        {
+            draft.SetSize(k, Math.Clamp(draft.SizeOf(k) + Math.Sign(args.delta), 1, layout.Tier.MaxSize));
+            Redraw(panel: false);
+            args.SetHandled(true);
+            return;
+        }
+        base.OnMouseWheel(args);
     }
 
     public override void OnMouseUp(MouseEvent args)
@@ -204,6 +227,8 @@ public class GuiDialogCircleCanvas : GuiDialog
         double size = bounds.InnerWidth, c = size / 2, u = size / CanvasSize, gr = layout.GlyphRadius * size;
         double px = Ink.PixelSize(u, style.CanvasGrain);
         double W(double width) => Math.Max(width * style.Weight, px); // tier weight, never thinner than one ink pixel
+        double R(SlotKey k) => layout.LetterRadius(draft.SizeOf(k)) * size;
+        bool Doubled(SlotKey k) => draft.SizeOf(k) >= 3 && style.Doubles; // full strength: a doubled letter circle
 
         if (!Ink.PaintArt(target, canvasArt, size))
         {
@@ -213,49 +238,18 @@ public class GuiDialogCircleCanvas : GuiDialog
 
         Ink.Pixelated(target, size, px, ctx =>
         {
-            // Lines erased in a halo around every written glyph, so they break around letters.
-            void PaintBrokenAroundGlyphs(double halo)
-            {
-                ctx.Operator = Operator.Clear;
-                foreach (var k in draft.Figures.Keys)
-                {
-                    var (x, y) = layout.SlotCentre(k, size);
-                    Ink.FillCircle(ctx, x, y, halo);
-                }
-                ctx.Operator = Operator.Over;
-                ctx.PopGroupToSource();
-                ctx.Paint();
-            }
-
-            // Structure: outer circle (doubled if the tier's style says so) and ring lines, with a wide
-            // halo. Big circles stay centred: hand-drawn without drifting.
+            var glyphs = draft.Figures.Keys.ToList();
             ctx.PushGroup();
-            Ink.Use(ctx, style.Stroke(1), 0.9);
-            Ink.StrokeCircle(ctx, c, c, size * 0.47, W(5 * u), seed: 1, centred: true, rough: style.Roughness);
-            if (style.DoubleBorder)
-            {
-                Ink.Use(ctx, style.Stroke(2), 0.9);
-                Ink.StrokeCircle(ctx, c, c, size * 0.45, W(2.5 * u), seed: 2, centred: true, rough: style.Roughness);
-            }
-            foreach (var ring in layout.Tier.Rings)
-            {
-                Ink.Use(ctx, style.Stroke(10 + (int)ring), 0.35);
-                Ink.StrokeCircle(ctx, c, c, layout.RingRadius(ring) * size, W(2 * u), seed: 10 + (int)ring, centred: true, rough: style.Roughness);
-            }
+            CirclePainter.Structure(ctx, draft, layout, style, size, W);
 
-            PaintBrokenAroundGlyphs(gr * 1.25);
-
-            // Links, with a tight halo: they reach right up to the letter circles, so even close
-            // neighbours show what joins what.
-            ctx.PushGroup();
-            ctx.LineWidth = W(3.5 * u); // links carry the meaning of a circle: bolder than the ring lines
+            // Links: straight, bowing only around glyphs they don't join (so they never look like two).
+            ctx.LineWidth = W(2.8 * u);
             foreach (var (a, b) in draft.Links)
             {
-                // Bend around written glyphs this link doesn't join, so it never looks like two links.
-                var avoid = draft.Figures.Keys.Where(k => k != a && k != b).Select(k => layout.SlotCentre(k, size)).ToList();
+                var avoid = glyphs.Where(k => k != a && k != b).Select(k => { var (x, y) = layout.SlotCentre(k, size); return (x, y, R(k) * 1.3); }).ToList();
                 // The selected glyph's own links show in the highlight colour.
                 GlyphPainter.Link(ctx, layout.SlotCentre(a, size), layout.SlotCentre(b, size), c,
-                    Ink.Seed(GlyphPainter.SlotSeed(a), GlyphPainter.SlotSeed(b)), style, avoid, gr * 1.3,
+                    Ink.Seed(GlyphPainter.SlotSeed(a), GlyphPainter.SlotSeed(b)), style, avoid,
                     a == selected || b == selected ? Ink.Highlight : null);
             }
             if (dragSlot is SlotKey from)
@@ -264,7 +258,16 @@ public class GuiDialogCircleCanvas : GuiDialog
                 GlyphPainter.Link(ctx, layout.SlotCentre(from, size), (mouseX, mouseY), c, seed: null, style);
             }
 
-            PaintBrokenAroundGlyphs(gr * 1.08);
+            // Letters cut every line they sit on.
+            ctx.Operator = Operator.Clear;
+            foreach (var k in glyphs)
+            {
+                var (x, y) = layout.SlotCentre(k, size);
+                Ink.FillCircle(ctx, x, y, R(k) * (Doubled(k) ? 1.2 : 1.05));
+            }
+            ctx.Operator = Operator.Over;
+            ctx.PopGroupToSource();
+            ctx.Paint();
 
             // Glyphs, empty slots (faint, exact) and the selection highlight.
             foreach (var k in layout.AllSlots())
@@ -273,7 +276,13 @@ public class GuiDialogCircleCanvas : GuiDialog
                 if (draft.Figures.TryGetValue(k, out var figure))
                 {
                     // Strokes scale with the glyph, so a big tier I glyph isn't drawn with hairlines.
-                    GlyphPainter.Rosette(ctx, x, y, gr, layout.GlyphRotation(k), figure, guides: false, W(gr * 0.1), GlyphPainter.SlotSeed(k), style);
+                    GlyphPainter.Rosette(ctx, x, y, R(k), layout.GlyphRotation(k), figure, guides: false, W(gr * 0.09), GlyphPainter.SlotSeed(k), style, bold: true);
+                    if (Doubled(k))
+                    {
+                        int seed = Ink.Seed(GlyphPainter.SlotSeed(k), 11);
+                        Ink.Use(ctx, style.Stroke(seed), 0.9);
+                        Ink.StrokeCircle(ctx, x, y, R(k) * 1.12, W(1.3 * u), seed, rough: style.Roughness);
+                    }
                 }
                 else
                 {
@@ -283,7 +292,7 @@ public class GuiDialogCircleCanvas : GuiDialog
                 if (k == selected)
                 {
                     Ink.Use(ctx, Ink.Highlight, 0.9);
-                    Ink.StrokeCircle(ctx, x, y, gr * 1.4, W(2 * u));
+                    Ink.StrokeCircle(ctx, x, y, R(k) * 1.4, W(2 * u));
                 }
                 else if (dragSlot is SlotKey linkFrom
                     ? (erasing ? draft.Links.Contains(CircleDraft.Normalize(linkFrom, k)) : CanLinkTo(linkFrom, k))
@@ -292,7 +301,7 @@ public class GuiDialogCircleCanvas : GuiDialog
                     // Dragging: where a link may be added, or (red) which links may be removed.
                     // Otherwise: the glyphs the selected one is linked to.
                     Ink.Use(ctx, dragSlot != null && erasing ? Ink.Erase : Ink.Highlight, 0.45);
-                    Ink.StrokeCircle(ctx, x, y, gr * 1.4, W(1.5 * u));
+                    Ink.StrokeCircle(ctx, x, y, R(k) * 1.4, W(1.5 * u));
                 }
             }
         }, style.Noise);

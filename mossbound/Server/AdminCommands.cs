@@ -50,7 +50,7 @@ static class AdminCommands
         var circle = ItemCircleMedium.ReadCircle(stack);
         if (circle == null) return TextCommandResult.Success($"{stack.GetName()} (tier {medium.Tier.Level}): blank.");
 
-        var lines = new List<string> { $"{stack.GetName()} (tier {medium.Tier.Level}): {circle.Glyphs.Count} glyphs, {circle.Links.Count} links" };
+        var lines = new List<string> { $"{stack.GetName()} (tier {medium.Tier.Level}): {circle.Glyphs.Count} glyphs, {circle.Links.Count} links, source: {circle.Source}" };
         if (!CircleParser.IsWithinBounds(circle, medium.Tier))
         {
             lines.Add("Out of bounds for this tier: casting does nothing.");
@@ -58,13 +58,13 @@ static class AdminCommands
         }
 
         string Slot(PlacedGlyph g) => $"{g.Ring} {g.Slot}";
-        foreach (var g in circle.Glyphs) lines.Add($"  {Slot(g)}: {script.Recognize(g.Figure)?.Code ?? "(not a glyph)"}");
+        foreach (var g in circle.Glyphs) lines.Add($"  {Slot(g)}: {script.Recognize(g.Figure)?.Code ?? "(not a glyph)"} (size {g.Power})");
         foreach (var l in circle.Links) lines.Add($"  link {Slot(circle.Glyphs[l.From])} - {Slot(circle.Glyphs[l.To])}");
 
         var plan = CircleParser.Parse(circle, script);
         lines.Add(plan.Fizzles
             ? "Result: mishap (" + string.Join(", ", plan.Mishaps) + ")"
-            : "Result: " + string.Join(", ", plan.Mix.Aspects.Select(a => $"{a.aspect} x{a.intensity}")));
+            : "Result: " + string.Join(", ", plan.Aspects.Select(a => $"{a.aspect} x{a.intensity}")));
         return TextCommandResult.Success(string.Join("\n", lines));
     }
 }

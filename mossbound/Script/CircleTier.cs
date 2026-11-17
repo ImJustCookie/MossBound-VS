@@ -35,6 +35,12 @@ public sealed class CircleTier
 
     public int SlotCount(CircleRing ring) => slots.GetValueOrDefault(ring);
 
+    // The largest size a glyph may be written at: a finger in moss can't press as hard as a pen.
+    public int MaxSize => Level == 1 ? 2 : 3;
+
+    // Moss always draws on itself and then on you; choosing the source starts with bark.
+    public bool ChoosesSource => Level >= 2;
+
     public bool HasSlot(CircleRing ring, int slot) => slot >= 0 && slot < SlotCount(ring);
 
     // Unknown levels clamp to the nearest tier, so a typo in item JSON can't crash the game.

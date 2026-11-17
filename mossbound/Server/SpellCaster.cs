@@ -59,7 +59,7 @@ class SpellCaster
             SpellEffects.Mishap(sapi, player, plan.Mishaps);
             return;
         }
-        foreach (var (aspect, intensity) in plan.Mix.Aspects) SpellEffects.Apply(sapi, player, target, aspect, intensity);
+        foreach (var (aspect, intensity) in plan.Aspects) SpellEffects.Apply(sapi, player, target, aspect, intensity);
     }
 
     // The client says what the player looks at; the server only accepts it within reach.

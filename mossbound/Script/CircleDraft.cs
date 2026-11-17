@@ -10,6 +10,17 @@ public sealed class CircleDraft
 {
     public Dictionary<SlotKey, GlyphFigure> Figures { get; } = new();
     public HashSet<(SlotKey A, SlotKey B)> Links { get; } = new();
+    public LifeSource Source { get; set; }
+    readonly Dictionary<SlotKey, int> sizes = new(); // only glyphs bigger than 1
+
+    public int SizeOf(SlotKey k) => sizes.GetValueOrDefault(k, 1);
+
+    // Sizes below 1 count as 1; the tier's cap is the caller's to apply.
+    public void SetSize(SlotKey k, int size)
+    {
+        if (size > 1) sizes[k] = size;
+        else sizes.Remove(k);
+    }
 
     public static (SlotKey, SlotKey) Normalize(SlotKey a, SlotKey b) =>
         (a.Ring, a.Slot).CompareTo((b.Ring, b.Slot)) <= 0 ? (a, b) : (b, a);
@@ -34,6 +45,7 @@ public sealed class CircleDraft
     public void Clear(SlotKey slot)
     {
         Figures.Remove(slot);
+        sizes.Remove(slot);
         Links.RemoveWhere(l => l.A == slot || l.B == slot);
     }
 
@@ -44,11 +56,11 @@ public sealed class CircleDraft
             .OrderBy(k => k.Ring).ThenBy(k => k.Slot).ToList();
         var index = keys.Select((k, i) => (k, i)).ToDictionary(t => t.k, t => t.i);
 
-        var circle = new Circle();
+        var circle = new Circle { Source = Source };
         foreach (var k in keys)
         {
             var f = Figures[k];
-            circle.Glyphs.Add(new PlacedGlyph { Ring = k.Ring, Slot = k.Slot, Links = f.Links, Marks = f.Marks });
+            circle.Glyphs.Add(new PlacedGlyph { Ring = k.Ring, Slot = k.Slot, Links = f.Links, Marks = f.Marks, Size = SizeOf(k) });
         }
         foreach (var (a, b) in Links)
         {
@@ -64,7 +76,13 @@ public sealed class CircleDraft
     {
         var draft = new CircleDraft();
         if (circle == null) return draft;
-        foreach (var g in circle.Glyphs) draft.Figures[new SlotKey(g.Ring, g.Slot)] = g.Figure;
+        draft.Source = circle.Source;
+        foreach (var g in circle.Glyphs)
+        {
+            var k = new SlotKey(g.Ring, g.Slot);
+            draft.Figures[k] = g.Figure;
+            draft.SetSize(k, g.Power);
+        }
         foreach (var l in circle.Links)
         {
             if (l.From < 0 || l.To < 0 || l.From >= circle.Glyphs.Count || l.To >= circle.Glyphs.Count) continue;

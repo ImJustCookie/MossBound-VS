@@ -23,6 +23,9 @@ sealed class CanvasLayout
     };
 
     readonly Dictionary<CircleRing, double> ringRadius = new();
+    // Each slot's place, worked out once: its angle and its distance from the centre (fraction of size).
+    readonly Dictionary<SlotKey, (double angle, double radius)> places = new();
+    readonly List<SlotKey> slots = new();
 
     public CircleTier Tier { get; }
     public double GlyphRadius { get; } // fraction of canvas size
@@ -33,38 +36,53 @@ sealed class CanvasLayout
         var (rings, glyph) = arrangements[Math.Clamp(tier.Rings.Count, 1, arrangements.Length) - 1];
         for (int i = 0; i < tier.Rings.Count; i++) ringRadius[tier.Rings[i]] = rings[Math.Min(i, rings.Length - 1)];
         GlyphRadius = glyph;
+
+        // Each slot sits a little off its exact place, seeded by the slot so it never moves while you
+        // write: circles look laid out by hand instead of on a grid.
+        foreach (var ring in tier.Rings)
+        {
+            for (int s = 0; s < tier.SlotCount(ring); s++)
+            {
+                var k = new SlotKey(ring, s);
+                var rng = new Random((int)ring * 31 + s);
+                double angle = -Math.PI / 2 + 2 * Math.PI * s / tier.SlotCount(ring) + (rng.NextDouble() * 2 - 1) * 0.06;
+                double radius = ringRadius[ring] + (rng.NextDouble() * 2 - 1) * 0.2 * glyph;
+                places[k] = (angle, radius);
+                slots.Add(k);
+            }
+        }
     }
 
     public double RingRadius(CircleRing ring) => ringRadius[ring];
 
-    public IEnumerable<SlotKey> AllSlots()
-    {
-        foreach (var ring in Tier.Rings)
-        {
-            for (int s = 0; s < Tier.SlotCount(ring); s++) yield return new SlotKey(ring, s);
-        }
-    }
+    // A glyph's size is its strength: each step past 1 draws its letter a fifth larger (fraction of size).
+    public double LetterRadius(int glyphSize) => GlyphRadius * (1 + 0.2 * (glyphSize - 1));
 
-    double SlotAngle(SlotKey k) => -Math.PI / 2 + 2 * Math.PI * k.Slot / Tier.SlotCount(k.Ring);
+    public IReadOnlyList<SlotKey> AllSlots() => slots;
 
     // Glyphs are turned so their point 0 faces outward, like letters around a Gallifreyan word.
-    public double GlyphRotation(SlotKey k) => SlotAngle(k) + Math.PI / 2;
+    public double GlyphRotation(SlotKey k) => places[k].angle + Math.PI / 2;
 
     public (double x, double y) SlotCentre(SlotKey k, double size)
     {
-        double a = SlotAngle(k), r = RingRadius(k.Ring) * size;
-        return (size / 2 + Math.Cos(a) * r, size / 2 + Math.Sin(a) * r);
+        var (a, r) = places[k];
+        return (size / 2 + Math.Cos(a) * r * size, size / 2 + Math.Sin(a) * r * size);
     }
 
+    // The slot whose centre is nearest, within reach (nearest, so big glyphs that overlap a neighbour
+    // still pick the one you aimed at).
     public SlotKey? SlotAt(double x, double y, double canvasSize)
     {
-        double reach = GlyphRadius * canvasSize * 1.3;
-        foreach (var k in AllSlots())
+        double reach = GlyphRadius * canvasSize * 1.4;
+        SlotKey? best = null;
+        double bestDistance = reach * reach;
+        foreach (var k in slots)
         {
             var (cx, cy) = SlotCentre(k, canvasSize);
-            if (Math.Abs(x - cx) < reach && Math.Abs(y - cy) < reach) return k;
+            double d = (x - cx) * (x - cx) + (y - cy) * (y - cy);
+            if (d < bestDistance) (best, bestDistance) = (k, d);
         }
-        return null;
+        return best;
     }
 
     // Point k of a rosette; point 0 is "up" before rotation, 6 is the centre.

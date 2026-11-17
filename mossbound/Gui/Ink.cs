@@ -40,7 +40,7 @@ static class Ink
         target.Save();
         target.Scale(pixel, pixel);
         target.SetSourceSurface(low, 0, 0);
-        ((SurfacePattern)target.GetSource()).Filter = Filter.Nearest;
+        using (var pattern = (SurfacePattern)target.GetSource()) pattern.Filter = Filter.Nearest; // GetSource returns a new wrapper each call
         target.Paint();
         target.Restore();
     }
@@ -92,7 +92,7 @@ static class Ink
         ctx.Save();
         ctx.Scale(size / art.Width, size / art.Height);
         ctx.SetSourceSurface(art, 0, 0);
-        ((SurfacePattern)ctx.GetSource()).Filter = Filter.Nearest;
+        using (var pattern = (SurfacePattern)ctx.GetSource()) pattern.Filter = Filter.Nearest; // GetSource returns a new wrapper each call
         ctx.Paint();
         ctx.Restore();
         return true;

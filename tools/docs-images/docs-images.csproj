@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Renders the circles shown in docs/ with the mod's real drawing code (see README.md).
+       Not part of the mod: never packaged. -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="mossbound"><HintPath>$(MSBuildThisFileDirectory)../../mossbound/bin/Debug/Mods/mod/mossbound.dll</HintPath></Reference>
+    <Reference Include="VintagestoryAPI"><HintPath>$(VINTAGE_STORY)/VintagestoryAPI.dll</HintPath></Reference>
+    <Reference Include="cairo-sharp"><HintPath>$(VINTAGE_STORY)/Lib/cairo-sharp.dll</HintPath></Reference>
+    <Reference Include="protobuf-net"><HintPath>$(VINTAGE_STORY)/Lib/protobuf-net.dll</HintPath></Reference>
+  </ItemGroup>
+</Project>

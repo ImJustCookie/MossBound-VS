@@ -9,7 +9,7 @@
     "medium-inscribed": "Inscribed with {0} glyph(s).",
 
     "canvas-title": "Inscription",
-    "canvas-hint": "Circle: click a slot to select it, drag between two glyphs to link them, drag with right-click to unlink them.\nGlyph: hold and sweep across points to draw, sweep with right-click to erase. Click a point to cycle its mark, right-click to clear it.",
+    "canvas-hint": "Circle: click a slot to select it, drag between two glyphs to link them, drag with right-click to unlink them, scroll over a glyph to write it more or less strongly, click the border to choose where its life comes from.\nGlyph: hold and sweep across points to draw, sweep with right-click to erase. Click a point to cycle its mark, right-click to clear it.",
     "canvas-clear": "Clear glyph",
     "canvas-inscribe": "Inscribe",
     "canvas-empty": "Draw at least one glyph (with a line) before inscribing.",
