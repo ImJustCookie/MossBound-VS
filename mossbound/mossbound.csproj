@@ -8,6 +8,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <!-- The docs image tool draws with the client's internal renderer and painters. -->
+    <InternalsVisibleTo Include="docs-images" />
+  </ItemGroup>
+  <ItemGroup>
     <Reference Include="VintagestoryAPI">
       <HintPath>$(VINTAGE_STORY)/VintagestoryAPI.dll</HintPath>
       <Private>false</Private>

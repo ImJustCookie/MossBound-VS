@@ -1,261 +1,222 @@
-using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Text.Json;
 using Cairo;
-using Mossbound.Gui;
-using Mossbound.Script;
-using Vintagestory.API.Client;
+using Mossbound.Client;
+using Mossbound.Core;
 
-// Every circle shown in the docs. Each scene is a CircleDraft drawn by the mod's own code; scenes.json
-// records slot centres and radii (and, for the diagram, the word circles) so labels can point at them.
+// Every circle shown in the docs, drawn with the mod's own renderer. out/scenes.json records where
+// glyphs (and, for the diagram, word circles) landed, so labels.py can point at them.
 static class Scenes
 {
-    const BindingFlags F = BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static;
-    static readonly Assembly mod = typeof(GuiDialogCircleCanvas).Assembly;
-    static readonly Type layoutType = mod.GetType("Mossbound.Gui.CanvasLayout")!;
     static readonly Dictionary<string, object> info = new();
     static readonly Dictionary<string, ImageSurface> arts = new();
+    static string artFolder = "";
+    static WorldScript script = null!;
 
-    // Each art file is loaded once and reused by every scene.
-    static ImageSurface Art(string file) => arts.TryGetValue(file, out var a) ? a : arts[file] = new ImageSurface(art + file);
-    static string art = "";
+    static SlotKey Heart(int i) => new(CircleRing.Heart, i);
+    static SlotKey Shape(int i) => new(CircleRing.Shape, i);
+    static SlotKey Aim(int i) => new(CircleRing.Aim, i);
 
-    static SlotKey C(int i) => new(CircleRing.Centre, i);
-    static SlotKey I(int i) => new(CircleRing.Inner, i);
-    static SlotKey O(int i) => new(CircleRing.Outer, i);
-
-    public static void Run(WorldScript script, string artFolder)
+    public static void Run(WorldScript worldScript, string art)
     {
-        art = artFolder;
-        GlyphFigure G(string code) => script.FigureOf(code);
-        CircleDraft New(LifeSource source = LifeSource.Medium) => new() { Source = source };
-        void Link(CircleDraft d, SlotKey a, SlotKey b) => d.Links.Add(CircleDraft.Normalize(a, b));
+        script = worldScript;
+        artFolder = art;
+        var moss = CircleTier.Moss;
+        var bark = CircleTier.Bark;
+        var parchment = CircleTier.Parchment;
 
-        // 1. A glyph: every kind of stroke and mark, on the panel and on a circle.
-        var anatomy = new GlyphFigure(0, 0).WithLink(0, 1).WithLink(1, 2).WithLink(2, 6).WithLink(6, 4).WithLink(4, 5)
+        // 1. A glyph: every kind of line and mark, on the panel and on a circle.
+        var anatomy = GlyphFigure.Empty.WithLine(0, 1).WithLine(1, 2).WithLine(2, 6).WithLine(6, 4).WithLine(4, 5)
             .WithMark(1, Mark.Dot).WithMark(3, Mark.Ring).WithMark(5, Mark.BigDot).WithMark(6, Mark.DoubleRing);
-        Panel(CircleTier.Parchment, anatomy, "anatomy_panel", 448);
-        { var d = New(); d.Figures[C(0)] = anatomy; Canvas(CircleTier.Parchment, d, "anatomy_canvas"); }
+        Panel(parchment, anatomy, "anatomy_panel", 448);
+        var single = new Scene(parchment);
+        single.Draft.Write(Heart(0), anatomy);
+        Canvas(single, "anatomy_canvas");
 
-        // 2. Strength: three separate hearts at sizes 1, 2, 3.
-        { var d = New(); d.Figures[C(0)] = G("ember"); d.Figures[C(1)] = G("ember"); d.Figures[C(2)] = G("ember");
-          d.SetSize(C(1), 2); d.SetSize(C(2), 3); Canvas(CircleTier.Bark, d, "size"); }
+        // 2. Strength: three separate hearts at sizes 1, 2 and 3.
+        Canvas(new Scene(bark).Glyph(Heart(0), "ember").Glyph(Heart(1), "ember", 2).Glyph(Heart(2), "ember", 3), "size");
 
         // 3. Mixing, on moss: apart, linked, opposites.
-        { var d = New(); d.Figures[C(0)] = G("water"); d.Figures[C(1)] = G("frost"); Canvas(CircleTier.Moss, d, "mix_apart"); }
-        { var d = New(); d.Figures[C(0)] = G("water"); d.Figures[C(1)] = G("frost"); Link(d, C(0), C(1)); Canvas(CircleTier.Moss, d, "mix_linked"); }
-        { var d = New(); d.Figures[C(0)] = G("ember"); d.Figures[C(1)] = G("frost"); Link(d, C(0), C(1)); Canvas(CircleTier.Moss, d, "mix_opposites"); }
+        Canvas(new Scene(moss).Glyph(Heart(0), "water").Glyph(Heart(1), "frost"), "mix_apart");
+        Canvas(new Scene(moss).Glyph(Heart(0), "water").Glyph(Heart(1), "frost").Link(Heart(0), Heart(1)), "mix_linked");
+        Canvas(new Scene(moss).Glyph(Heart(0), "ember").Glyph(Heart(1), "frost").Link(Heart(0), Heart(1)), "mix_opposites");
 
         // 4. Casts, on bark: one cast, one heart feeding two casts, an unlinked typo.
-        { var d = New(); d.Figures[C(0)] = G("life"); d.Figures[I(0)] = G("ward"); Link(d, C(0), I(0)); Canvas(CircleTier.Bark, d, "cast_one"); }
-        { var d = New(); d.Figures[C(0)] = G("ember"); d.Figures[I(1)] = G("wind"); d.Figures[I(3)] = G("stone");
-          Link(d, C(0), I(1)); Link(d, C(0), I(3)); Canvas(CircleTier.Bark, d, "cast_two"); }
-        { var d = New(); d.Figures[C(0)] = G("life"); d.Figures[I(0)] = G("ward"); Link(d, C(0), I(0)); d.Figures[I(2)] = G("rot");
-          Canvas(CircleTier.Bark, d, "cast_typo"); }
+        Canvas(new Scene(bark).Glyph(Heart(0), "life").Glyph(Shape(0), "ward").Link(Heart(0), Shape(0)), "cast_one");
+        Canvas(new Scene(bark).Glyph(Heart(0), "ember").Glyph(Shape(1), "wind").Glyph(Shape(3), "stone")
+            .Link(Heart(0), Shape(1)).Link(Heart(0), Shape(3)), "cast_two");
+        Canvas(new Scene(bark).Glyph(Heart(0), "life").Glyph(Shape(0), "ward").Link(Heart(0), Shape(0)).Glyph(Shape(2), "rot"), "cast_typo");
 
         // 5. Source, on parchment (its finer ink shows the border best): the same spell three ways.
         foreach (var source in Enum.GetValues<LifeSource>())
-        {
-            var d = New(source); d.Figures[C(0)] = G("life"); d.Figures[I(0)] = G("ward"); Link(d, C(0), I(0));
-            Canvas(CircleTier.Parchment, d, $"source_{source.ToString().ToLower()}");
-        }
+            Canvas(new Scene(parchment, source).Glyph(Heart(0), "life").Glyph(Shape(0), "ward").Link(Heart(0), Shape(0)), $"source_{source.ToString().ToLower()}");
 
         // 6. Aim, on parchment: stops at the shape ring, or reaches the aim ring.
-        { var d = New(); d.Figures[C(0)] = G("ember"); d.Figures[I(1)] = G("wind"); Link(d, C(0), I(1)); Canvas(CircleTier.Parchment, d, "aim_no"); }
-        { var d = New(); d.Figures[C(0)] = G("ember"); d.Figures[I(1)] = G("wind"); d.Figures[O(1)] = G("stone"); d.Figures[O(2)] = G("rot");
-          Link(d, C(0), I(1)); Link(d, I(1), O(1)); Link(d, O(1), O(2)); Canvas(CircleTier.Parchment, d, "aim_yes"); }
+        Canvas(new Scene(parchment).Glyph(Heart(0), "ember").Glyph(Shape(1), "wind").Link(Heart(0), Shape(1)), "aim_no");
+        Canvas(new Scene(parchment).Glyph(Heart(0), "ember").Glyph(Shape(1), "wind").Glyph(Aim(1), "stone").Glyph(Aim(2), "rot")
+            .Link(Heart(0), Shape(1)).Link(Shape(1), Aim(1)).Link(Aim(1), Aim(2)), "aim_yes");
 
-        // 7. The full example, written vs drawn, and (at 2x) the numbered grammar diagram.
-        var full = New(LifeSource.Self);
-        full.Figures[C(0)] = G("water"); full.SetSize(C(0), 3); full.Figures[C(1)] = G("frost"); Link(full, C(0), C(1));
-        full.Figures[I(1)] = G("ember"); full.SetSize(I(1), 2); Link(full, C(1), I(1));
-        full.Figures[I(2)] = G("wind"); Link(full, I(1), I(2));
-        full.Figures[O(2)] = G("stone"); Link(full, I(1), O(2)); full.Figures[O(3)] = G("rot"); Link(full, O(2), O(3));
-        full.Figures[C(2)] = G("life"); full.Figures[I(4)] = G("ward"); Link(full, C(2), I(4));
-        Canvas(CircleTier.Parchment, full, "full");
-        Bare(CircleTier.Parchment, full, "full_bare");
-        var diagram = CircleDraft.FromCircle(full.ToCircle());
-        diagram.Figures[O(7)] = G("ember"); // the diagram also shows an unlinked typo
-        Canvas(CircleTier.Parchment, diagram, "diagram", 896, extra: true);
+        // 7. The full example: written vs drawn, and (at 2x, with a typo) the numbered grammar diagram.
+        Scene Full() => new Scene(parchment, LifeSource.Self)
+            .Glyph(Heart(0), "water", 3).Glyph(Heart(1), "frost").Link(Heart(0), Heart(1))
+            .Glyph(Shape(1), "ember", 2).Link(Heart(1), Shape(1))
+            .Glyph(Shape(2), "wind").Link(Shape(1), Shape(2))
+            .Glyph(Aim(2), "stone").Link(Shape(1), Aim(2)).Glyph(Aim(3), "rot").Link(Aim(2), Aim(3))
+            .Glyph(Heart(2), "life").Glyph(Shape(4), "ward").Link(Heart(2), Shape(4));
+        Canvas(Full(), "full");
+        WrittenOnly(Full(), "full_bare");
+        Canvas(Full().Glyph(Aim(7), "ember"), "diagram", 896, withWords: true);
 
-        // The inscription window on each tier: a typical circle, its first heart glyph selected, and the
-        // glyph panel showing that glyph (docs/images/tier-interfaces.png).
+        // The inscription window on each tier: a typical circle with its first heart glyph selected,
+        // and the glyph panel showing that glyph.
+        var windows = new[]
         {
-            var moss = New(); moss.Figures[C(0)] = G("water"); moss.SetSize(C(0), 2); moss.Figures[C(1)] = G("frost"); Link(moss, C(0), C(1));
-            var bark = New(LifeSource.Self);
-            bark.Figures[C(0)] = G("water"); bark.Figures[C(1)] = G("frost"); Link(bark, C(0), C(1));
-            bark.Figures[I(1)] = G("ember"); bark.SetSize(I(1), 2); Link(bark, C(1), I(1)); bark.Figures[I(2)] = G("wind"); Link(bark, I(1), I(2));
-            bark.Figures[C(2)] = G("life"); bark.Figures[I(3)] = G("ward"); Link(bark, C(2), I(3));
-            foreach (var (tier, d) in new[] { (CircleTier.Moss, moss), (CircleTier.Bark, bark), (CircleTier.Parchment, full) })
-            {
-                Canvas(tier, d, $"window_{tier.Art}", selected: C(0));
-                Panel(tier, d.Figures[C(0)], $"window_{tier.Art}_panel", 256);
-            }
+            new Scene(moss).Glyph(Heart(0), "water", 2).Glyph(Heart(1), "frost").Link(Heart(0), Heart(1)),
+            new Scene(bark, LifeSource.Self).Glyph(Heart(0), "water").Glyph(Heart(1), "frost").Link(Heart(0), Heart(1))
+                .Glyph(Shape(1), "ember", 2).Link(Heart(1), Shape(1)).Glyph(Shape(2), "wind").Link(Shape(1), Shape(2))
+                .Glyph(Heart(2), "life").Glyph(Shape(3), "ward").Link(Heart(2), Shape(3)),
+            Full(),
+        };
+        foreach (var window in windows)
+        {
+            Canvas(window, $"window_{window.Tier.Art}", selected: Heart(0));
+            Panel(window.Tier, window.Draft.FigureAt(Heart(0)), $"window_{window.Tier.Art}_panel", 256);
         }
 
         // 8. The media, empty.
-        foreach (var tier in new[] { CircleTier.Moss, CircleTier.Bark, CircleTier.Parchment })
-            Canvas(tier, New(), $"empty_{tier.Art}");
+        foreach (var tier in new[] { moss, bark, parchment }) Canvas(new Scene(tier), $"empty_{tier.Art}");
 
         File.WriteAllText("out/scenes.json", JsonSerializer.Serialize(info));
-        foreach (var a in arts.Values) a.Dispose();
+        foreach (var surface in arts.Values) surface.Dispose();
     }
 
-    static object Layout(CircleTier tier) => Activator.CreateInstance(layoutType, tier)!;
-    static (double x, double y) Centre(object layout, SlotKey k, int size) => ((double, double))layoutType.GetMethod("SlotCentre")!.Invoke(layout, new object[] { k, (double)size })!;
-    static double Letter(object layout, int glyphSize) => (double)layoutType.GetMethod("LetterRadius")!.Invoke(layout, new object[] { glyphSize })!;
-    static object Style(CircleTier tier) => mod.GetType("Mossbound.Gui.InkStyle")!.GetMethod("For")!.Invoke(null, new object[] { tier })!;
-
-    static GuiDialogCircleCanvas Dialog(CircleTier tier, CircleDraft d, object layout, SlotKey? selected = null)
+    // A circle to draw, built glyph by glyph with the editor's own rules.
+    sealed class Scene
     {
-        var t = typeof(GuiDialogCircleCanvas);
-        var dlg = (GuiDialogCircleCanvas)RuntimeHelpers.GetUninitializedObject(t);
-        t.GetField("draft", F)!.SetValue(dlg, d);
-        t.GetField("layout", F)!.SetValue(dlg, layout);
-        t.GetField("style", F)!.SetValue(dlg, Style(tier));
-        t.GetField("selected", F)!.SetValue(dlg, selected ?? new SlotKey(CircleRing.Outer, 99)); // none by default
-        t.GetField("canvasArt", F)!.SetValue(dlg, Art(tier.Art + "/canvas.png"));
-        return dlg;
-    }
-
-    static ElementBounds Bounds(int size)
-    {
-        var b = ElementBounds.Fixed(0, 0, size, size);
-        b.absInnerWidth = size;
-        b.absInnerHeight = size;
-        return b;
-    }
-
-    // The circle exactly as the inscription window draws it.
-    static void Canvas(CircleTier tier, CircleDraft d, string name, int size = 448, bool extra = false, SlotKey? selected = null)
-    {
-        var layout = Layout(tier);
-        var dlg = Dialog(tier, d, layout, selected);
-        using (var surf = new ImageSurface(Format.Argb32, size, size))
-        using (var ctx = new Context(surf))
+        public Scene(CircleTier tier, LifeSource source = LifeSource.Medium)
         {
-            typeof(GuiDialogCircleCanvas).GetMethod("DrawCanvas", F)!.Invoke(dlg, new object[] { ctx, surf, Bounds(size) });
-            surf.WriteToPng($"out/{name}.png");
+            Tier = tier;
+            Draft = new CircleDraft { Source = source };
         }
-        double gr = (double)layoutType.GetProperty("GlyphRadius")!.GetValue(layout)! * size;
-        var scene = new Dictionary<string, object>
+
+        public CircleTier Tier { get; }
+        public CircleDraft Draft { get; }
+
+        public Scene Glyph(SlotKey slot, string code, int size = 1)
         {
-            ["size"] = size,
-            ["glyphRadius"] = gr,
-            ["slots"] = d.Figures.Keys.ToDictionary(k => $"{k.Ring}{k.Slot}", k =>
-            {
-                var (x, y) = Centre(layout, k, size);
-                return new[] { x, y, Letter(layout, d.SizeOf(k)) * size };
-            }),
-        };
-        if (extra)
-        {
-            scene["words"] = CircleShape.Words(d.Figures.Keys, d.Links).Select(w =>
-            {
-                var members = w.Heart.Concat(w.Body).ToList();
-                var (x, y, r) = CircleShape.WordCircle(members.Select(k => Centre(layout, k, size)).ToList(), gr, (size / 2.0, size / 2.0),
-                    size * 0.45, extraWeight: members.Sum(k => d.SizeOf(k) - 1));
-                return new { x, y, r };
-            }).ToList();
-            var (ex, ey) = Centre(layout, I(0), size);
-            scene["empty"] = new[] { ex, ey };
+            Draft.Write(slot, script.FigureOf(code));
+            Draft.SetSize(slot, size);
+            return this;
         }
-        info[name] = scene;
+
+        public Scene Link(SlotKey a, SlotKey b)
+        {
+            Draft.Link(a, b, Tier);
+            return this;
+        }
     }
 
-    // The glyph panel with one glyph selected, as when writing it.
+    static ImageSurface Art(CircleTier tier, string file)
+    {
+        string path = $"{artFolder}{tier.Art}/{file}";
+        return arts.TryGetValue(path, out var surface) ? surface : arts[path] = new ImageSurface(path);
+    }
+
+    static void Canvas(Scene scene, string name, int size = 448, bool withWords = false, SlotKey? selected = null)
+    {
+        var layout = new CanvasLayout(scene.Tier);
+        using (var surface = new ImageSurface(Format.Argb32, size, size))
+        using (var ctx = new Context(surface))
+        {
+            CanvasRenderer.DrawCanvas(ctx, size, scene.Draft, layout, InkStyle.For(scene.Tier), Art(scene.Tier, "canvas.png"),
+                new CanvasView(selected, null, false, (0, 0)));
+            surface.WriteToPng($"out/{name}.png");
+        }
+        info[name] = Positions(scene.Draft, layout, size, withWords);
+    }
+
     static void Panel(CircleTier tier, GlyphFigure figure, string name, int size)
     {
-        var d = new CircleDraft();
-        d.Figures[C(0)] = figure;
-        var t = typeof(GuiDialogCircleCanvas);
-        var dlg = Dialog(tier, d, Layout(tier));
-        t.GetField("selected", F)!.SetValue(dlg, C(0));
-        t.GetField("panelArt", F)!.SetValue(dlg, Art(tier.Art + "/glyphpanel.png"));
-        using var surf = new ImageSurface(Format.Argb32, size, size);
-        using var ctx = new Context(surf);
-        t.GetMethod("DrawPanel", F)!.Invoke(dlg, new object[] { ctx, surf, Bounds(size) });
-        surf.WriteToPng($"out/{name}.png");
+        using var surface = new ImageSurface(Format.Argb32, size, size);
+        using var ctx = new Context(surface);
+        CanvasRenderer.DrawPanel(ctx, size, figure, GlyphPainter.SlotSeed(Heart(0)), InkStyle.For(tier), Art(tier, "glyphpanel.png"),
+            new PanelView(null, false, (0, 0)));
+        surface.WriteToPng($"out/{name}.png");
     }
 
-    // Only what the writer writes: the border's source, faint slot circles, plain links, and each glyph
-    // exactly as on the panel (no letter circle), with the canvas's own ink. None of the drawn extras.
-    static void Bare(CircleTier tier, CircleDraft d, string name, int size = 448)
+    // Only what the writer writes: the border's source, faint slots, plain links, and each glyph as
+    // drawn on the panel (no letter circle). None of what the game draws on top.
+    static void WrittenOnly(Scene scene, string name, int size = 448)
     {
-        var ink = mod.GetType("Mossbound.Gui.Ink")!;
-        var painter = mod.GetType("Mossbound.Gui.GlyphPainter")!;
-        var circlePainter = mod.GetType("Mossbound.Gui.CirclePainter")!;
-        var layout = Layout(tier);
-        var style = Style(tier);
-        T Prop<T>(string p) => (T)style.GetType().GetProperty(p)!.GetValue(style)!;
-        double u = size / 448.0, px = Math.Max(1, Math.Round(Prop<double>("CanvasGrain") * u));
-        double gr = (double)layoutType.GetProperty("GlyphRadius")!.GetValue(layout)! * size;
-        Func<double, double> W = w => Math.Max(w * Prop<double>("Weight"), px);
-        (double, double) P(SlotKey k) => Centre(layout, k, size);
-        double R(SlotKey k) => Letter(layout, d.SizeOf(k)) * size;
-        int Seed(SlotKey k) => (int)painter.GetMethod("SlotSeed")!.Invoke(null, new object[] { k })!;
-        var use = ink.GetMethod("Use")!;
-        var stroke = style.GetType().GetMethod("Stroke")!;
+        var layout = new CanvasLayout(scene.Tier);
+        var style = InkStyle.For(scene.Tier);
+        var draft = scene.Draft;
+        double unit = size / CanvasLayout.CanvasSize, pixel = Ink.PixelSize(unit, style.CanvasGrain);
+        double glyphRadius = layout.GlyphRadius * size;
+        double Width(double w) => Math.Max(w * style.Weight, pixel);
+        double LetterRadius(SlotKey k) => layout.LetterRadius(draft.SizeOf(k)) * size;
 
-        using var surf = new ImageSurface(Format.Argb32, size, size);
-        using var target = new Context(surf);
-        ink.GetMethod("PaintArt")!.Invoke(null, new object?[] { target, Art(tier.Art + "/canvas.png"), (double)size });
-        Action<Context> draw = ctx =>
+        using var surface = new ImageSurface(Format.Argb32, size, size);
+        using var target = new Context(surface);
+        Ink.PaintArt(target, Art(scene.Tier, "canvas.png"), size);
+        Ink.Pixelated(target, size, pixel, ctx =>
         {
-            circlePainter.GetMethod("Border")!.Invoke(null, new object[] { ctx, d.Source, style, (double)size, W, Array.Empty<(double, double, double)>() });
+            CirclePainter.Border(ctx, draft.Source, style, size, Width, Array.Empty<(double, double, double)>());
 
-            use.Invoke(null, new object[] { ctx, Prop<object>("Colour"), 0.25 });
-            ctx.LineWidth = W(1.5 * u);
-            foreach (var k in (IEnumerable<SlotKey>)layoutType.GetMethod("AllSlots")!.Invoke(layout, null)!)
+            Ink.Use(ctx, style.Colour, 0.25);
+            foreach (var slot in layout.AllSlots())
             {
-                var (sx, sy) = P(k);
-                ctx.NewPath(); ctx.Arc(sx, sy, d.Figures.ContainsKey(k) ? R(k) : gr, 0, 2 * Math.PI); ctx.Stroke();
+                var (x, y) = layout.SlotCentre(slot, size);
+                Ink.StrokeCircle(ctx, x, y, draft.IsWritten(slot) ? LetterRadius(slot) : glyphRadius, Width(1.5 * unit));
             }
 
             ctx.PushGroup();
-            ctx.LineWidth = W(2.8 * u);
-            foreach (var (a, b) in d.Links)
-                painter.GetMethod("Link")!.Invoke(null, new object?[] { ctx, P(a), P(b), size / 2.0, (int?)(Seed(a) * 31 + Seed(b)), style, null, null });
+            ctx.LineWidth = Width(2.8 * unit);
+            foreach (var (a, b) in draft.Links)
+                GlyphPainter.DrawLink(ctx, layout.SlotCentre(a, size), layout.SlotCentre(b, size), size / 2,
+                    GlyphPainter.SlotSeed(a) * 31 + GlyphPainter.SlotSeed(b), style);
             ctx.Operator = Operator.Clear;
-            foreach (var k in d.Figures.Keys) { var (x, y) = P(k); ctx.NewPath(); ctx.Arc(x, y, R(k) * 1.05, 0, 2 * Math.PI); ctx.Fill(); }
+            foreach (var slot in draft.Figures.Keys)
+            {
+                var (x, y) = layout.SlotCentre(slot, size);
+                Ink.FillCircle(ctx, x, y, LetterRadius(slot) * 1.05);
+            }
             ctx.Operator = Operator.Over;
             ctx.PopGroupToSource();
             ctx.Paint();
 
-            var segment = painter.GetMethod("Segment")!;
-            var drawMark = painter.GetMethod("DrawMark", F)!;
-            var markRadius = painter.GetMethod("MarkRadius", F)!;
-            var pointAt = layoutType.GetMethod("RosettePoint")!;
-            foreach (var (k, f) in d.Figures)
+            foreach (var (slot, figure) in draft.Figures)
             {
-                var (x, y) = P(k);
-                double rot = (double)layoutType.GetMethod("GlyphRotation")!.Invoke(layout, new object[] { k })!;
-                double r = R(k), lw = W(gr * 0.09);
-                (double, double) Point(int p) => ((double, double))pointAt.Invoke(null, new object[] { x, y, r, rot, p })!;
-                ctx.PushGroup();
-                ctx.LineWidth = lw;
-                foreach (var (pa, pb) in f.LinkPairs())
-                    segment.Invoke(null, new object[] { ctx, x, y, r, rot, pa, pb, Seed(k), style, true, 1.0 });
-                ctx.Operator = Operator.Clear;
-                for (int p = 0; p < GlyphFigure.PointCount; p++)
-                {
-                    if (f.MarkAt(p) == Mark.None) continue;
-                    var (mx, my) = Point(p);
-                    ctx.NewPath(); ctx.Arc(mx, my, (double)markRadius.Invoke(null, new object[] { r, f.MarkAt(p) })! + lw, 0, 2 * Math.PI); ctx.Fill();
-                }
-                ctx.Operator = Operator.Over;
-                for (int p = 0; p < GlyphFigure.PointCount; p++)
-                {
-                    if (f.MarkAt(p) == Mark.None) continue;
-                    var (mx, my) = Point(p);
-                    use.Invoke(null, new object[] { ctx, stroke.Invoke(style, new object[] { Seed(k) + p })!, 1.0 });
-                    drawMark.Invoke(null, new object[] { ctx, mx, my, r, f.MarkAt(p), lw, Seed(k) + p, Prop<double>("Roughness") });
-                }
-                ctx.PopGroupToSource();
-                ctx.Paint();
+                var (x, y) = layout.SlotCentre(slot, size);
+                GlyphPainter.DrawGlyph(ctx, x, y, LetterRadius(slot), layout.GlyphRotation(slot), figure, Width(glyphRadius * 0.09),
+                    GlyphPainter.SlotSeed(slot), style, LetterCircle.None);
             }
+        }, style.Noise);
+        surface.WriteToPng($"out/{name}.png");
+    }
+
+    static Dictionary<string, object> Positions(CircleDraft draft, CanvasLayout layout, int size, bool withWords)
+    {
+        double glyphRadius = layout.GlyphRadius * size;
+        var positions = new Dictionary<string, object>
+        {
+            ["size"] = size,
+            ["glyphRadius"] = glyphRadius,
+            ["slots"] = draft.Figures.Keys.ToDictionary(k => $"{k.Ring}{k.Slot}", k =>
+            {
+                var (x, y) = layout.SlotCentre(k, size);
+                return new[] { x, y, layout.LetterRadius(draft.SizeOf(k)) * size };
+            }),
         };
-        ink.GetMethod("Pixelated")!.Invoke(null, new object[] { target, (double)size, px, draw, Prop<double>("Noise") });
-        surf.WriteToPng($"out/{name}.png");
+        if (!withWords) return positions;
+        positions["words"] = CircleStructure.Casts(draft.Figures.Keys, draft.Links).Select(cast =>
+        {
+            var members = cast.Heart.Concat(cast.Body).ToList();
+            var (x, y, r) = WordCircle.Place(members.Select(k => layout.SlotCentre(k, size)).ToList(), glyphRadius,
+                (size / 2.0, size / 2.0), size * 0.45, extraWeight: members.Sum(k => draft.SizeOf(k) - 1));
+            return new { x, y, r };
+        }).ToList();
+        var (ex, ey) = layout.SlotCentre(Shape(0), size);
+        positions["empty"] = new[] { ex, ey };
+        return positions;
     }
 }

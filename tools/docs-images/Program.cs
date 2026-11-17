@@ -2,7 +2,7 @@
 // using the mod's real canvas and panel code through reflection and the system's Cairo. The Python
 // scripts then add titles and labels. Run through run.sh, from this folder.
 using Cairo;
-using Mossbound.Script;
+using Mossbound.Core;
 
 System.Runtime.InteropServices.NativeLibrary.SetDllImportResolver(typeof(Context).Assembly, (name, _, _) =>
     name.Contains("cairo") && System.Runtime.InteropServices.NativeLibrary.TryLoad("libcairo.so.2", out var lib) ? lib : IntPtr.Zero);

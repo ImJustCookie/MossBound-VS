@@ -1,10 +1,9 @@
 using System.Collections.Generic;
 using System.Linq;
+using Mossbound.Core;
 using Vintagestory.API.Common;
-using Vintagestory.API.Common.Entities;
 using Vintagestory.API.MathTools;
 using Vintagestory.API.Server;
-using Mossbound.Script;
 
 namespace Mossbound.Server;
 
@@ -48,18 +47,18 @@ static class SpellEffects
     }
 
     // Opposite or overloaded elements backfire a little; a circle with no usable element just fizzles.
-    public static void Mishap(ICoreServerAPI sapi, IServerPlayer caster, IReadOnlyList<Mishap> mishaps)
+    public static void ApplyMishap(ICoreServerAPI sapi, IServerPlayer caster, IReadOnlyList<Mishap> mishaps)
     {
         var at = caster.Entity.Pos.XYZ.Add(0, 1, 0);
         Burst(sapi, at, smokeColour, 25);
-        if (mishaps.Contains(Script.Mishap.Opposition) || mishaps.Contains(Script.Mishap.Overload))
+        if (mishaps.Contains(Mishap.Opposition) || mishaps.Contains(Mishap.Overload))
         {
             caster.Entity.ReceiveDamage(new DamageSource { Source = EnumDamageSource.Internal, Type = EnumDamageType.Injury }, 1);
-            caster.Tell("mossbound:cast-backfire");
+            caster.Tell("cast-backfire");
         }
         else
         {
-            caster.Tell("mossbound:cast-fizzle");
+            caster.Tell("cast-fizzle");
         }
     }
 
