@@ -1,4 +1,4 @@
-using Mossbound.Script;
+using Mossbound.Core;
 using ProtoBuf;
 
 namespace Mossbound.Tests;
@@ -12,12 +12,12 @@ public class GlyphFigureTests
         for (int a = 0; a < GlyphFigure.PointCount; a++)
             for (int b = a + 1; b < GlyphFigure.PointCount; b++)
             {
-                int i = GlyphFigure.LinkIndex(a, b);
-                Assert.InRange(i, 0, GlyphFigure.LinkCount - 1);
+                int i = GlyphFigure.LineIndex(a, b);
+                Assert.InRange(i, 0, GlyphFigure.PairCount - 1);
                 Assert.True(seen.Add(i));
-                Assert.Equal(i, GlyphFigure.LinkIndex(b, a));
+                Assert.Equal(i, GlyphFigure.LineIndex(b, a));
             }
-        Assert.Equal(GlyphFigure.LinkCount, seen.Count);
+        Assert.Equal(GlyphFigure.PairCount, seen.Count);
     }
 
     [Fact]
@@ -26,14 +26,14 @@ public class GlyphFigureTests
         Assert.True(GlyphFigure.IsArc(0, 1));
         Assert.True(GlyphFigure.IsArc(5, 0));
         Assert.False(GlyphFigure.IsArc(0, 2));
-        Assert.False(GlyphFigure.IsArc(0, GlyphFigure.Centre));
+        Assert.False(GlyphFigure.IsArc(0, GlyphFigure.Middle));
     }
 
     [Fact]
     public void StrokeOrderDoesNotMatterAndMarksRoundTrip()
     {
-        var a = new GlyphFigure(0, 0).WithLink(0, 1).WithLink(1, 6).WithMark(3, Mark.DoubleRing);
-        var b = new GlyphFigure(0, 0).WithMark(3, Mark.DoubleRing).WithLink(6, 1).WithLink(1, 0);
+        var a = GlyphFigure.Empty.WithLine(0, 1).WithLine(1, 6).WithMark(3, Mark.DoubleRing);
+        var b = GlyphFigure.Empty.WithMark(3, Mark.DoubleRing).WithLine(6, 1).WithLine(1, 0);
         Assert.Equal(a, b);
         Assert.Equal(Mark.DoubleRing, a.MarkAt(3));
         Assert.Equal(Mark.None, a.MarkAt(2));
@@ -43,19 +43,55 @@ public class GlyphFigureTests
     [Fact]
     public void EmptyOrMalformedFiguresAreInvalidButDotOnlyIsFine()
     {
-        Assert.False(new GlyphFigure(0, 0).IsValid);
-        Assert.True(new GlyphFigure(0, 0).WithMark(1, Mark.Dot).IsValid);
+        Assert.False(GlyphFigure.Empty.IsValid);
+        Assert.True(GlyphFigure.Empty.WithMark(1, Mark.Dot).IsValid);
         Assert.False(new GlyphFigure(1u << 30, 0).IsValid);
-        Assert.False(new GlyphFigure(0, 0).WithLink(0, 3).IsValid); // straight chords don't exist
+        Assert.False(GlyphFigure.Empty.WithLine(0, 3).IsValid); // straight chords don't exist
         Assert.False(new GlyphFigure(0, 7u).IsValid);                // mark value 7 doesn't exist
-        Assert.True(new GlyphFigure(0, 0).WithMark(6, Mark.BigDot).WithMark(5, Mark.DoubleRing).IsValid);
-        Assert.False(new GlyphFigure(0, 0).WithLink(0, 2).IsValid);
-        Assert.True(new GlyphFigure(0, 0).WithLink(0, 6).WithLink(6, 3).WithLink(3, 4).IsValid);
+        Assert.True(GlyphFigure.Empty.WithMark(6, Mark.BigDot).WithMark(5, Mark.DoubleRing).IsValid);
+        Assert.False(GlyphFigure.Empty.WithLine(0, 2).IsValid);
+        Assert.True(GlyphFigure.Empty.WithLine(0, 6).WithLine(6, 3).WithLine(3, 4).IsValid);
     }
 }
 
 public class WorldScriptTests
 {
+    // Recorded from the original generator: a change here would change every existing world's script.
+    [Theory]
+        [InlineData(1, "water", 132129u, 36896u)]
+        [InlineData(1, "ember", 165952u, 131104u)]
+        [InlineData(1, "frost", 19505u, 12576u)]
+        [InlineData(1, "stone", 802832u, 262176u)]
+        [InlineData(1, "life", 150592u, 132128u)]
+        [InlineData(1, "rot", 296976u, 16416u)]
+        [InlineData(1, "wind", 1049633u, 1064992u)]
+        [InlineData(1, "ward", 1852480u, 12321u)]
+        [InlineData(12345, "water", 1346560u, 1028u)]
+        [InlineData(12345, "ember", 1180736u, 132u)]
+        [InlineData(12345, "frost", 950272u, 4100u)]
+        [InlineData(12345, "stone", 296976u, 65540u)]
+        [InlineData(12345, "life", 525408u, 28u)]
+        [InlineData(12345, "rot", 1048625u, 260u)]
+        [InlineData(12345, "wind", 951297u, 1540u)]
+        [InlineData(12345, "ward", 1736736u, 32772u)]
+        [InlineData(-987654321, "water", 951296u, 136192u)]
+        [InlineData(-987654321, "ember", 543744u, 131138u)]
+        [InlineData(-987654321, "frost", 183360u, 131088u)]
+        [InlineData(-987654321, "stone", 1572913u, 131076u)]
+        [InlineData(-987654321, "life", 1966112u, 921600u)]
+        [InlineData(-987654321, "rot", 1230848u, 393280u)]
+        [InlineData(-987654321, "wind", 819232u, 393216u)]
+        [InlineData(-987654321, "ward", 1181728u, 135680u)]
+    public void GlyphShapesNeverChangeForAGivenSeed(long seed, string code, uint lines, uint marks) =>
+        Assert.Equal(new GlyphFigure(lines, marks), new WorldScript(seed).FigureOf(code));
+
+    [Theory]
+        [InlineData(1, 1, Mark.DoubleRing)]
+        [InlineData(12345, 0, Mark.DoubleRing)]
+        [InlineData(-987654321, 5, Mark.DoubleRing)]
+    public void FamilyMarksNeverChangeForAGivenSeed(long seed, int point, Mark mark) =>
+        Assert.Equal((point, mark), new WorldScript(seed).FamilyMarkOf(GlyphKind.Element));
+
     [Fact]
     public void SameSeedGivesSameScript()
     {
@@ -87,10 +123,10 @@ public class WorldScriptTests
             Assert.True(figures.Add(f));
             Assert.Same(g, script.Recognize(f));
 
-            var (point, mark) = script.MotifOf(g.Kind);
+            var (point, mark) = script.FamilyMarkOf(g.Kind);
             Assert.Equal(mark, f.MarkAt(point));
 
-            var links = f.LinkPairs().ToList();
+            var links = f.LinePairs().ToList();
             Assert.InRange(links.Count, 4, 6);
             Assert.True(IsConnected(links));
 
@@ -104,10 +140,10 @@ public class WorldScriptTests
     {
         var script = new WorldScript(7);
         var known = GlyphRegistry.All.Select(g => script.FigureOf(g.Code)).ToHashSet();
-        var all = new GlyphFigure(0, 0);
+        var all = GlyphFigure.Empty;
         for (int a = 0; a < GlyphFigure.PointCount; a++)
             for (int b = a + 1; b < GlyphFigure.PointCount; b++)
-                all = all.WithLink(a, b);
+                all = all.WithLine(a, b);
         Assert.DoesNotContain(all, known);
         Assert.Null(script.Recognize(all));
     }
@@ -169,7 +205,7 @@ public class ElementMixerTests
     [Fact]
     public void MoreThanThreeOfOneElementOverloads()
     {
-        Assert.False(Mix(Element.Water, Element.Water, Element.Water).Failed);
+        Assert.Empty(Mix(Element.Water, Element.Water, Element.Water).Mishaps);
         Assert.Contains(Mishap.Overload, Mix(Element.Water, Element.Water, Element.Water, Element.Water).Mishaps);
     }
 
@@ -184,44 +220,44 @@ public class CircleParserTests
     static PlacedGlyph Place(string code, CircleRing ring, int slot = 0)
     {
         var f = script.FigureOf(code);
-        return new PlacedGlyph { Ring = ring, Slot = slot, Links = f.Links, Marks = f.Marks };
+        return new PlacedGlyph { Ring = ring, Slot = slot, Lines = f.Lines, Marks = f.Marks };
     }
 
     [Fact]
     public void GlyphSizeIsIntensityAndIsCappedPerTier()
     {
-        var strong = Place("ember", CircleRing.Centre); strong.Size = 3;
-        var plan = CircleParser.Parse(new Circle { Glyphs = { strong } }, script);
+        var strong = Place("ember", CircleRing.Heart); strong.Size = 3;
+        var plan = SpellReading.Read(new Circle { Glyphs = { strong } }, script);
         Assert.Equal((Aspect.Ember, 3), Assert.Single(plan.Aspects));
 
         // A water glyph of size 2 next to a plain frost: Ice, at the smaller count (1).
-        var water = Place("water", CircleRing.Centre); water.Size = 2;
-        var mix = CircleParser.Parse(new Circle { Glyphs = { water, Place("frost", CircleRing.Centre, 1) }, Links = { new CircleLink { From = 0, To = 1 } } }, script);
+        var water = Place("water", CircleRing.Heart); water.Size = 2;
+        var mix = SpellReading.Read(new Circle { Glyphs = { water, Place("frost", CircleRing.Heart, 1) }, Links = { new CircleLink { From = 0, To = 1 } } }, script);
         Assert.Contains((Aspect.Ice, 1), mix.Aspects);
 
-        Assert.True(CircleParser.IsWithinBounds(new Circle { Glyphs = { strong } }, CircleTier.Bark));
-        Assert.False(CircleParser.IsWithinBounds(new Circle { Glyphs = { strong } }, CircleTier.Moss)); // moss caps at 2
-        var negative = Place("ember", CircleRing.Centre); negative.Size = -1;
-        Assert.False(CircleParser.IsWithinBounds(new Circle { Glyphs = { negative } }, CircleTier.Stone));
+        Assert.True(CircleValidation.FitsTier(new Circle { Glyphs = { strong } }, CircleTier.Bark));
+        Assert.False(CircleValidation.FitsTier(new Circle { Glyphs = { strong } }, CircleTier.Moss)); // moss caps at 2
+        var negative = Place("ember", CircleRing.Heart); negative.Size = -1;
+        Assert.False(CircleValidation.FitsTier(new Circle { Glyphs = { negative } }, CircleTier.Stone));
         // Strips written before sizes existed (Size 0) read as size 1.
-        Assert.Equal(1, Place("ember", CircleRing.Centre).Power);
+        Assert.Equal(1, Place("ember", CircleRing.Heart).EffectiveSize);
     }
 
     [Fact]
     public void SourceIsChosenFromBarkUpAndMustBeKnown()
     {
-        var land = new Circle { Glyphs = { Place("ember", CircleRing.Centre) }, Source = LifeSource.Land };
-        Assert.True(CircleParser.IsWithinBounds(land, CircleTier.Bark));
-        Assert.False(CircleParser.IsWithinBounds(land, CircleTier.Moss));
+        var land = new Circle { Glyphs = { Place("ember", CircleRing.Heart) }, Source = LifeSource.Land };
+        Assert.True(CircleValidation.FitsTier(land, CircleTier.Bark));
+        Assert.False(CircleValidation.FitsTier(land, CircleTier.Moss));
         land.Source = (LifeSource)42;
-        Assert.False(CircleParser.IsWithinBounds(land, CircleTier.Stone));
+        Assert.False(CircleValidation.FitsTier(land, CircleTier.Stone));
     }
 
     [Fact]
     public void LinkedHeartsMix()
     {
-        var circle = new Circle { Glyphs = { Place("water", CircleRing.Centre), Place("frost", CircleRing.Centre, 1) }, Links = { new CircleLink { From = 0, To = 1 } } };
-        var plan = CircleParser.Parse(circle, script);
+        var circle = new Circle { Glyphs = { Place("water", CircleRing.Heart), Place("frost", CircleRing.Heart, 1) }, Links = { new CircleLink { From = 0, To = 1 } } };
+        var plan = SpellReading.Read(circle, script);
         Assert.False(plan.Fizzles);
         Assert.Equal(new[] { (Aspect.Ice, 1) }, plan.Aspects);
     }
@@ -230,57 +266,56 @@ public class CircleParserTests
     public void UnlinkedHeartsStaySeparate()
     {
         // Opposites only cancel when they are linked into the same heart.
-        var circle = new Circle { Glyphs = { Place("ember", CircleRing.Centre), Place("frost", CircleRing.Centre, 1) } };
-        var plan = CircleParser.Parse(circle, script);
+        var circle = new Circle { Glyphs = { Place("ember", CircleRing.Heart), Place("frost", CircleRing.Heart, 1) } };
+        var plan = SpellReading.Read(circle, script);
         Assert.False(plan.Fizzles);
         Assert.Equal(new[] { (Aspect.Ember, 1), (Aspect.Frost, 1) }, plan.Aspects);
 
         circle.Links.Add(new CircleLink { From = 0, To = 1 });
-        Assert.Contains(Mishap.Opposition, CircleParser.Parse(circle, script).Mishaps);
+        Assert.Contains(Mishap.Opposition, SpellReading.Read(circle, script).Mishaps);
     }
 
     [Fact]
     public void ElementOutsideCentreIsMisplaced()
     {
-        var circle = new Circle { Glyphs = { Place("water", CircleRing.Centre), Place("frost", CircleRing.Outer) } };
-        var plan = CircleParser.Parse(circle, script);
+        var circle = new Circle { Glyphs = { Place("water", CircleRing.Heart), Place("frost", CircleRing.Aim) } };
+        var plan = SpellReading.Read(circle, script);
         Assert.Contains(Mishap.Misplaced, plan.Mishaps);
     }
 
     [Fact]
-    public void UnknownFiguresAreCollectedNotCrashed()
+    public void UnknownFiguresAreIgnored()
     {
-        var junk = new PlacedGlyph { Ring = CircleRing.Centre, Links = (1u << GlyphFigure.LinkCount) - 1 };
-        var circle = new Circle { Glyphs = { Place("ember", CircleRing.Centre), junk } };
-        var plan = CircleParser.Parse(circle, script);
-        Assert.Single(plan.Unrecognized);
+        var junk = new PlacedGlyph { Ring = CircleRing.Heart, Slot = 1, Lines = (1u << GlyphFigure.PairCount) - 1 };
+        var circle = new Circle { Glyphs = { Place("ember", CircleRing.Heart), junk } };
+        var plan = SpellReading.Read(circle, script);
         Assert.Equal(new[] { (Aspect.Ember, 1) }, plan.Aspects);
     }
 
     [Fact]
     public void BoundsRejectOversizedOrMalformedInput()
     {
-        var ok = new Circle { Glyphs = { Place("water", CircleRing.Centre), Place("life", CircleRing.Centre, 1) } };
-        Assert.True(CircleParser.IsWithinBounds(ok, CircleTier.Moss));
+        var ok = new Circle { Glyphs = { Place("water", CircleRing.Heart), Place("life", CircleRing.Heart, 1) } };
+        Assert.True(CircleValidation.FitsTier(ok, CircleTier.Moss));
 
         var tooMany = new Circle();
-        for (int i = 0; i <= CircleParser.MaxGlyphs; i++) tooMany.Glyphs.Add(Place("water", CircleRing.Centre));
-        Assert.False(CircleParser.IsWithinBounds(tooMany, CircleTier.Stone));
+        for (int i = 0; i <= CircleValidation.MaxGlyphs; i++) tooMany.Glyphs.Add(Place("water", CircleRing.Heart));
+        Assert.False(CircleValidation.FitsTier(tooMany, CircleTier.Stone));
 
-        var sameSlot = new Circle { Glyphs = { Place("water", CircleRing.Centre), Place("life", CircleRing.Centre) } };
-        Assert.False(CircleParser.IsWithinBounds(sameSlot, CircleTier.Stone));
+        var sameSlot = new Circle { Glyphs = { Place("water", CircleRing.Heart), Place("life", CircleRing.Heart) } };
+        Assert.False(CircleValidation.FitsTier(sameSlot, CircleTier.Stone));
 
-        var badLink = new Circle { Glyphs = { Place("water", CircleRing.Centre) }, Links = { new CircleLink { From = 0, To = 5 } } };
-        Assert.False(CircleParser.IsWithinBounds(badLink, CircleTier.Stone));
+        var badLink = new Circle { Glyphs = { Place("water", CircleRing.Heart) }, Links = { new CircleLink { From = 0, To = 5 } } };
+        Assert.False(CircleValidation.FitsTier(badLink, CircleTier.Stone));
 
-        var badSlot = new Circle { Glyphs = { Place("water", CircleRing.Centre, CircleTier.Stone.SlotCount(CircleRing.Centre)) } };
-        Assert.False(CircleParser.IsWithinBounds(badSlot, CircleTier.Stone));
+        var badSlot = new Circle { Glyphs = { Place("water", CircleRing.Heart, CircleTier.Stone.SlotCount(CircleRing.Heart)) } };
+        Assert.False(CircleValidation.FitsTier(badSlot, CircleTier.Stone));
 
         var badRing = new Circle { Glyphs = { Place("water", (CircleRing)42) } };
-        Assert.False(CircleParser.IsWithinBounds(badRing, CircleTier.Stone));
+        Assert.False(CircleValidation.FitsTier(badRing, CircleTier.Stone));
 
-        var badFigure = new Circle { Glyphs = { new PlacedGlyph { Ring = CircleRing.Centre } } }; // empty figure
-        Assert.False(CircleParser.IsWithinBounds(badFigure, CircleTier.Stone));
+        var badFigure = new Circle { Glyphs = { new PlacedGlyph { Ring = CircleRing.Heart } } }; // empty figure
+        Assert.False(CircleValidation.FitsTier(badFigure, CircleTier.Stone));
     }
 
     [Fact]
@@ -288,7 +323,7 @@ public class CircleParserTests
     {
         var circle = new Circle
         {
-            Glyphs = { Place("water", CircleRing.Centre), Place("wind", CircleRing.Centre, 3) },
+            Glyphs = { Place("water", CircleRing.Heart), Place("wind", CircleRing.Heart, 3) },
             Links = { new CircleLink { From = 0, To = 1 } },
         };
         using var ms = new MemoryStream();
@@ -303,19 +338,19 @@ public class CircleParserTests
 
 public class CircleDraftTests
 {
-    static readonly SlotKey c0 = new(CircleRing.Centre, 0), c1 = new(CircleRing.Centre, 1), o3 = new(CircleRing.Outer, 3);
-    static readonly GlyphFigure line = new GlyphFigure(0, 0).WithLink(0, 1);
+    static readonly SlotKey c0 = new(CircleRing.Heart, 0), c1 = new(CircleRing.Heart, 1), o3 = new(CircleRing.Aim, 3);
+    static readonly GlyphFigure line = GlyphFigure.Empty.WithLine(0, 1);
 
     [Fact]
     public void LinksJoinNeighbouringRingsOrNeighbouringSlots()
     {
         var bark = CircleTier.Bark; // heart 3, shape 4
-        Assert.True(CircleDraft.CanLink(c0, new(CircleRing.Inner, 2), bark));      // next ring
-        Assert.True(CircleDraft.CanLink(new(CircleRing.Inner, 0), new(CircleRing.Inner, 3), bark)); // wraps
-        Assert.False(CircleDraft.CanLink(new(CircleRing.Inner, 0), new(CircleRing.Inner, 2), bark)); // across
-        Assert.False(CircleDraft.CanLink(c0, o3, CircleTier.Parchment));          // skips a ring
-        Assert.False(CircleDraft.CanLink(c0, o3, bark));                          // no such slot
-        Assert.False(CircleDraft.CanLink(c0, c0, bark));
+        Assert.True(bark.AllowsLink(c0, new(CircleRing.Shape, 2)));                         // next ring
+        Assert.True(bark.AllowsLink(new(CircleRing.Shape, 0), new(CircleRing.Shape, 3)));   // wraps
+        Assert.False(bark.AllowsLink(new(CircleRing.Shape, 0), new(CircleRing.Shape, 2)));  // across
+        Assert.False(CircleTier.Parchment.AllowsLink(c0, o3));          // skips a ring
+        Assert.False(bark.AllowsLink(c0, o3));                          // no such slot
+        Assert.False(bark.AllowsLink(c0, c0));
     }
 
     [Fact]
@@ -349,15 +384,15 @@ public class CircleDraftTests
     {
         var d = new CircleDraft();
         d.Figures[c0] = line;
-        d.Figures[c1] = new GlyphFigure(0, 0).WithMark(2, Mark.Dot); // dot-only: kept
-        d.Figures[o3] = new GlyphFigure(0, 0);                       // empty: dropped
+        d.Figures[c1] = GlyphFigure.Empty.WithMark(2, Mark.Dot); // dot-only: kept
+        d.Figures[o3] = GlyphFigure.Empty;                       // empty: dropped
         d.ToggleLink(c0, c1);
         d.ToggleLink(c0, o3);
 
         var circle = d.ToCircle();
         Assert.Equal(2, circle.Glyphs.Count);
         Assert.Single(circle.Links);
-        Assert.True(CircleParser.IsWithinBounds(circle, CircleTier.Parchment));
+        Assert.True(CircleValidation.FitsTier(circle, CircleTier.Parchment));
     }
 
     [Fact]
@@ -440,10 +475,10 @@ public class PatternStrokeTests
     [Fact]
     public void StrokeSegmentsMakeAValidFigure()
     {
-        var f = new GlyphFigure(0, 0);
-        foreach (var (a, b) in Draw(1, 4, 5).Segments()) f = f.WithLink(a, b);
+        var f = GlyphFigure.Empty;
+        foreach (var (a, b) in Draw(1, 4, 5).Segments()) f = f.WithLine(a, b);
         Assert.True(f.IsValid);
-        Assert.True(f.HasLink(1, 6) && f.HasLink(6, 4) && f.HasLink(4, 5));
+        Assert.True(f.HasLine(1, 6) && f.HasLine(6, 4) && f.HasLine(4, 5));
     }
 }
 
@@ -454,35 +489,35 @@ public class CircleTierTests
     static PlacedGlyph Place(CircleRing ring, int slot)
     {
         var f = script.FigureOf("life");
-        return new PlacedGlyph { Ring = ring, Slot = slot, Links = f.Links, Marks = f.Marks };
+        return new PlacedGlyph { Ring = ring, Slot = slot, Lines = f.Lines, Marks = f.Marks };
     }
 
     [Fact]
     public void EachTierAddsARingOutward()
     {
-        Assert.Equal(new[] { CircleRing.Centre }, CircleTier.Moss.Rings);
-        Assert.Equal(new[] { CircleRing.Centre, CircleRing.Inner }, CircleTier.Bark.Rings);
-        Assert.Equal(new[] { CircleRing.Centre, CircleRing.Inner, CircleRing.Outer }, CircleTier.Parchment.Rings);
-        Assert.Equal(new[] { CircleRing.Centre, CircleRing.Inner, CircleRing.Outer, CircleRing.Rim }, CircleTier.Stone.Rings);
-        Assert.Equal(2, CircleTier.Moss.SlotCount(CircleRing.Centre));
-        Assert.Equal(0, CircleTier.Moss.SlotCount(CircleRing.Inner));
-        Assert.Equal((3, 4), (CircleTier.Bark.SlotCount(CircleRing.Centre), CircleTier.Bark.SlotCount(CircleRing.Inner)));
-        Assert.Equal((4, 6), (CircleTier.Parchment.SlotCount(CircleRing.Centre), CircleTier.Parchment.SlotCount(CircleRing.Inner)));
+        Assert.Equal(new[] { CircleRing.Heart }, CircleTier.Moss.Rings);
+        Assert.Equal(new[] { CircleRing.Heart, CircleRing.Shape }, CircleTier.Bark.Rings);
+        Assert.Equal(new[] { CircleRing.Heart, CircleRing.Shape, CircleRing.Aim }, CircleTier.Parchment.Rings);
+        Assert.Equal(new[] { CircleRing.Heart, CircleRing.Shape, CircleRing.Aim, CircleRing.Rim }, CircleTier.Stone.Rings);
+        Assert.Equal(2, CircleTier.Moss.SlotCount(CircleRing.Heart));
+        Assert.Equal(0, CircleTier.Moss.SlotCount(CircleRing.Shape));
+        Assert.Equal((3, 4), (CircleTier.Bark.SlotCount(CircleRing.Heart), CircleTier.Bark.SlotCount(CircleRing.Shape)));
+        Assert.Equal((4, 6), (CircleTier.Parchment.SlotCount(CircleRing.Heart), CircleTier.Parchment.SlotCount(CircleRing.Shape)));
     }
 
     [Fact]
     public void ServerRejectsRingsAndSlotsTheMediumDoesNotHave()
     {
-        var heartOnly = new Circle { Glyphs = { Place(CircleRing.Centre, 0), Place(CircleRing.Centre, 1) } };
-        Assert.True(CircleParser.IsWithinBounds(heartOnly, CircleTier.Moss));
+        var heartOnly = new Circle { Glyphs = { Place(CircleRing.Heart, 0), Place(CircleRing.Heart, 1) } };
+        Assert.True(CircleValidation.FitsTier(heartOnly, CircleTier.Moss));
 
-        var thirdHeartSlot = new Circle { Glyphs = { Place(CircleRing.Centre, 2) } };
-        Assert.False(CircleParser.IsWithinBounds(thirdHeartSlot, CircleTier.Moss));
-        Assert.True(CircleParser.IsWithinBounds(thirdHeartSlot, CircleTier.Bark));
+        var thirdHeartSlot = new Circle { Glyphs = { Place(CircleRing.Heart, 2) } };
+        Assert.False(CircleValidation.FitsTier(thirdHeartSlot, CircleTier.Moss));
+        Assert.True(CircleValidation.FitsTier(thirdHeartSlot, CircleTier.Bark));
 
-        var shape = new Circle { Glyphs = { Place(CircleRing.Inner, 0) } };
-        Assert.False(CircleParser.IsWithinBounds(shape, CircleTier.Moss));
-        Assert.True(CircleParser.IsWithinBounds(shape, CircleTier.Bark));
+        var shape = new Circle { Glyphs = { Place(CircleRing.Shape, 0) } };
+        Assert.False(CircleValidation.FitsTier(shape, CircleTier.Moss));
+        Assert.True(CircleValidation.FitsTier(shape, CircleTier.Bark));
     }
 
     [Theory]
@@ -496,9 +531,9 @@ public class CircleTierTests
 
 public class CircleShapeTests
 {
-    static SlotKey C(int s) => new(CircleRing.Centre, s);
-    static SlotKey I(int s) => new(CircleRing.Inner, s);
-    static SlotKey O(int s) => new(CircleRing.Outer, s);
+    static SlotKey C(int s) => new(CircleRing.Heart, s);
+    static SlotKey I(int s) => new(CircleRing.Shape, s);
+    static SlotKey O(int s) => new(CircleRing.Aim, s);
 
     [Fact]
     public void LinkedHeartsMixAndEachBodyFedByAHeartIsAWord()
@@ -506,15 +541,15 @@ public class CircleShapeTests
         var glyphs = new[] { C(0), C(1), C(2), I(0), I(1), O(0), I(3), O(5) };
         var links = new[] { (C(0), C(1)), (C(1), I(0)), (I(0), I(1)), (I(0), O(0)), (C(2), I(3)) };
 
-        var mix = Assert.Single(CircleShape.MixGroups(glyphs, links));
+        var mix = Assert.Single(CircleStructure.Mixes(glyphs, links));
         Assert.Equal(new[] { C(0), C(1) }, mix);
 
-        var words = CircleShape.Words(glyphs, links);
+        var words = CircleStructure.Casts(glyphs, links);
         Assert.Equal(2, words.Count);
         Assert.Equal(new[] { I(0), I(1), O(0) }, words[0].Body);
         Assert.Equal(O(0), words[0].AimEnd);
         Assert.Equal(new[] { C(2) }, words[1].Heart);
-        Assert.False(words[1].Aimed);
+        Assert.False(words[1].IsAimed);
         // O(5) is linked to nothing: not part of any word.
         Assert.DoesNotContain(words, w => w.Body.Contains(O(5)));
     }
@@ -525,13 +560,13 @@ public class CircleShapeTests
         // Heart -> shape -> Foes -> Closest: the chain ends at O(1), wherever the slots happen to sit.
         var glyphs = new[] { C(0), I(1), O(2), O(1) };
         var links = new[] { (C(0), I(1)), (I(1), O(2)), (O(2), O(1)) };
-        Assert.Equal(O(1), Assert.Single(CircleShape.Words(glyphs, links)).AimEnd);
+        Assert.Equal(O(1), Assert.Single(CircleStructure.Casts(glyphs, links)).AimEnd);
     }
 
     [Fact]
     public void WordCirclesBiteTheBorder()
     {
-        var (x, y, r) = CircleShape.WordCircle(new[] { (100.0, 0.0), (140.0, 0.0) }, 10, (0, 0), border: 200);
+        var (x, y, r) = WordCircle.Place(new[] { (100.0, 0.0), (140.0, 0.0) }, 10, (0, 0), border: 200);
         Assert.Equal(0, y, 6);
         Assert.Equal(200 + r * 0.1, x + r, 6); // reaches past the border by 10% of its radius
     }
@@ -540,20 +575,20 @@ public class CircleShapeTests
     public void HeavierWordsAreBigger()
     {
         var glyphs = new[] { (100.0, 0.0), (140.0, 0.0) };
-        double plain = CircleShape.WordCircle(glyphs, 10, (0, 0), 200).r;
-        double strong = CircleShape.WordCircle(glyphs, 10, (0, 0), 200, extraWeight: 3).r;
-        double capped = CircleShape.WordCircle(glyphs, 10, (0, 0), 200, extraWeight: 99).r;
+        double plain = WordCircle.Place(glyphs, 10, (0, 0), 200).r;
+        double strong = WordCircle.Place(glyphs, 10, (0, 0), 200, extraWeight: 3).r;
+        double capped = WordCircle.Place(glyphs, 10, (0, 0), 200, extraWeight: 99).r;
         Assert.Equal(plain * 1.3, strong, 6);
         Assert.Equal(plain * 1.5, capped, 6);
         // However heavy, a word stays well inside the circle it bites.
         var spread = new[] { (-150.0, 0.0), (150.0, 0.0) };
-        Assert.True(CircleShape.WordCircle(spread, 10, (0, 0), 200, extraWeight: 5).r <= 200 * 0.85);
+        Assert.True(WordCircle.Place(spread, 10, (0, 0), 200, extraWeight: 5).r <= 200 * 0.85);
     }
 
     [Fact]
     public void ChordRunsAcrossTheWholeCircle()
     {
-        var chord = CircleShape.Chord((0, 0), (10, 0), (0, 0), 50);
+        var chord = Geometry.LineAcrossCircle((0, 0), (10, 0), (0, 0), 50);
         Assert.NotNull(chord);
         Assert.Equal((-50.0, 0.0), chord.Value.from);
         Assert.Equal((50.0, 0.0), chord.Value.to);

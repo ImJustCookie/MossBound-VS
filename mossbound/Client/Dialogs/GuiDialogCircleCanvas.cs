@@ -2,13 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Cairo;
-using Mossbound.Script;
+using Mossbound.Core;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 using Vintagestory.API.Config;
-using static Mossbound.Gui.CanvasLayout;
+using static Mossbound.Client.CanvasLayout;
+using Mossbound.Network;
 
-namespace Mossbound.Gui;
+namespace Mossbound.Client;
 
 // The inscription table.
 // Canvas (left): the main circle. Click a slot to select it; drag from one glyph to another to link them.
@@ -26,7 +27,7 @@ public class GuiDialogCircleCanvas : GuiDialog
     ElementBounds canvasBounds = null!;
     ElementBounds panelBounds = null!;
 
-    SlotKey selected = new(CircleRing.Centre, 0);
+    SlotKey selected = new(CircleRing.Heart, 0);
     SlotKey? dragSlot;         // canvas: glyph a link is being dragged from
     PatternStroke? stroke;     // panel: lines being drawn, or erased if `erasing`
     bool erasing;              // right button: the panel sweep or the canvas drag removes instead of adds
@@ -183,20 +184,20 @@ public class GuiDialogCircleCanvas : GuiDialog
         var figure = draft.Figures.GetValueOrDefault(selected);
         if (stroke!.Points.Count >= 2)
         {
-            foreach (var (a, b) in stroke.Segments()) figure = erasing ? figure.WithoutLink(a, b) : figure.WithLink(a, b);
+            foreach (var (a, b) in stroke.Segments()) figure = erasing ? figure.WithoutLine(a, b) : figure.WithLine(a, b);
         }
         else if (pressedPoint is int p && stroke.Points.Count == 1)
         {
             figure = figure.WithMark(p, erasing ? Mark.None : NextMark(figure.MarkAt(p)));
         }
 
-        if (figure.Links == 0 && figure.Marks == 0) draft.Clear(selected); // drops its links too
+        if (figure.Lines == 0 && figure.Marks == 0) draft.Clear(selected); // drops its links too
         else draft.Figures[selected] = figure;
     }
 
     // Both ends written, and the grammar allows the pair (neighbouring rings or slots).
     bool CanLinkTo(SlotKey from, SlotKey to) =>
-        draft.Figures.ContainsKey(from) && draft.Figures.ContainsKey(to) && CircleDraft.CanLink(from, to, layout.Tier);
+        draft.Figures.ContainsKey(from) && draft.Figures.ContainsKey(to) && layout.Tier.AllowsLink(from, to);
 
     static Mark NextMark(Mark m) => m == Mark.DoubleRing ? Mark.None : m + 1;
 

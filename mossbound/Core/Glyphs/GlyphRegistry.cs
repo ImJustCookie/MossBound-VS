@@ -1,7 +1,6 @@
 using System.Collections.Generic;
-using System.Linq;
 
-namespace Mossbound.Script;
+namespace Mossbound.Core;
 
 public enum GlyphKind
 {
@@ -24,8 +23,8 @@ public sealed record GlyphDef(string Code, GlyphKind Kind, Element? Element = nu
 
 public static class GlyphRegistry
 {
-    // APPEND-ONLY. Glyph shapes are generated in this order from the world seed, so reordering or
-    // removing an entry changes the script of every existing world.
+    // Append only: each world generates glyph shapes in this order from its seed, so reordering or
+    // removing an entry would change the script of every existing world.
     public static readonly IReadOnlyList<GlyphDef> All = new GlyphDef[]
     {
         new("water", GlyphKind.Element, Element.Water),
@@ -37,8 +36,4 @@ public static class GlyphRegistry
         new("wind", GlyphKind.Element, Element.Wind),
         new("ward", GlyphKind.Element, Element.Ward),
     };
-
-    static readonly Dictionary<string, GlyphDef> byCode = All.ToDictionary(g => g.Code);
-
-    public static GlyphDef? Get(string code) => byCode.GetValueOrDefault(code);
 }

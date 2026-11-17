@@ -1,8 +1,8 @@
 using System.Collections.Generic;
-using Mossbound.Script;
+using Mossbound.Core;
 using ProtoBuf;
 
-namespace Mossbound;
+namespace Mossbound.Network;
 
 // Client → server: "inscribe this drawing on the medium I'm holding". The server checks the held
 // item and the drawing's bounds; it never tells the client what the glyphs mean.
@@ -24,6 +24,6 @@ public class GlyphAtlas
 public class GlyphAtlasEntry
 {
     [ProtoMember(1)] public string Code { get; set; } = "";
-    [ProtoMember(2)] public uint Links { get; set; }
+    [ProtoMember(2)] public uint Lines { get; set; }
     [ProtoMember(3)] public uint Marks { get; set; }
 }

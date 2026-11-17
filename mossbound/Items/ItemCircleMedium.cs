@@ -1,6 +1,6 @@
 using System.Text;
-using Mossbound.Gui;
-using Mossbound.Script;
+using Mossbound.Client;
+using Mossbound.Core;
 using Mossbound.Server;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
@@ -8,7 +8,7 @@ using Vintagestory.API.Config;
 using Vintagestory.API.Server;
 using Vintagestory.API.Util;
 
-namespace Mossbound;
+namespace Mossbound.Items;
 
 // Anything a circle can be written on: moss sigil, bark strip, later parchment and stone. The item
 // JSON sets `circleTier` (1–4), which decides the rings and slots available. The circle itself is

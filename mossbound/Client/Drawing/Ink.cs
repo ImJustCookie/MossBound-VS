@@ -4,7 +4,7 @@ using Cairo;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 
-namespace Mossbound.Gui;
+namespace Mossbound.Client;
 
 // Drawing toolkit for the hand-inked, pixelated look. Every imperfection comes from a seed, so the
 // same element always wobbles the same way and redraws (on every mouse move) never flicker.

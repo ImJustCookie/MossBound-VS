@@ -1,9 +1,9 @@
 using System.Collections.Generic;
 
-namespace Mossbound.Script;
+namespace Mossbound.Core;
 
-// A pattern-lock style stroke being drawn on a rosette (arcs and spokes only): points snap in as the cursor passes over
-// them; moving back onto the previous point un-snaps the last one.
+// A stroke being drawn on the glyph panel, like a phone's pattern lock: points snap in as the cursor
+// passes over them, and moving back onto the previous point takes the last one off.
 public sealed class PatternStroke
 {
     readonly List<int> points = new();
@@ -13,10 +13,9 @@ public sealed class PatternStroke
     public void Hover(int p)
     {
         if (points.Count > 0 && points[^1] == p) return;
-        // Only arcs and spokes exist, so a jump is routed through the point in between (along the rim,
-        // or through the centre), like a phone lock auto-adds a skipped dot. Going through Hover twice
-        // also makes backing off such a jump a single step.
-        if (points.Count > 0 && GlyphFigure.Via(points[^1], p) is int via)
+        // A jump between points that no single line joins goes through the point in between, like a
+        // phone lock adds a skipped dot. Hovering both makes backing off such a jump a single step.
+        if (points.Count > 0 && GlyphFigure.PointBetween(points[^1], p) is int via)
         {
             int before = points.Count;
             Hover(via);

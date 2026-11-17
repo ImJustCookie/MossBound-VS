@@ -118,21 +118,21 @@ One name per part, used the same way in the game, the guide and the code.
 | medium | What a circle is written on: moss sigil, bark strip, hide parchment, carved stone | `ItemCircleMedium` |
 | tier | The medium's level, I to IV. Sets the rings, slots and limits | `CircleTier` |
 | circle | Everything written on one medium | `Circle` (saved, sent), `CircleDraft` (being edited) |
-| ring | A row of slots: the heart, the shape ring, the aim ring, the rim | `CircleRing`: `Centre`, `Inner`, `Outer`, `Rim` |
+| ring | A row of slots: the heart, the shape ring, the aim ring, the rim | `CircleRing`: `Heart`, `Shape`, `Aim`, `Rim` |
 | slot | The place for one glyph on a ring | `SlotKey` |
 | glyph | One written word: its lines and marks | `GlyphFigure` |
 | point | One of a glyph's 7 points: 6 on its rim, 1 in its middle | |
-| line | An arc (along the rim, between neighbouring points) or a spoke (to the middle) | `GlyphFigure.Links` |
+| line | An arc (along the rim, between neighbouring points) or a spoke (to the middle) | `GlyphFigure.Lines` |
 | mark | A dot, big dot, ring or double ring on a point | `Mark` |
 | size | How strongly a glyph is written, 1 to 3 | `PlacedGlyph.Size` |
 | link | A connection between two glyphs | `CircleLink` |
 | source | Where the spell takes its life: medium, self or land | `LifeSource` |
-| heart | Heart-ring glyphs linked together. One heart mixes its elements | `CircleShape.Hearts` |
-| cast | A heart plus every glyph reached from it by following links outward | `Word` |
+| heart | Heart-ring glyphs linked together. One heart mixes its elements | `CircleStructure.Hearts` |
+| cast | A heart plus every glyph reached from it by following links outward | `Cast` |
 | form | Shape-ring glyph: how a cast travels (Touch, Seed, Ring...) *(planned)* | |
 | behaviour | Shape-ring glyph linked to a form, changing how it acts (Seeking, Delayed...) *(planned)* | |
 | aim glyph | Aim-ring glyph: what a cast lands on (Me, Foes, Closest...) *(planned)* | |
-| aim chain | A cast's aim glyphs, read link by link | `Word.AimEnd` (its last glyph) |
+| aim chain | A cast's aim glyphs, read link by link | `Cast.AimEnd` (its last glyph) |
 | trigger | Rim glyph: when a nested circle fires *(planned)* | |
 | mishap | What a broken circle does instead of its spell | `Mishap` |
 
@@ -142,8 +142,8 @@ One name per part, used the same way in the game, the guide and the code.
 |---|---|---|
 | border | The circle's outer line. Its style shows the source: plain, diamonds or bramble | `CirclePainter.Border` |
 | letter circle | The bold circle drawn around each written glyph | `GlyphPainter.Rosette` |
-| mix circle | The circle around a heart of two glyphs or more | `CircleShape.MixGroups` |
-| word circle | The big circle around one cast | `CircleShape.WordCircle` |
+| mix circle | The circle around a heart of two glyphs or more | `CircleStructure.Mixes` |
+| word circle | The big circle around one cast | `WordCircle.Place` |
 | bite | Where a word circle cuts into the border | `CirclePainter.Border` |
 | aim line | The line across the circle for a cast that reaches the aim ring | `CirclePainter` |
 | doubled line | A thin second line beside a strong one | `InkStyle.Doubles` |

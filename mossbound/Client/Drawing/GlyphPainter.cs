@@ -1,10 +1,10 @@
 using System;
 using System.Collections.Generic;
 using Cairo;
-using Mossbound.Script;
-using static Mossbound.Gui.CanvasLayout;
+using Mossbound.Core;
+using static Mossbound.Client.CanvasLayout;
 
-namespace Mossbound.Gui;
+namespace Mossbound.Client;
 
 // How glyphs and links look. Readability rules borrowed from Circular Gallifreyan: strokes are arcs
 // and radial spokes only, every glyph is a letter circle, marks sit on their point and break the lines
@@ -38,7 +38,7 @@ static class GlyphPainter
         }
 
         ctx.LineWidth = lineWidth;
-        foreach (var (a, b) in figure.LinkPairs()) Segment(ctx, cx, cy, r, rotation, a, b, seed, style, arcScale: bold ? 0.78 : 1);
+        foreach (var (a, b) in figure.LinePairs()) Segment(ctx, cx, cy, r, rotation, a, b, seed, style, arcScale: bold ? 0.78 : 1);
 
         // Break the lines around each mark, like a Gallifreyan vowel on its line.
         ctx.Operator = Operator.Clear;
@@ -78,7 +78,7 @@ static class GlyphPainter
         if (GlyphFigure.IsArc(a, b))
         {
             // Clockwise from the lower point of the pair (5→0 wraps), overshooting a hair at each end.
-            int start = (b == (a + 1) % GlyphFigure.EdgePoints) ? a : b;
+            int start = (b == (a + 1) % GlyphFigure.RimPoints) ? a : b;
             double angle = rotation - Math.PI / 2 + start * Math.PI / 3;
             double over0 = Ink.Jitter(rng, 0.04 * rough), over1 = Ink.Jitter(rng, 0.04 * rough);
             Ink.TraceWobblyArc(ctx, cx, cy, r * arcScale, angle - over0, Math.PI / 3 + over0 + over1, glyphSeed, rough: rough);

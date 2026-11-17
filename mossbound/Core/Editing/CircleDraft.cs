@@ -1,9 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Mossbound.Script;
-
-public readonly record struct SlotKey(CircleRing Ring, int Slot);
+namespace Mossbound.Core;
 
 // The editable drawing on the client. Converted to/from the network Circle.
 public sealed class CircleDraft
@@ -24,16 +22,6 @@ public sealed class CircleDraft
 
     public static (SlotKey, SlotKey) Normalize(SlotKey a, SlotKey b) =>
         (a.Ring, a.Slot).CompareTo((b.Ring, b.Slot)) <= 0 ? (a, b) : (b, a);
-
-    // The grammar's linking rule: a link joins neighbouring rings, or neighbouring slots on one ring
-    // (wrapping around). Links never skip a ring, so they don't run under glyphs they don't join.
-    public static bool CanLink(SlotKey a, SlotKey b, CircleTier tier)
-    {
-        if (!tier.HasSlot(a.Ring, a.Slot) || !tier.HasSlot(b.Ring, b.Slot) || a == b) return false;
-        if (a.Ring != b.Ring) return System.Math.Abs(a.Ring - b.Ring) == 1;
-        int n = tier.SlotCount(a.Ring), d = System.Math.Abs(a.Slot - b.Slot);
-        return d == 1 || d == n - 1;
-    }
 
     public void ToggleLink(SlotKey a, SlotKey b)
     {
@@ -60,7 +48,7 @@ public sealed class CircleDraft
         foreach (var k in keys)
         {
             var f = Figures[k];
-            circle.Glyphs.Add(new PlacedGlyph { Ring = k.Ring, Slot = k.Slot, Links = f.Links, Marks = f.Marks, Size = SizeOf(k) });
+            circle.Glyphs.Add(new PlacedGlyph { Ring = k.Ring, Slot = k.Slot, Lines = f.Lines, Marks = f.Marks, Size = SizeOf(k) });
         }
         foreach (var (a, b) in Links)
         {
@@ -79,16 +67,13 @@ public sealed class CircleDraft
         draft.Source = circle.Source;
         foreach (var g in circle.Glyphs)
         {
-            var k = new SlotKey(g.Ring, g.Slot);
-            draft.Figures[k] = g.Figure;
-            draft.SetSize(k, g.Power);
+            draft.Figures[g.Key] = g.Figure;
+            draft.SetSize(g.Key, g.EffectiveSize);
         }
         foreach (var l in circle.Links)
         {
             if (l.From < 0 || l.To < 0 || l.From >= circle.Glyphs.Count || l.To >= circle.Glyphs.Count) continue;
-            var a = circle.Glyphs[l.From];
-            var b = circle.Glyphs[l.To];
-            draft.Links.Add(Normalize(new SlotKey(a.Ring, a.Slot), new SlotKey(b.Ring, b.Slot)));
+            draft.Links.Add(Normalize(circle.Glyphs[l.From].Key, circle.Glyphs[l.To].Key));
         }
         return draft;
     }

@@ -2,8 +2,8 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
 using Cairo;
-using Mossbound.Gui;
-using Mossbound.Script;
+using Mossbound.Client;
+using Mossbound.Core;
 using Vintagestory.API.Client;
 
 // Every circle shown in the docs. Each scene is a CircleDraft drawn by the mod's own code; scenes.json
@@ -12,7 +12,7 @@ static class Scenes
 {
     const BindingFlags F = BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static;
     static readonly Assembly mod = typeof(GuiDialogCircleCanvas).Assembly;
-    static readonly Type layoutType = mod.GetType("Mossbound.Gui.CanvasLayout")!;
+    static readonly Type layoutType = mod.GetType("Mossbound.Client.CanvasLayout")!;
     static readonly Dictionary<string, object> info = new();
     static readonly Dictionary<string, ImageSurface> arts = new();
 
@@ -20,9 +20,9 @@ static class Scenes
     static ImageSurface Art(string file) => arts.TryGetValue(file, out var a) ? a : arts[file] = new ImageSurface(art + file);
     static string art = "";
 
-    static SlotKey C(int i) => new(CircleRing.Centre, i);
-    static SlotKey I(int i) => new(CircleRing.Inner, i);
-    static SlotKey O(int i) => new(CircleRing.Outer, i);
+    static SlotKey C(int i) => new(CircleRing.Heart, i);
+    static SlotKey I(int i) => new(CircleRing.Shape, i);
+    static SlotKey O(int i) => new(CircleRing.Aim, i);
 
     public static void Run(WorldScript script, string artFolder)
     {
@@ -32,7 +32,7 @@ static class Scenes
         void Link(CircleDraft d, SlotKey a, SlotKey b) => d.Links.Add(CircleDraft.Normalize(a, b));
 
         // 1. A glyph: every kind of stroke and mark, on the panel and on a circle.
-        var anatomy = new GlyphFigure(0, 0).WithLink(0, 1).WithLink(1, 2).WithLink(2, 6).WithLink(6, 4).WithLink(4, 5)
+        var anatomy = GlyphFigure.Empty.WithLine(0, 1).WithLine(1, 2).WithLine(2, 6).WithLine(6, 4).WithLine(4, 5)
             .WithMark(1, Mark.Dot).WithMark(3, Mark.Ring).WithMark(5, Mark.BigDot).WithMark(6, Mark.DoubleRing);
         Panel(CircleTier.Parchment, anatomy, "anatomy_panel", 448);
         { var d = New(); d.Figures[C(0)] = anatomy; Canvas(CircleTier.Parchment, d, "anatomy_canvas"); }
@@ -104,7 +104,7 @@ static class Scenes
     static object Layout(CircleTier tier) => Activator.CreateInstance(layoutType, tier)!;
     static (double x, double y) Centre(object layout, SlotKey k, int size) => ((double, double))layoutType.GetMethod("SlotCentre")!.Invoke(layout, new object[] { k, (double)size })!;
     static double Letter(object layout, int glyphSize) => (double)layoutType.GetMethod("LetterRadius")!.Invoke(layout, new object[] { glyphSize })!;
-    static object Style(CircleTier tier) => mod.GetType("Mossbound.Gui.InkStyle")!.GetMethod("For")!.Invoke(null, new object[] { tier })!;
+    static object Style(CircleTier tier) => mod.GetType("Mossbound.Client.InkStyle")!.GetMethod("For")!.Invoke(null, new object[] { tier })!;
 
     static GuiDialogCircleCanvas Dialog(CircleTier tier, CircleDraft d, object layout, SlotKey? selected = null)
     {
@@ -113,7 +113,7 @@ static class Scenes
         t.GetField("draft", F)!.SetValue(dlg, d);
         t.GetField("layout", F)!.SetValue(dlg, layout);
         t.GetField("style", F)!.SetValue(dlg, Style(tier));
-        t.GetField("selected", F)!.SetValue(dlg, selected ?? new SlotKey(CircleRing.Outer, 99)); // none by default
+        t.GetField("selected", F)!.SetValue(dlg, selected ?? new SlotKey(CircleRing.Aim, 99)); // none by default
         t.GetField("canvasArt", F)!.SetValue(dlg, Art(tier.Art + "/canvas.png"));
         return dlg;
     }
@@ -150,10 +150,10 @@ static class Scenes
         };
         if (extra)
         {
-            scene["words"] = CircleShape.Words(d.Figures.Keys, d.Links).Select(w =>
+            scene["words"] = CircleStructure.Casts(d.Figures.Keys, d.Links).Select(w =>
             {
                 var members = w.Heart.Concat(w.Body).ToList();
-                var (x, y, r) = CircleShape.WordCircle(members.Select(k => Centre(layout, k, size)).ToList(), gr, (size / 2.0, size / 2.0),
+                var (x, y, r) = WordCircle.Place(members.Select(k => Centre(layout, k, size)).ToList(), gr, (size / 2.0, size / 2.0),
                     size * 0.45, extraWeight: members.Sum(k => d.SizeOf(k) - 1));
                 return new { x, y, r };
             }).ToList();
@@ -182,9 +182,9 @@ static class Scenes
     // exactly as on the panel (no letter circle), with the canvas's own ink. None of the drawn extras.
     static void Bare(CircleTier tier, CircleDraft d, string name, int size = 448)
     {
-        var ink = mod.GetType("Mossbound.Gui.Ink")!;
-        var painter = mod.GetType("Mossbound.Gui.GlyphPainter")!;
-        var circlePainter = mod.GetType("Mossbound.Gui.CirclePainter")!;
+        var ink = mod.GetType("Mossbound.Client.Ink")!;
+        var painter = mod.GetType("Mossbound.Client.GlyphPainter")!;
+        var circlePainter = mod.GetType("Mossbound.Client.CirclePainter")!;
         var layout = Layout(tier);
         var style = Style(tier);
         T Prop<T>(string p) => (T)style.GetType().GetProperty(p)!.GetValue(style)!;
@@ -234,7 +234,7 @@ static class Scenes
                 (double, double) Point(int p) => ((double, double))pointAt.Invoke(null, new object[] { x, y, r, rot, p })!;
                 ctx.PushGroup();
                 ctx.LineWidth = lw;
-                foreach (var (pa, pb) in f.LinkPairs())
+                foreach (var (pa, pb) in f.LinePairs())
                     segment.Invoke(null, new object[] { ctx, x, y, r, rot, pa, pb, Seed(k), style, true, 1.0 });
                 ctx.Operator = Operator.Clear;
                 for (int p = 0; p < GlyphFigure.PointCount; p++)

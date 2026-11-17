@@ -2,9 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Cairo;
-using Mossbound.Script;
+using Mossbound.Core;
 
-namespace Mossbound.Gui;
+namespace Mossbound.Client;
 
 // How a written circle is drawn around its letters, Gallifreyan-style. Everything here is read from
 // how the circle is written (CircleShape), never from what its glyphs mean: the client doesn't know
@@ -20,12 +20,12 @@ static class CirclePainter
         double c = size / 2, u = size / CanvasLayout.CanvasSize, gr = layout.GlyphRadius * size;
         double outer = size * Outer, inner = size * Inner;
         var glyphs = draft.Figures.Keys.ToList();
-        var words = CircleShape.Words(glyphs, draft.Links);
+        var words = CircleStructure.Casts(glyphs, draft.Links);
         var wordCircles = words
             .Select(w =>
             {
                 var members = w.Heart.Concat(w.Body).ToList();
-                return CircleShape.WordCircle(members.Select(k => layout.SlotCentre(k, size)).ToList(), gr, (c, c), inner,
+                return WordCircle.Place(members.Select(k => layout.SlotCentre(k, size)).ToList(), gr, (c, c), inner,
                     extraWeight: members.Sum(k => draft.SizeOf(k) - 1));
             })
             .ToList();
@@ -54,7 +54,7 @@ static class CirclePainter
         ctx.Restore();
 
         // Mixes: a circle around heart elements linked together; doubled for a triple mix.
-        foreach (var mix in CircleShape.MixGroups(glyphs, draft.Links))
+        foreach (var mix in CircleStructure.Mixes(glyphs, draft.Links))
         {
             var (mx, my) = Centroid(mix);
             double mr = mix.Max(k => Distance(layout.SlotCentre(k, size), (mx, my))) + gr * 1.3;
@@ -67,11 +67,11 @@ static class CirclePainter
         // An aimed cast points outward: a line from its heart through the end of its aim chain, right
         // across the circle.
         ctx.LineWidth = W(1.6 * u);
-        foreach (var w in words.Where(w => w.Aimed))
+        foreach (var w in words.Where(w => w.IsAimed))
         {
             var heart = Centroid(w.Heart);
             var end = layout.SlotCentre(w.AimEnd!.Value, size);
-            if (CircleShape.Chord(heart, end, (c, c), inner) is not { } chord) continue;
+            if (Geometry.LineAcrossCircle(heart, end, (c, c), inner) is not { } chord) continue;
             int seed = Ink.Seed(GlyphPainter.SlotSeed(w.Body[0]), 7);
             Ink.Use(ctx, style.Stroke(seed), 0.9);
             ctx.NewPath();

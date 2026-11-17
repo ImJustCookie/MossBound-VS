@@ -1,10 +1,11 @@
 using System;
 using System.Collections.Generic;
-using Mossbound.Script;
+using Mossbound.Core;
 using Vintagestory.API.Common;
 using Vintagestory.API.Common.Entities;
 using Vintagestory.API.MathTools;
 using Vintagestory.API.Server;
+using Mossbound.Items;
 
 namespace Mossbound.Server;
 
@@ -35,7 +36,7 @@ class SpellCaster
         var worldScript = script();
         var circle = ItemCircleMedium.ReadCircle(slot.Itemstack);
         if (worldScript == null || circle == null || slot.Itemstack?.Collectible is not ItemCircleMedium medium
-            || !CircleParser.IsWithinBounds(circle, medium.Tier)) return;
+            || !CircleValidation.FitsTier(circle, medium.Tier)) return;
 
         long now = sapi.World.ElapsedMilliseconds;
         if (lastCastMs.TryGetValue(player.PlayerUID, out long last) && now - last < CooldownMs)
@@ -52,11 +53,11 @@ class SpellCaster
             slot.MarkDirty();
         }
 
-        var plan = CircleParser.Parse(circle, worldScript);
+        var plan = SpellReading.Read(circle, worldScript);
         var target = ResolveTouch(player, entitySel, blockSel);
         if (plan.Fizzles)
         {
-            SpellEffects.Mishap(sapi, player, plan.Mishaps);
+            SpellEffects.ApplyMishap(sapi, player, plan.Mishaps);
             return;
         }
         foreach (var (aspect, intensity) in plan.Aspects) SpellEffects.Apply(sapi, player, target, aspect, intensity);

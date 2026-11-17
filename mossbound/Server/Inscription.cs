@@ -1,4 +1,7 @@
 using Vintagestory.API.Server;
+using Mossbound.Network;
+using Mossbound.Core;
+using Mossbound.Items;
 
 namespace Mossbound.Server;
 
@@ -17,7 +20,7 @@ class Inscription
             player.Tell("mossbound:inscribe-nobark");
             return;
         }
-        if (msg.Circle == null || msg.Circle.Glyphs.Count == 0 || !Script.CircleParser.IsWithinBounds(msg.Circle, medium.Tier))
+        if (msg.Circle == null || msg.Circle.Glyphs.Count == 0 || !CircleValidation.FitsTier(msg.Circle, medium.Tier))
         {
             sapi.Logger.Warning("[mossbound] rejected malformed inscription from {0}", player.PlayerName);
             return;

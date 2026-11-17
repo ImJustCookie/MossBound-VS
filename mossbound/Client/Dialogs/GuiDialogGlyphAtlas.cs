@@ -1,8 +1,9 @@
 using Cairo;
-using Mossbound.Script;
+using Mossbound.Core;
 using Vintagestory.API.Client;
+using Mossbound.Network;
 
-namespace Mossbound.Gui;
+namespace Mossbound.Client;
 
 // Admin-only window listing this world's glyphs with their names. Opened by `/mossbound glyphs`;
 // its data comes from the server only after the privilege check. Drawn as clean reference figures
@@ -56,7 +57,7 @@ public class GuiDialogGlyphAtlas : GuiDialog
             Ink.Use(ctx, Ink.Paper, 1);
             ctx.Rectangle(cell * 0.04, cell * 0.04, cell * 0.92, cell * 0.92);
             ctx.Fill();
-            GlyphPainter.Rosette(ctx, cell / 2, cell / 2, r, 0, new GlyphFigure(e.Links, e.Marks),
+            GlyphPainter.Rosette(ctx, cell / 2, cell / 2, r, 0, new GlyphFigure(e.Lines, e.Marks),
                 guides: true, r * 0.06, 0, Clean, guideAlpha: 0.45, guideDot: 0.035);  // well below a Dot mark (0.07)
             ctx.Restore();
         }

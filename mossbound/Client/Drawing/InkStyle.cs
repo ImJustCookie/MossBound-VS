@@ -1,7 +1,7 @@
 using System;
-using Mossbound.Script;
+using Mossbound.Core;
 
-namespace Mossbound.Gui;
+namespace Mossbound.Client;
 
 // How a tier's circles are inked. Lower tiers are drawn more roughly and less evenly, like a finger in
 // moss; higher tiers are steadier, like a pen or a chisel.

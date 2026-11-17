@@ -128,7 +128,7 @@ pc, pr = P / 2, P * 0.38
 pt = lambda k: (pc, pc) if k == 6 else (pc + math.cos(math.radians(-90 + 60 * k)) * pr, pc + math.sin(math.radians(-90 + 60 * k)) * pr)
 mid = lambda a, b: ((pt(a)[0] + pt(b)[0]) / 2, (pt(a)[1] + pt(b)[1]) / 2)
 arc01 = (pc + math.cos(math.radians(-60)) * pr, pc + math.sin(math.radians(-60)) * pr)
-g0 = slot("anatomy_canvas", "Centre0")
+g0 = slot("anatomy_canvas", "Heart0")
 CROPS["anatomy_canvas"] = (g0[0] - 60, g0[1] - 60, 120)
 card("01-glyph", "A glyph",
      "Every glyph is drawn on 7 points: 6 on a circle and 1 in the middle. Lines go along the circle (arcs) or to the "
@@ -148,9 +148,9 @@ card("02-strength", "Strength: the size of a glyph",
      "that element written twice.",
      [("size", "Sizes 1, 2 and 3", "The same element three times, at each size. Full strength (3) gets a doubled "
        "letter circle. Moss stops at size 2.", TEXT,
-       [(sz("Centre0")[0] + 120, sz("Centre0")[1] - 60, "1", sz("Centre0")[0] + sz("Centre0")[2], sz("Centre0")[1]),
-        (sz("Centre1")[0] + 110, sz("Centre1")[1] + 90, "2", sz("Centre1")[0] + sz("Centre1")[2] * 0.7, sz("Centre1")[1] + sz("Centre1")[2] * 0.7),
-        (sz("Centre2")[0] - 120, sz("Centre2")[1] + 90, "3", sz("Centre2")[0] - sz("Centre2")[2] * 0.8, sz("Centre2")[1] + sz("Centre2")[2] * 0.6)])],
+       [(sz("Heart0")[0] + 120, sz("Heart0")[1] - 60, "1", sz("Heart0")[0] + sz("Heart0")[2], sz("Heart0")[1]),
+        (sz("Heart1")[0] + 110, sz("Heart1")[1] + 90, "2", sz("Heart1")[0] + sz("Heart1")[2] * 0.7, sz("Heart1")[1] + sz("Heart1")[2] * 0.7),
+        (sz("Heart2")[0] - 120, sz("Heart2")[1] + 90, "3", sz("Heart2")[0] - sz("Heart2")[2] * 0.8, sz("Heart2")[1] + sz("Heart2")[2] * 0.6)])],
      img=520)
 
 # 3. Mixing
@@ -163,7 +163,7 @@ card("03-mixing", "Mixing elements",
        "a small hurt.", BAD, [])])
 
 # 4. Casts
-t1 = slot("cast_typo", "Inner2")
+t1 = slot("cast_typo", "Shape2")
 card("04-casts", "Casts and word circles",
      "A cast is a heart plus everything you reach from it by following links outward. The game draws each cast as a "
      "word circle: a big ring around it that bites into the border. Heavier casts make bigger words.",
@@ -235,8 +235,8 @@ def diagram():
     c = S / 2
     sl = d["slots"]
     a, b = d["words"][0], d["words"][1]
-    water, frost, life, typo = sl["Centre0"], sl["Centre1"], sl["Centre2"], sl["Outer7"]
-    i1, o2 = sl["Inner1"], sl["Outer2"]
+    water, frost, life, typo = sl["Heart0"], sl["Heart1"], sl["Heart2"], sl["Aim7"]
+    i1, o2 = sl["Shape1"], sl["Aim2"]
     mix_x, mix_y = (water[0] + frost[0]) / 2, (water[1] + frost[1]) / 2
     mix_r = math.hypot(water[0] - mix_x, water[1] - mix_y) + d["glyphRadius"] * 1.3
     callout(1, (c + math.cos(-1.05) * S * 0.47, c + math.sin(-1.05) * S * 0.47), (60, -40))

@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
-using Mossbound.Script;
+using Mossbound.Core;
 
-namespace Mossbound.Gui;
+namespace Mossbound.Client;
 
 // Geometry of the inscription table for one tier. Positions are element-local, already GUI-scaled
 // pixels; `size` is the element's width (canvas and panel are square). Fewer rings means bigger
@@ -88,7 +88,7 @@ sealed class CanvasLayout
     // Point k of a rosette; point 0 is "up" before rotation, 6 is the centre.
     public static (double x, double y) RosettePoint(double cx, double cy, double r, double rotation, int k)
     {
-        if (k == GlyphFigure.Centre) return (cx, cy);
+        if (k == GlyphFigure.Middle) return (cx, cy);
         double a = rotation - Math.PI / 2 + k * Math.PI / 3;
         return (cx + Math.Cos(a) * r, cy + Math.Sin(a) * r);
     }
