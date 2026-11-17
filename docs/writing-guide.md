@@ -75,9 +75,9 @@ Form glyphs for the shape ring (Touch, Seed, Ring...) are *(planned)*. Until the
 | Circle | Left drag / right drag between glyphs | Link / unlink |
 | Circle | Mouse wheel over a glyph | Change its size |
 | Circle | Click / right-click the border | Next / previous source (bark and up) |
-| Panel | Sweep / right-button sweep across points | Draw / erase lines |
+| Panel | Sweep / right-button sweep across points | Draw / erase lines (a skipped point is routed along the rim or through the middle) |
 | Panel | Click / right-click a point | Cycle / clear its mark |
-| Buttons | Clear glyph, Inscribe | Wipe the selected glyph, write the circle |
+| Buttons | Clear glyph, Inscribe | Wipe the selected glyph; send the circle to the server, which checks it and writes it on the medium |
 | In hand | Hold right-click | Cast (on what you look at, or you) |
 | In hand | Sneak + right-click | Edit again |
 

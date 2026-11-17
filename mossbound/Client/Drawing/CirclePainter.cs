@@ -6,104 +6,45 @@ using Mossbound.Core;
 
 namespace Mossbound.Client;
 
-// How a written circle is drawn around its letters, Gallifreyan-style. Everything here is read from
-// how the circle is written (CircleShape), never from what its glyphs mean: the client doesn't know
-// the script. Draws into the caller's current group; the caller then adds links and cuts every line
-// where a letter sits.
+// Draws what the game adds around the written glyphs: the border (with its source), the word circle of
+// each cast, mix circles and aim lines. All of it is read from how the circle is written
+// (CircleStructure), never from what the glyphs mean: the client doesn't know the script.
 static class CirclePainter
 {
-    // Fractions of the canvas size.
-    const double Outer = 0.47, Inner = 0.45;
+    const double Outer = 0.47, Inner = 0.45; // border radii, as fractions of the canvas size
 
     public static void Structure(Context ctx, CircleDraft draft, CanvasLayout layout, InkStyle style, double size, Func<double, double> W)
     {
-        double c = size / 2, u = size / CanvasLayout.CanvasSize, gr = layout.GlyphRadius * size;
-        double outer = size * Outer, inner = size * Inner;
-        var glyphs = draft.Figures.Keys.ToList();
-        var words = CircleStructure.Casts(glyphs, draft.Links);
-        var wordCircles = words
-            .Select(w =>
-            {
-                var members = w.Heart.Concat(w.Body).ToList();
-                return WordCircle.Place(members.Select(k => layout.SlotCentre(k, size)).ToList(), gr, (c, c), inner,
-                    extraWeight: members.Sum(k => draft.SizeOf(k) - 1));
-            })
-            .ToList();
-        (double x, double y) Centroid(IEnumerable<SlotKey> keys)
-        {
-            var pts = keys.Select(k => layout.SlotCentre(k, size)).ToList();
-            return (pts.Average(p => p.x), pts.Average(p => p.y));
-        }
-
+        var casts = CircleStructure.Casts(draft.Figures.Keys, draft.Links);
+        var wordCircles = casts.Select(cast => PlaceWordCircle(cast, draft, layout, size)).ToList();
         Border(ctx, draft.Source, style, size, W, wordCircles);
-
-        // Each word's own arc closes the bite it made (clipped to the border).
-        ctx.Save();
-        ctx.NewPath();
-        ctx.Arc(c, c, outer, 0, 2 * Math.PI);
-        ctx.Clip();
-        for (int i = 0; i < words.Count; i++)
-        {
-            // A long word (three glyphs or more past its heart) is doubled, where the ink allows it.
-            var (wx, wy, wr) = wordCircles[i];
-            int seed = Ink.Seed(GlyphPainter.SlotSeed(words[i].Body[0]), 3);
-            Ink.Use(ctx, style.Stroke(seed), 0.95);
-            Ink.StrokeCircle(ctx, wx, wy, wr, W(3 * u), seed, centred: true, rough: style.Roughness);
-            if (style.Doubles && words[i].Body.Count >= 3) Echo(ctx, style, wx, wy, wr - 7 * u, W(1.3 * u), seed + 1);
-        }
-        ctx.Restore();
-
-        // Mixes: a circle around heart elements linked together; doubled for a triple mix.
-        foreach (var mix in CircleStructure.Mixes(glyphs, draft.Links))
-        {
-            var (mx, my) = Centroid(mix);
-            double mr = mix.Max(k => Distance(layout.SlotCentre(k, size), (mx, my))) + gr * 1.3;
-            int seed = Ink.Seed(GlyphPainter.SlotSeed(mix[0]), 5);
-            Ink.Use(ctx, style.Stroke(seed), 0.95);
-            Ink.StrokeCircle(ctx, mx, my, mr, W(2.6 * u), seed, centred: true, rough: style.Roughness);
-            if (style.Doubles && mix.Count >= 3) Echo(ctx, style, mx, my, mr - 6 * u, W(1.3 * u), seed + 1);
-        }
-
-        // An aimed cast points outward: a line from its heart through the end of its aim chain, right
-        // across the circle.
-        ctx.LineWidth = W(1.6 * u);
-        foreach (var w in words.Where(w => w.IsAimed))
-        {
-            var heart = Centroid(w.Heart);
-            var end = layout.SlotCentre(w.AimEnd!.Value, size);
-            if (Geometry.LineAcrossCircle(heart, end, (c, c), inner) is not { } chord) continue;
-            int seed = Ink.Seed(GlyphPainter.SlotSeed(w.Body[0]), 7);
-            Ink.Use(ctx, style.Stroke(seed), 0.9);
-            ctx.NewPath();
-            Ink.TraceHandLine(ctx, chord.from.x, chord.from.y, chord.to.x, chord.to.y, new Random(seed), style.Roughness * 0.3);
-            ctx.Stroke();
-        }
+        DrawWordCircles(ctx, casts, wordCircles, style, size, W);
+        DrawMixCircles(ctx, draft, layout, style, size, W);
+        DrawAimLines(ctx, casts, layout, style, size, W);
     }
 
-    // The sentence circle: the border (doubled if the tier's style says so), with where the life comes
-    // from worked into it (plain for the medium, long thorn-diamonds for your own body, a thorny
-    // bramble for the land), then cut where words bite into it. Drawn in its own layer so the bites
-    // cut only the border. Big circles stay centred: hand-drawn without drifting.
+    // The outer circle, with the source worked into it (plain for the medium, thorn-diamonds for the
+    // body, a bramble for the land), cut where words bite into it. Drawn in its own layer so a bite
+    // cuts only the border.
     public static void Border(Context ctx, LifeSource source, InkStyle style, double size, Func<double, double> W,
         IEnumerable<(double x, double y, double r)> bites)
     {
-        double c = size / 2, u = size / CanvasLayout.CanvasSize;
+        double u = size / CanvasLayout.CanvasSize;
+        var (c, outer) = (Centre(size), size * Outer);
         var biteList = bites.ToList();
-        // A spot on the border is bitten when it lies within `reach` of a word's bite. Ornaments reach
-        // past the border line, so they are left out near a bite instead of being cut: cutting would
-        // leave their tips sticking out beyond the word's arc.
-        bool Bitten(double angle, double reach)
-        {
-            var p = Polar(c, size * Outer, angle);
-            return biteList.Any(b => Distance(p, (b.x, b.y)) < b.r + reach);
-        }
+
+        // Ornaments reach past the border line, so they are left out near a bite instead of being cut,
+        // which would leave their tips sticking out beyond the word's arc.
+        bool Bitten(double angle, double reach) =>
+            biteList.Any(b => Geometry.Distance(Geometry.OnCircle(c, outer, angle), (b.x, b.y)) < b.r + reach);
+
         ctx.PushGroup();
         Ink.Use(ctx, style.Stroke(1), 0.9);
-        Ink.StrokeCircle(ctx, c, c, size * Outer, W(5 * u), seed: 1, centred: true, rough: style.Roughness);
+        Ink.StrokeCircle(ctx, c.x, c.y, outer, W(5 * u), seed: 1, centred: true, rough: style.Roughness);
         if (style.DoubleBorder)
         {
             Ink.Use(ctx, style.Stroke(2), 0.9);
-            Ink.StrokeCircle(ctx, c, c, size * Inner, W(2.5 * u), seed: 2, centred: true, rough: style.Roughness);
+            Ink.StrokeCircle(ctx, c.x, c.y, size * Inner, W(2.5 * u), seed: 2, centred: true, rough: style.Roughness);
         }
         if (source == LifeSource.Self) Diamonds(ctx, style, size, Bitten);
         if (source == LifeSource.Land) Bramble(ctx, style, size, W, Bitten);
@@ -115,8 +56,83 @@ static class CirclePainter
         ctx.Paint();
     }
 
-    // A thinner second line inside a circle: the concentric doubling of the references.
-    static void Echo(Context ctx, InkStyle style, double x, double y, double r, double width, int seed)
+    public static bool IsOnBorder(double x, double y, double size)
+    {
+        double fromCentre = Geometry.Distance((x, y), Centre(size)) / size;
+        return fromCentre >= Inner - 0.02 && fromCentre <= 0.49;
+    }
+
+    static (double x, double y) Centre(double size) => (size / 2, size / 2);
+
+    static (double x, double y, double r) PlaceWordCircle(Cast cast, CircleDraft draft, CanvasLayout layout, double size)
+    {
+        var members = cast.Heart.Concat(cast.Body).ToList();
+        return WordCircle.Place(members.Select(k => layout.SlotCentre(k, size)).ToList(), layout.GlyphRadius * size, Centre(size),
+            size * Inner, extraWeight: members.Sum(k => draft.SizeOf(k) - 1));
+    }
+
+    // Clipped to the border, so a word's own arc closes the bite it made. A long cast (three glyphs or
+    // more past its heart) gets a doubled word circle, where the ink allows it.
+    static void DrawWordCircles(Context ctx, List<Cast> casts, List<(double x, double y, double r)> circles, InkStyle style, double size,
+        Func<double, double> W)
+    {
+        double u = size / CanvasLayout.CanvasSize;
+        ctx.Save();
+        ctx.NewPath();
+        ctx.Arc(size / 2, size / 2, size * Outer, 0, 2 * Math.PI);
+        ctx.Clip();
+        for (int i = 0; i < casts.Count; i++)
+        {
+            var (x, y, r) = circles[i];
+            int seed = Ink.Seed(GlyphPainter.SlotSeed(casts[i].Body[0]), 3);
+            Ink.Use(ctx, style.Stroke(seed), 0.95);
+            Ink.StrokeCircle(ctx, x, y, r, W(3 * u), seed, centred: true, rough: style.Roughness);
+            if (style.Doubles && casts[i].Body.Count >= 3) DrawInnerEcho(ctx, style, x, y, r - 7 * u, W(1.3 * u), seed + 1);
+        }
+        ctx.Restore();
+    }
+
+    // Around heart glyphs linked together; doubled for a mix of three.
+    static void DrawMixCircles(Context ctx, CircleDraft draft, CanvasLayout layout, InkStyle style, double size, Func<double, double> W)
+    {
+        double u = size / CanvasLayout.CanvasSize;
+        foreach (var mix in CircleStructure.Mixes(draft.Figures.Keys, draft.Links))
+        {
+            var middle = Middle(mix, layout, size);
+            double r = mix.Max(k => Geometry.Distance(layout.SlotCentre(k, size), middle)) + layout.GlyphRadius * size * 1.3;
+            int seed = Ink.Seed(GlyphPainter.SlotSeed(mix[0]), 5);
+            Ink.Use(ctx, style.Stroke(seed), 0.95);
+            Ink.StrokeCircle(ctx, middle.x, middle.y, r, W(2.6 * u), seed, centred: true, rough: style.Roughness);
+            if (style.Doubles && mix.Count >= 3) DrawInnerEcho(ctx, style, middle.x, middle.y, r - 6 * u, W(1.3 * u), seed + 1);
+        }
+    }
+
+    // A cast that reaches the aim ring gets a line from its heart through the end of its aim chain,
+    // right across the circle.
+    static void DrawAimLines(Context ctx, List<Cast> casts, CanvasLayout layout, InkStyle style, double size, Func<double, double> W)
+    {
+        ctx.LineWidth = W(1.6 * size / CanvasLayout.CanvasSize);
+        foreach (var cast in casts.Where(c => c.IsAimed))
+        {
+            var heart = Middle(cast.Heart, layout, size);
+            var end = layout.SlotCentre(cast.AimEnd!.Value, size);
+            if (Geometry.LineAcrossCircle(heart, end, Centre(size), size * Inner) is not { } line) continue;
+            int seed = Ink.Seed(GlyphPainter.SlotSeed(cast.Body[0]), 7);
+            Ink.Use(ctx, style.Stroke(seed), 0.9);
+            ctx.NewPath();
+            Ink.TraceHandLine(ctx, line.from.x, line.from.y, line.to.x, line.to.y, new Random(seed), style.Roughness * 0.3);
+            ctx.Stroke();
+        }
+    }
+
+    static (double x, double y) Middle(IEnumerable<SlotKey> slots, CanvasLayout layout, double size)
+    {
+        var centres = slots.Select(k => layout.SlotCentre(k, size)).ToList();
+        return (centres.Average(p => p.x), centres.Average(p => p.y));
+    }
+
+    // The thin second line of a doubled circle.
+    static void DrawInnerEcho(Context ctx, InkStyle style, double x, double y, double r, double width, int seed)
     {
         Ink.Use(ctx, style.Stroke(seed), 0.8);
         Ink.StrokeCircle(ctx, x, y, r, width, seed, centred: true, rough: style.Roughness);
@@ -126,74 +142,79 @@ static class CirclePainter
     static void Diamonds(Context ctx, InkStyle style, double size, Func<double, double, bool> bitten)
     {
         const int Count = 20;
-        const double Along = 0.028, Across = 14; // half-width along the border (radians), reach each side (GUI units)
-        double c = size / 2, u = size / CanvasLayout.CanvasSize, outer = size * Outer;
+        const double HalfWidth = 0.028; // along the border, in radians
+        double reach = 14 * size / CanvasLayout.CanvasSize, outer = size * Outer;
+        var c = Centre(size);
         Ink.Use(ctx, style.Stroke(79), 0.95);
         for (int i = 0; i < Count; i++)
         {
             double a = 2 * Math.PI * (i + 0.5) / Count;
-            if (bitten(a, Across * u)) continue;
-            var tipOut = Polar(c, outer + Across * u, a);
-            var side1 = Polar(c, outer, a + Along);
-            var tipIn = Polar(c, outer - Across * u, a);
-            var side2 = Polar(c, outer, a - Along);
-            ctx.NewPath();
-            ctx.MoveTo(tipOut.x, tipOut.y); ctx.LineTo(side1.x, side1.y); ctx.LineTo(tipIn.x, tipIn.y); ctx.LineTo(side2.x, side2.y);
-            ctx.ClosePath();
-            ctx.Fill();
+            if (bitten(a, reach)) continue;
+            var corners = new[]
+            {
+                Geometry.OnCircle(c, outer + reach, a),
+                Geometry.OnCircle(c, outer, a + HalfWidth),
+                Geometry.OnCircle(c, outer - reach, a),
+                Geometry.OnCircle(c, outer, a - HalfWidth),
+            };
+            FillPolygon(ctx, corners);
         }
     }
 
-    // A thin vine weaving across the border, a hooked thorn on every crest, pointing out on the outer
-    // crests and in on the inner ones.
+    // A thin vine weaving across the border, with a hooked thorn on every crest: pointing out on the
+    // outer crests, in on the inner ones.
     static void Bramble(Context ctx, InkStyle style, double size, Func<double, double> W, Func<double, double, bool> bitten)
     {
-        const int Waves = 16;
-        double c = size / 2, u = size / CanvasLayout.CanvasSize, outer = size * Outer, amp = 7 * u;
+        const int Waves = 16, Steps = 720;
+        double u = size / CanvasLayout.CanvasSize, outer = size * Outer, amplitude = 7 * u, thorn = 11 * u;
+        var c = Centre(size);
         Ink.Use(ctx, style.Stroke(82), 0.9);
         ctx.LineWidth = W(2.2 * u);
-        // The vine, in runs that stop short of every bite.
-        bool drawing = false;
-        for (int i = 0; i <= 720; i++)
+
+        bool drawing = false; // the vine is drawn in runs that stop short of every bite
+        for (int i = 0; i <= Steps; i++)
         {
-            double a = 2 * Math.PI * i / 720;
-            if (bitten(a, amp + 3 * u))
+            double a = 2 * Math.PI * i / Steps;
+            if (bitten(a, amplitude + 3 * u))
             {
                 if (drawing) ctx.Stroke();
                 drawing = false;
                 continue;
             }
-            var (x, y) = Polar(c, outer + amp * Math.Sin(a * Waves), a);
-            if (!drawing) { ctx.NewPath(); ctx.MoveTo(x, y); drawing = true; }
-            else ctx.LineTo(x, y);
+            var (x, y) = Geometry.OnCircle(c, outer + amplitude * Math.Sin(a * Waves), a);
+            if (drawing) ctx.LineTo(x, y);
+            else
+            {
+                ctx.NewPath();
+                ctx.MoveTo(x, y);
+                drawing = true;
+            }
         }
         if (drawing) ctx.Stroke();
+
         for (int i = 0; i < Waves; i++)
         {
-            double aOut = 2 * Math.PI * (i + 0.25) / Waves, aIn = 2 * Math.PI * (i + 0.75) / Waves;
-            if (!bitten(aOut, amp + 11 * u)) Thorn(ctx, c, outer + amp - 2 * u, 11 * u, aOut);   // outer crest, pointing out
-            if (!bitten(aIn, amp + 11 * u)) Thorn(ctx, c, outer - amp + 2 * u, -11 * u, aIn);    // inner crest, pointing in
+            double outerCrest = 2 * Math.PI * (i + 0.25) / Waves, innerCrest = 2 * Math.PI * (i + 0.75) / Waves;
+            if (!bitten(outerCrest, amplitude + thorn)) Thorn(ctx, c, outer + amplitude - 2 * u, thorn, outerCrest);
+            if (!bitten(innerCrest, amplitude + thorn)) Thorn(ctx, c, outer - amplitude + 2 * u, -thorn, innerCrest);
         }
     }
 
-    // A small hooked thorn rising `height` from radius `r` at angle `a` (negative height points inward).
-    static void Thorn(Context ctx, double c, double r, double height, double a)
+    // A small hooked thorn rising `height` from radius `r` (a negative height points inward).
+    static void Thorn(Context ctx, (double x, double y) c, double r, double height, double angle) =>
+        FillPolygon(ctx, new[]
+        {
+            Geometry.OnCircle(c, r, angle - 0.03),
+            Geometry.OnCircle(c, r + height, angle + 0.045),
+            Geometry.OnCircle(c, r, angle + 0.03),
+        });
+
+    static void FillPolygon(Context ctx, IReadOnlyList<(double x, double y)> corners)
     {
-        var (x0, y0) = Polar(c, r, a - 0.03);
-        var (x1, y1) = Polar(c, r, a + 0.03);
-        var (tx, ty) = Polar(c, r + height, a + 0.045);
-        ctx.NewPath(); ctx.MoveTo(x0, y0); ctx.LineTo(tx, ty); ctx.LineTo(x1, y1); ctx.ClosePath();
+        ctx.NewPath();
+        ctx.MoveTo(corners[0].x, corners[0].y);
+        foreach (var (x, y) in corners.Skip(1)) ctx.LineTo(x, y);
+        ctx.ClosePath();
         ctx.Fill();
-    }
-
-    static (double x, double y) Polar(double c, double r, double a) => (c + Math.Cos(a) * r, c + Math.Sin(a) * r);
-
-    static double Distance((double x, double y) a, (double x, double y) b) => Math.Sqrt((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y));
-
-    // A click on the border band (not on a slot) picks the source.
-    public static bool IsOnBorder(double x, double y, double size)
-    {
-        double d = Distance((x, y), (size / 2, size / 2)) / size;
-        return d >= Inner - 0.02 && d <= 0.49;
     }
 }

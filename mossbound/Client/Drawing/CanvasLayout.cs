@@ -23,7 +23,6 @@ sealed class CanvasLayout
     };
 
     readonly Dictionary<CircleRing, double> ringRadius = new();
-    // Each slot's place, worked out once: its angle and its distance from the centre (fraction of size).
     readonly Dictionary<SlotKey, (double angle, double radius)> places = new();
     readonly List<SlotKey> slots = new();
 
@@ -37,20 +36,25 @@ sealed class CanvasLayout
         for (int i = 0; i < tier.Rings.Count; i++) ringRadius[tier.Rings[i]] = rings[Math.Min(i, rings.Length - 1)];
         GlyphRadius = glyph;
 
-        // Each slot sits a little off its exact place, seeded by the slot so it never moves while you
-        // write: circles look laid out by hand instead of on a grid.
         foreach (var ring in tier.Rings)
         {
             for (int s = 0; s < tier.SlotCount(ring); s++)
             {
                 var k = new SlotKey(ring, s);
-                var rng = new Random((int)ring * 31 + s);
-                double angle = -Math.PI / 2 + 2 * Math.PI * s / tier.SlotCount(ring) + (rng.NextDouble() * 2 - 1) * 0.06;
-                double radius = ringRadius[ring] + (rng.NextDouble() * 2 - 1) * 0.2 * glyph;
-                places[k] = (angle, radius);
+                places[k] = HandPlaced(k, tier.SlotCount(ring), glyph);
                 slots.Add(k);
             }
         }
+    }
+
+    // A little off its exact place, seeded by the slot so it never moves while you write: circles look
+    // laid out by hand instead of on a grid.
+    (double angle, double radius) HandPlaced(SlotKey k, int slotsOnRing, double glyph)
+    {
+        var rng = new Random((int)k.Ring * 31 + k.Slot);
+        double angle = -Math.PI / 2 + 2 * Math.PI * k.Slot / slotsOnRing + Ink.Jitter(rng, 0.06);
+        double radius = ringRadius[k.Ring] + Ink.Jitter(rng, 0.2 * glyph);
+        return (angle, radius);
     }
 
     public double RingRadius(CircleRing ring) => ringRadius[ring];
@@ -75,11 +79,10 @@ sealed class CanvasLayout
     {
         double reach = GlyphRadius * canvasSize * 1.4;
         SlotKey? best = null;
-        double bestDistance = reach * reach;
+        double bestDistance = reach;
         foreach (var k in slots)
         {
-            var (cx, cy) = SlotCentre(k, canvasSize);
-            double d = (x - cx) * (x - cx) + (y - cy) * (y - cy);
+            double d = Geometry.Distance((x, y), SlotCentre(k, canvasSize));
             if (d < bestDistance) (best, bestDistance) = (k, d);
         }
         return best;

@@ -19,7 +19,6 @@ static class Ink
 
     public static void Use(Context ctx, Colour c, double alpha) => ctx.SetSourceRGBA(c.R, c.G, c.B, alpha);
 
-    // ---------- pixelation ----------
 
     public static double PixelSize(double guiScale, double grain) => Math.Max(1, Math.Round(grain * guiScale));
 
@@ -98,7 +97,6 @@ static class Ink
         return true;
     }
 
-    // ---------- shapes ----------
 
     public static void FillCircle(Context ctx, double x, double y, double radius)
     {
@@ -139,7 +137,6 @@ static class Ink
         }
     }
 
-    // ---------- hand-drawn imperfections ----------
 
     // The radius wobble depends on the absolute angle, so every arc traced with the same seed lies on
     // the same imperfect circle. `centred` drops the first harmonic (which in effect shifts the centre)

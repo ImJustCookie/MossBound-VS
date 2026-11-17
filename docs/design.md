@@ -356,18 +356,7 @@ A circle that asks for more than its sources can give pulls harder. It drains yo
 
 ## 8. The inscription window (built)
 
-**Controls**
-
-| Where | Action | Does |
-|---|---|---|
-| Circle | Left click a slot | Select it |
-| Circle | Left drag / right drag between glyphs | Link / unlink |
-| Circle | Mouse wheel over a glyph | Change its size |
-| Circle | Click / right-click the border | Next / previous source (bark and up) |
-| Panel | Sweep / right-button sweep across points | Draw / erase lines (pattern-lock style; a skipped point is routed along the rim or through the middle) |
-| Panel | Click / right-click a point | Cycle / clear its mark |
-| Buttons | Clear glyph, Inscribe | Wipe the selected glyph; send the circle to the server, which checks it and writes it on the medium |
-| In hand | Hold right-click / sneak + right-click | Cast / edit again |
+The controls are in the [writing guide](writing-guide.md#controls).
 
 Once the media are crafted in the world (M4), inscribing moves onto them: a stick on moss lying on stone for tier I, the charcoal stick at the scribing stump for tier II.
 
@@ -378,7 +367,7 @@ Once the media are crafted in the world (M4), inscribing moves onto them: a stic
 *The same kind of circle on moss (tier I), bark (tier II) and parchment (tier III): each medium has its own art, rings and ink.*
 
 - It reads like Circular Gallifreyan: bold letter circles, word circles biting the border, mix circles, straight links that bend only around glyphs they don't join, and doubled lines where they are earned (see "What is written, what is drawn").
-- The ink is pixelated and hand-drawn, with a style per tier (`Gui/InkStyle.cs`). There is no anti-aliasing, and every imperfection is seeded so nothing flickers.
+- The ink is pixelated and hand-drawn, with a style per tier (`Client/Drawing/InkStyle.cs`). There is no anti-aliasing, and every imperfection is seeded so nothing flickers.
 
   | Tier | Ink | Feel |
   |---|---|---|
