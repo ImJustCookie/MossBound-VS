@@ -14,3 +14,4 @@ First version.
 - Casting at test scale: hold right-click to cast; Life heals, Ember burns, Wind pushes; mishaps backfire or fizzle.
 - Admin commands: `/mossbound glyphs` and `/mossbound inspect`.
 - Every text in `lang/en.json`, shown in each player's language.
+- Licence: CC BY-NC-SA 4.0 for code, art and documentation.
