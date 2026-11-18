@@ -46,10 +46,16 @@ public class ItemCircleMedium : Item
     static bool IsEditing(ItemSlot slot, EntityAgent byEntity) =>
         slot.Itemstack?.Attributes.HasAttribute(CircleAttribute) != true || byEntity.Controls.ShiftKey;
 
+    // Decided once per interaction: the canvas keeps right-click held, so re-checking sneak each tick turned an edit
+    // into a cast. Set on each side when its interaction starts.
+    const string EditingAttribute = "mossbound:editing";
+    static bool InteractionIsEditing(EntityAgent byEntity) => byEntity.Attributes.GetBool(EditingAttribute);
+
     // From patches/player-cast-animation.json.
     const string HoldAnimation = "mossbound-hold";
     const string CastAnimation = "mossbound-cast";
     const string ReadyAnimation = "mossbound-ready";
+    const string WriteAnimation = "mossbound-write";
 
     // Per spell later: clients can't read a circle's meaning, so the server would write a look code on the stack.
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0060", Justification = "Per-spell looks will read the stack")]
@@ -62,9 +68,14 @@ public class ItemCircleMedium : Item
     public override string? GetHeldReadyAnimation(ItemSlot activeHotbarSlot, Entity forEntity, EnumHand hand) =>
         hand == EnumHand.Right ? ReadyAnimation : base.GetHeldReadyAnimation(activeHotbarSlot, forEntity, hand);
 
-    // The game stops the idle pose during any use, so writing names the hold pose too.
+    // Played whenever right-click reads as held, even with the canvas open. The write pose is the hold pose under its
+    // own name: sharing the idle pose's name made the game restart it (a twitch).
     public override string? GetHeldTpUseAnimation(ItemSlot activeHotbarSlot, Entity forEntity) =>
-        forEntity is EntityAgent agent && IsEditing(activeHotbarSlot, agent) ? HoldAnimation : CastAnimation;
+        forEntity is EntityAgent agent && IsCasting(agent) ? CastAnimation : WriteAnimation;
+
+    // Controls on the holder's own client, server-synced controls for everyone else's view of them.
+    static bool IsCasting(EntityAgent agent) => !InteractionIsEditing(agent)
+        && (agent.Controls.HandUse == EnumHandInteract.HeldItemInteract || agent.ServerControls.HandUse == EnumHandInteract.HeldItemInteract);
 
     readonly HeldMediumMotion motion = new();
 
@@ -100,7 +111,9 @@ public class ItemCircleMedium : Item
         if (!firstEvent) return;
         handling = EnumHandHandling.PreventDefault;
 
-        if (IsEditing(slot, byEntity) && byEntity.World.Api is ICoreClientAPI capi && byEntity == capi.World.Player.Entity)
+        bool editing = IsEditing(slot, byEntity);
+        byEntity.Attributes.SetBool(EditingAttribute, editing);
+        if (editing && byEntity.World.Api is ICoreClientAPI capi && byEntity == capi.World.Player.Entity)
         {
             new GuiDialogCircleCanvas(capi, ReadCircle(slot.Itemstack), Tier).TryOpen();
         }
@@ -109,11 +122,11 @@ public class ItemCircleMedium : Item
     // Fires on release once charged, like a bow: firing at full charge emptied the hand mid-hold, and the game
     // then played its empty-hand reach animation.
     public override bool OnHeldInteractStep(float secondsUsed, ItemSlot slot, EntityAgent byEntity, BlockSelection blockSel, EntitySelection entitySel) =>
-        !IsEditing(slot, byEntity);
+        !InteractionIsEditing(byEntity);
 
     public override void OnHeldInteractStop(float secondsUsed, ItemSlot slot, EntityAgent byEntity, BlockSelection blockSel, EntitySelection entitySel)
     {
-        if (secondsUsed < CastSecondsFor(slot.Itemstack) || IsEditing(slot, byEntity)) return;
+        if (secondsUsed < CastSecondsFor(slot.Itemstack) || InteractionIsEditing(byEntity)) return;
         if (byEntity.World.Api is ICoreServerAPI sapi && byEntity is EntityPlayer { Player: IServerPlayer player })
         {
             sapi.ModLoader.GetModSystem<MossboundModSystem>().Caster?.Cast(player, slot, entitySel, blockSel);

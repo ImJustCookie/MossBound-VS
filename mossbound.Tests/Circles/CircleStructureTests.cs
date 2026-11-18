@@ -50,6 +50,15 @@ public class CircleStructureTests
     }
 
     [Fact]
+    public void AHeartFeedingTwoCastsIsInBothGroups()
+    {
+        var circle = Written(new[] { Heart(0), Shape(0), Shape(2) }, (Heart(0), Shape(0)), (Heart(0), Shape(2)));
+        var groups = CircleStructure.CastGroups(circle, maxGroups: 3);
+        Assert.Equal(new[] { Heart(0), Shape(0) }, groups[0].Select(g => g.Key));
+        Assert.Equal(new[] { Heart(0), Shape(2) }, groups[1].Select(g => g.Key));
+    }
+
+    [Fact]
     public void CastGroupsOfAHeartOnlySpellAreItsHeartGroups()
     {
         var circle = Written(new[] { Heart(0), Heart(1) });

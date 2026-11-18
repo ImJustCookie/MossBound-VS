@@ -43,6 +43,9 @@ public class LangTests
         var needed = GlyphRegistry.All.Select(g => "glyph-" + g.Code)
             .Concat(Enum.GetValues<Aspect>().Select(a => Key("aspect-", a)))
             .Concat(Enum.GetValues<Mishap>().Select(m => Key("mishap-", m)))
+            .Concat(Enum.GetValues<Mishap>().Select(m => Key("mishap-hint-", m)))
+            .Concat(Enum.GetValues<Form>().Select(f => Key("form-", f)))
+            .Concat(Enum.GetValues<GlyphKind>().Select(k => Key("atlas-kind-", k)))
             .Concat(Enum.GetValues<CircleRing>().Select(r => Key("ring-", r)))
             .Concat(Enum.GetValues<LifeSource>().Select(s => Key("source-", s)));
         var missing = needed.Where(k => !keys.Contains(k)).ToList();

@@ -19,9 +19,11 @@
 
     "cast-cooldown": "Your hand is still trembling from the last working.",
     "cast-fizzle": "The circle smoulders and crumbles. Nothing answers.",
-    "cast-backfire": "The elements fight each other and the circle bursts in your hand!",
+    "cast-backfire": "The circle bursts in your hand!",
 
     "atlas-title": "Glyph atlas (admin)",
+    "atlas-kind-element": "Elements",
+    "atlas-kind-form": "Forms",
 
     "command-mossbound": "Mossbound admin tools",
     "command-inspect": "Show how the server reads the circle on the medium in your hand (spoilers!)",
@@ -37,8 +39,8 @@
     "inspect-glyph": "  {0}: {1} (size {2})",
     "inspect-unknown-glyph": "(not a glyph)",
     "inspect-link": "  link {0} - {1}",
-    "inspect-aspects": "Result: {0}",
-    "inspect-aspect": "{0} x{1}",
+    "inspect-spells": "Result: {0}",
+    "inspect-spell": "{0} {1} (strength {2}, scale {3})",
     "inspect-mishaps": "Result: mishap ({0})",
 
     "ring-heart": "Heart",
@@ -58,6 +60,12 @@
     "glyph-rot": "Rot",
     "glyph-wind": "Wind",
     "glyph-ward": "Ward",
+    "glyph-seed": "Seed",
+    "glyph-ring": "Ring",
+
+    "form-touch": "Touch",
+    "form-seed": "Seed",
+    "form-ring": "Ring",
 
     "aspect-water": "Water",
     "aspect-ember": "Ember",
@@ -81,8 +89,21 @@
     "aspect-blight": "Blight",
     "aspect-moss": "Moss",
 
-    "mishap-overload": "overload",
+    "mishap-overload": "too strong",
     "mishap-opposition": "opposites",
-    "mishap-misplaced": "misplaced element",
-    "mishap-noelement": "nothing to cast"
+    "mishap-misplaced": "misplaced glyph",
+    "mishap-noelement": "nothing to cast",
+    "mishap-nomix": "mixes into nothing",
+    "mishap-unknown": "unknown glyph",
+    "mishap-oversized": "too large",
+    "mishap-toomanyspells": "too many spells",
+
+    "mishap-hint-overload": "A heart is too strong for this medium: its glyph sizes add up past {0}. Use smaller element glyphs.",
+    "mishap-hint-oversized": "A form is too large for this medium: its glyph sizes add up past {1}. Use smaller form glyphs.",
+    "mishap-hint-toomanyspells": "Too many spells for this medium: it holds {2}. Link glyphs into fewer hearts or form groups.",
+    "mishap-hint-unknown": "A linked figure is no glyph. Check its lines and marks, or remove it.",
+    "mishap-hint-opposition": "Opposing glyphs were linked together. Keep them apart.",
+    "mishap-hint-misplaced": "A glyph sits on the wrong ring: elements belong in the heart, forms on the ring around it.",
+    "mishap-hint-noelement": "Nothing to cast: write at least one element in the heart.",
+    "mishap-hint-nomix": "Some linked glyphs mix into nothing. Try another combination, or unlink them."
 }

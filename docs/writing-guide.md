@@ -17,13 +17,13 @@ A glyph is a word. You draw it on the glyph panel; the circle shows it in place.
 
 ## 2. Strength
 
-The size of a glyph sets how strong it is.
+The size of a glyph sets how strong it is. A heart's strength is the sum of its glyph sizes, up to the medium's limit.
 
 ![Strength](images/guide/02-strength.png)
 
 ## 3. Mixing
 
-Element glyphs linked together in the heart mix into one result.
+Element glyphs linked together in the heart mix into one result. Only which glyphs you link counts, not their sizes, and two of the same glyph count as two. If the glyphs make no known mix, the circle fails.
 
 ![Mixing](images/guide/03-mixing.png)
 
@@ -82,11 +82,15 @@ Better media have more rings and slots.
 | Mishap | Cause | Result |
 |---|---|---|
 | Opposites | Ember with Frost, or Wind with Ward, in one heart | Backfires: smoke and slight damage to you |
-| Overload | More than 3 of one element in a heart (sizes add up) | Backfires |
+| No mix | Glyphs linked in a heart that make no known mix | Fizzles |
+| Too strong | A heart's sizes add up past the medium's limit (moss 2, bark 3, parchment 4) | Backfires |
+| Too large | A form group's sizes add up past the medium's limit (bark 2, parchment 3) | Backfires |
+| Too many spells | More spells than the medium holds (moss 1, bark 2, parchment 3) | Backfires |
+| Unknown glyph | A linked figure that is no glyph (an unlinked one is ignored) | Fizzles |
 | Misplaced | An element glyph outside the heart | Fizzles |
 | Nothing to cast | No element in any heart | Fizzles |
 
-If any heart fails, the whole circle fails.
+If any heart fails, the whole circle fails. After a mishap, a message says what went wrong and how to fix it, without naming any glyph.
 
 ### Controls
 

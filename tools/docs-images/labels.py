@@ -155,10 +155,10 @@ card("02-strength", "Strength: the size of a glyph",
 
 # 3. Mixing
 card("03-mixing", "Mixing elements",
-     "The heart is the centre of the circle. Link two element glyphs there (drag from one to the other) and they mix "
-     "into something new. What a mix does is only revealed when you cast it.",
-     [("mix_apart", "Not linked: two hearts", "Water and Frost stay separate and are cast side by side.", TEXT, []),
-      ("mix_linked", "Linked: one heart", "Water + Frost mix into Ice. The mix circle shows the link.", GOOD, []),
+     "The heart is the centre of the circle. Link element glyphs there (drag from one to the other) and they mix "
+     "into one new thing, or into nothing if no such mix exists. What a mix does is only revealed when you cast it.",
+     [("mix_apart", "Not linked: two hearts", "Water and Ember stay separate: two spells.", TEXT, []),
+      ("mix_linked", "Linked: one heart", "Water + Ember mix into Steam. The mix circle shows the link.", GOOD, []),
       ("mix_opposites", "Opposites: it backfires", "Ember + Frost (or Wind + Ward) cancel out when linked: smoke and "
        "a small hurt.", BAD, [])])
 

@@ -63,13 +63,15 @@ static class AdminCommands
         }
         string SlotName(PlacedGlyph g) => Say("inspect-slot", Say("ring-" + Lower(g.Ring)), g.Slot);
         string GlyphName(PlacedGlyph g) => script!.Recognize(g.Figure) is { } def ? Say("glyph-" + def.Code) : Say("inspect-unknown-glyph");
+        string SpellName(SpellCell c) => Say("inspect-spell", Say("aspect-" + Lower(c.Aspect)), Say("form-" + Lower(c.Form)), c.Strength, c.Scale);
+        string MishapName(Mishap m) => Say("mishap-" + Lower(m));
         foreach (var g in circle.Glyphs) lines.Add(Say("inspect-glyph", SlotName(g), GlyphName(g), g.EffectiveSize));
         foreach (var l in circle.Links) lines.Add(Say("inspect-link", SlotName(circle.Glyphs[l.From]), SlotName(circle.Glyphs[l.To])));
 
-        var plan = SpellReading.Read(circle, script!);
+        var plan = SpellReading.Read(circle, script!, medium.Tier);
         lines.Add(plan.Fizzles
-            ? Say("inspect-mishaps", string.Join(", ", plan.Mishaps.Select(m => Say("mishap-" + Lower(m)))))
-            : Say("inspect-aspects", string.Join(", ", plan.Aspects.Select(a => Say("inspect-aspect", Say("aspect-" + Lower(a.aspect)), a.intensity)))));
+            ? Say("inspect-mishaps", string.Join(", ", plan.Mishaps.Select(MishapName)))
+            : Say("inspect-spells", string.Join(", ", plan.Cells.Select(SpellName))));
         return TextCommandResult.Success(string.Join("\n", lines));
     }
 

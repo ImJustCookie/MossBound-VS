@@ -104,7 +104,10 @@ A cell with no variant for a scale uses its nearest one, grown or shrunk.
 |---|---|---|
 | **Opposition** | opposites together in one heart (Ember + Frost, Wind + Ward), or in one form group (proposed: Seed + Ward, Imbue + Ring) | backfire: hurts the caster |
 | **No mix** | a heart or form group that matches no entry | fizzle |
-| **Overload** | strength or scale over the tier cap, or more spells from one circle than the tier allows | backfire |
+| **Too strong** | a heart's strength over the tier cap | backfire |
+| **Too large** | a form group's scale over the tier cap | backfire |
+| **Too many spells** | more spells from one circle than the tier allows | backfire |
+| **Unknown glyph** | a linked figure that is no glyph (unlinked ones are ignored) | fizzle |
 | **Misplaced** | an element outside the heart, or a form outside the shape ring | fizzle |
 | **Nothing to cast** | no element at all | fizzle |
 
@@ -257,6 +260,8 @@ sequenceDiagram
 **First build:** see [Version 0](#version-0).
 
 ## What changes in built behaviour
+
+The heart rules below, the form glyphs Seed and Ring, and the tier limits are built (`Core/Spells/SpellReading.cs`); every spell still acts by touch until the deliveries exist.
 
 | Built today ([Appendix C](design-appendix.md#c-elements-and-mixing)) | Becomes |
 |---|---|

@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using Mossbound.Core;
@@ -58,12 +57,12 @@ sealed class GlyphRings : IRenderer
         if (circle == null || circle.Glyphs.Count == 0 || style.GlyphMax <= 0) return null;
         if (sprites.Count + circle.Glyphs.Count > GlyphSprites.MaxCached) ClearAll();
 
-        var groups = Capped(CircleStructure.CastGroups(circle, CastRings.MaxRings), style.GlyphMin, style.GlyphMax);
+        var groups = Capped(CircleStructure.CastGroups(circle, CastRings.MaxRings), style.GlyphMax);
         return live[holder.EntityId] = new CastRings(holder, groups, style, castSeconds, sprites);
     }
 
-    // At most `max` glyphs in all (dropped from the last rings first); at least `min` (the first ring repeated).
-    static List<List<PlacedGlyph>> Capped(List<List<PlacedGlyph>> groups, int min, int max)
+    // At most `max` glyphs in all, dropped from the last rings first.
+    static List<List<PlacedGlyph>> Capped(List<List<PlacedGlyph>> groups, int max)
     {
         var capped = new List<List<PlacedGlyph>>();
         int left = max;
@@ -72,8 +71,6 @@ sealed class GlyphRings : IRenderer
             capped.Add(group.Take(left).ToList());
             left -= capped[^1].Count;
         }
-        var first = capped[0];
-        for (int i = 0, n = first.Count; capped.Sum(g => g.Count) < Math.Min(min, max); i++) first.Add(first[i % n]);
         return capped;
     }
 

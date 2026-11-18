@@ -53,14 +53,15 @@ class SpellCaster
             slot.MarkDirty();
         }
 
-        var plan = SpellReading.Read(circle, worldScript);
+        var plan = SpellReading.Read(circle, worldScript, medium.Tier);
         var target = ResolveTouch(player, entitySel, blockSel);
         if (plan.Fizzles)
         {
-            SpellEffects.ApplyMishap(sapi, player, plan.Mishaps);
+            SpellEffects.ApplyMishap(sapi, player, plan.Mishaps, medium.Tier.Limits);
             return;
         }
-        foreach (var (aspect, intensity) in plan.Aspects) SpellEffects.Apply(sapi, player, target, aspect, intensity);
+        // shortcut: every spell acts by touch whatever its form; deliveries come with the spell framework.
+        foreach (var cell in plan.Cells) SpellEffects.Apply(sapi, player, target, cell.Aspect, cell.Strength);
     }
 
     // The client says what the player looks at; the server only accepts it within reach.

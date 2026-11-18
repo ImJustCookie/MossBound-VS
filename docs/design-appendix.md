@@ -94,11 +94,14 @@ The server rejects a circle unless: every slot exists on the tier, no slot is us
 | Rot + Wind | Blight | withering cloud |
 
 Rules:
-1. Mixes are tried in table order. Each element joins at most one mix; a mix's intensity is the smaller count of its elements; leftovers stay pure.
-2. More than 3 of one element in a heart: **overload** mishap.
-3. Ember with Frost, or Wind with Ward, in one heart: **opposites** mishap.
-4. An element outside the heart: **misplaced** mishap. No element at all: **nothing to cast**.
-5. If any heart fails, the whole circle fails.
+1. A heart mixes into exactly one aspect: its glyphs, counted by glyph and never by size, must match one element or one mix (`Core/Spells/Recipes.cs`). Otherwise: **no mix** mishap.
+2. Castable now: every element alone, and the mixes Steam, Rain, Smoke. The other mixes in the table are designed but have no recipe yet, so they give **no mix**.
+3. A heart's strength is the sum of its glyph sizes; over the medium's limit (moss 2, bark 3, parchment 4): **too strong** mishap. More spells than the medium holds (moss 1, bark 2, parchment 3): **too many spells**. A linked figure that is no glyph: **unknown glyph**.
+4. Ember with Frost, or Wind with Ward, in one heart: **opposites** mishap.
+5. An element outside the heart: **misplaced** mishap. No element at all: **nothing to cast**.
+6. If any heart fails, the whole circle fails.
+
+The full rules, including forms: [spell system](spell-system.md).
 
 What each mishap does: [writing guide](writing-guide.md#when-it-goes-wrong).
 
@@ -166,7 +169,7 @@ nested circle  aim: If [Ground is soil] at There
 | Cooldown | 2 seconds per player |
 | Medium | Used up, except in creative mode |
 | Effects | A coloured burst per aspect; Life heals, Ember burns creatures, Wind pushes creatures. Never damages or pushes players |
-| Mishaps | Opposites and overload slightly hurt the caster; others fizzle |
+| Mishaps | Opposites and going over a limit slightly hurt the caster; others fizzle. A hint follows each |
 
 ## H. Life cost
 

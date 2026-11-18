@@ -13,8 +13,7 @@ public sealed record CastStyle(
     float FlyOffShare = 0.03f,  // ring sparks thrown out of the spin
     float SiphonShare = 0.2f,   // ring sparks drawn up into the caster
     int ReleaseBurst = 30,
-    int GlyphMin = 3,           // glyphs rising around the caster: one per written glyph, within these limits
-    int GlyphMax = 12,
+    int GlyphMax = 24,          // glyphs rising around the caster: one per glyph of each cast, at most this many
     float GlyphSpin = 0.12f,    // glyph ring turns per second once ready
     byte Glow = 160)
 {

@@ -5,6 +5,7 @@ namespace Mossbound.Core;
 public enum GlyphKind
 {
     Element,
+    Form,
 }
 
 public enum Element
@@ -19,7 +20,15 @@ public enum Element
     Ward,
 }
 
-public sealed record GlyphDef(string Code, GlyphKind Kind, Element? Element = null);
+// How a spell travels and acts. Touch is not a glyph: it is what a cast with no form does.
+public enum Form
+{
+    Touch,
+    Seed,
+    Ring,
+}
+
+public sealed record GlyphDef(string Code, GlyphKind Kind, Element? Element = null, Form? Form = null);
 
 public static class GlyphRegistry
 {
@@ -35,5 +44,7 @@ public static class GlyphRegistry
         new("rot", GlyphKind.Element, Element.Rot),
         new("wind", GlyphKind.Element, Element.Wind),
         new("ward", GlyphKind.Element, Element.Ward),
+        new("seed", GlyphKind.Form, Form: Form.Seed),
+        new("ring", GlyphKind.Form, Form: Form.Ring),
     };
 }
