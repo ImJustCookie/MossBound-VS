@@ -1,10 +1,10 @@
 {
     "item-mosssigil": "Moss sigil",
-    "itemdesc-mosssigil": "A pad of pressed living moss. Right-click to write a small circle on it, hold right-click to cast it, sneak + right-click to edit it.",
-    "item-barkstrip": "Bark strip",
-    "itemdesc-barkstrip": "A thin strip of bark. Right-click to write a circle on it, hold right-click to cast it, sneak + right-click to edit it.",
-    "item-parchment": "Hide parchment",
-    "itemdesc-parchment": "A scraped, stretched sheet of hide. Room for a full circle with its aim ring. Right-click to write on it, hold right-click to cast it, sneak + right-click to edit it.",
+    "itemdesc-mosssigil": "A pad of pressed living moss. Right-click to write a small circle on it, hold right-click then release to cast it, sneak + right-click to edit it.",
+    "item-barksigil": "Bark sigil",
+    "itemdesc-barksigil": "A flattened piece of bark. Right-click to write a circle on it, hold right-click then release to cast it, sneak + right-click to edit it.",
+    "item-parchmentsigil": "Parchment sigil",
+    "itemdesc-parchmentsigil": "A scraped, stretched sheet of hide. Room for a full circle with its aim ring. Right-click to write on it, hold right-click then release to cast it, sneak + right-click to edit it.",
     "medium-blank": "Blank.",
     "medium-inscribed": "Inscribed with {0} glyph(s).",
 

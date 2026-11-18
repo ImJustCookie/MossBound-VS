@@ -21,8 +21,8 @@ A **medium** holds one **circle**. The circle has rings of **slots**, and each s
 | Ring | Says | Tier | Status |
 |---|---|---|---|
 | Heart (centre) | what: elements | I, moss sigil | built |
-| Shape (inner) | how: forms and behaviours | II, bark strip | planned |
-| Aim (outer) | at whom: targets | III, hide parchment | planned |
+| Shape (inner) | how: forms and behaviours | II, bark sigil | planned |
+| Aim (outer) | at whom: targets | III, parchment sigil | planned |
 | Rim (edge) | when: triggers and nested circles | IV, carved stone | planned |
 
 The **border** shows the **source**, which pays for the spell: the medium, the caster or the land (from tier II).
@@ -41,7 +41,7 @@ There are 8 elements: Water, Ember, Frost, Stone, Life, Rot, Wind, Ward. Element
 
 ## Casting (built, test scale)
 
-Inscribe the circle, then hold right-click for one second to cast it. The medium is used up. Today every spell acts by touch, and only Life, Ember and Wind have real effects. → [Appendix G](design-appendix.md#g-casting)
+Inscribe the circle, then hold right-click for at least one second and release to cast it. The medium is used up. Today every spell acts by touch, and only Life, Ember and Wind have real effects. → [Appendix G](design-appendix.md#g-casting)
 
 ## Planned systems
 

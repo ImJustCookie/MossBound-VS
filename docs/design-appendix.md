@@ -37,8 +37,8 @@ Reference details for [design.md](design.md). Each section is marked **built** o
 | Tier | Medium | Heart | Shape | Aim | Rim | Max size | Choose source |
 |---|---|---|---|---|---|---|---|
 | I | Moss sigil | 2 | | | | 2 | no |
-| II | Bark strip | 3 | 4 | | | 3 | yes |
-| III | Hide parchment | 4 | 6 | 8 | | 3 | yes |
+| II | Bark sigil | 3 | 4 | | | 3 | yes |
+| III | Parchment sigil | 4 | 6 | 8 | | 3 | yes |
 | IV | Carved stone (planned) | 4 | 6 | 8 | 4 | 3 | yes |
 
 Numbers are slots per ring. Planned lifetimes: moss wilts within a day; bark and parchment are used up on casting; stone is permanent.
@@ -161,7 +161,7 @@ nested circle  aim: If [Ground is soil] at There
 | | |
 |---|---|
 | Inscribe | The server validates the circle and writes it on one medium from the held stack |
-| Cast | Hold right-click 1 second |
+| Cast | Hold right-click at least 1 second to charge, release to cast; releasing earlier cancels |
 | Target | Creature looked at within 5 blocks, else the block looked at, else the caster |
 | Cooldown | 2 seconds per player |
 | Medium | Used up, except in creative mode |
@@ -189,11 +189,11 @@ The cost is computed once per cast from intensity, number of casts, area, durati
 
 ## I. Making the media
 
-**Planned (M4).** Today: bark strips come from a knife and a placed log in the crafting grid; the moss sigil and hide parchment are creative-only.
+**Planned (M4).** Today: bark sigils come from a knife and a placed log in the crafting grid; the moss and parchment sigils are creative-only.
 
 **Tier I, moss sigil** (on any stone block, no workstation): scrape moss off a mossy block with a knife → lay 5 living moss on stone → flatten with a loose stone in stages → carve with a knife → sneak + right-click with a stick to inscribe. Wilts in about a day.
 
-**Tier II, bark strip** (scribing stump): strip a placed log with a knife (2–3 bark, leaves a debarked log) → chop a debarked log into a scribing stump (once) → flatten bark on the stump → carve → whittle charcoal into a charcoal stick, which wears down → inscribe on the stump.
+**Tier II, bark sigil** (scribing stump): strip a placed log with a knife (2–3 bark, leaves a debarked log) → chop a debarked log into a scribing stump (once) → flatten bark on the stump → carve → whittle charcoal into a charcoal stick, which wears down → inscribe on the stump.
 
 **Carving:** like vanilla knapping, a 10×10 grid cut one voxel per knife click to match a pattern. Patterns are JSON recipes; offcuts are lost.
 
