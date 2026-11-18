@@ -45,6 +45,7 @@ class SpellCaster
             return;
         }
         lastCastMs[player.PlayerUID] = now;
+        CastVisuals.Release(sapi.World, player.Entity, ItemCircleMedium.CastStyleFor(slot.Itemstack));
 
         // Creative players keep the strip so they can recast while experimenting.
         if (player.WorldData.CurrentGameMode != EnumGameMode.Creative)
