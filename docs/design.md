@@ -37,7 +37,7 @@ A glyph is a set of lines and marks on 7 points (6 on a rim, 1 in the middle). L
 
 ## Elements and mixing (built)
 
-There are 8 elements: Water, Ember, Frost, Stone, Life, Rot, Wind, Ward. Elements linked in one heart mix: Water + Frost gives Ice, Life + Water + Stone gives Moss, 13 results in all. Opposites (Ember and Frost, Wind and Ward) in one heart make the circle fail, as does more than 3 of one element. A failed circle gives a **mishap**: it backfires or fizzles. → [Appendix C](design-appendix.md#c-elements-and-mixing)
+There are 8 elements: Water, Ember, Frost, Stone, Life, Rot, Wind, Ward. Elements linked in one heart mix into exactly one result (Water + Ember gives Steam); glyphs that make no mix fail. Sizes add up to the heart's strength, capped per medium. Opposites (Ember and Frost, Wind and Ward) in one heart make the circle fail. Castable now: every element alone, and Steam, Rain, Smoke. A failed circle gives a **mishap**: it backfires or fizzles. → [Appendix C](design-appendix.md#c-elements-and-mixing)
 
 ## Casting (built, test scale)
 

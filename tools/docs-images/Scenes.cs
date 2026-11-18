@@ -35,10 +35,10 @@ static class Scenes
         // 2. Strength: three separate hearts at sizes 1, 2 and 3.
         Canvas(new Scene(bark).Glyph(Heart(0), "ember").Glyph(Heart(1), "ember", 2).Glyph(Heart(2), "ember", 3), "size");
 
-        // 3. Mixing, on moss: apart, linked, opposites.
-        Canvas(new Scene(moss).Glyph(Heart(0), "water").Glyph(Heart(1), "frost"), "mix_apart");
-        Canvas(new Scene(moss).Glyph(Heart(0), "water").Glyph(Heart(1), "frost").Link(Heart(0), Heart(1)), "mix_linked");
-        Canvas(new Scene(moss).Glyph(Heart(0), "ember").Glyph(Heart(1), "frost").Link(Heart(0), Heart(1)), "mix_opposites");
+        // 3. Mixing, on bark (moss holds one spell): apart, linked, opposites.
+        Canvas(new Scene(bark).Glyph(Heart(0), "water").Glyph(Heart(1), "ember"), "mix_apart");
+        Canvas(new Scene(bark).Glyph(Heart(0), "water").Glyph(Heart(1), "ember").Link(Heart(0), Heart(1)), "mix_linked");
+        Canvas(new Scene(bark).Glyph(Heart(0), "ember").Glyph(Heart(1), "frost").Link(Heart(0), Heart(1)), "mix_opposites");
 
         // 4. Casts, on bark: one cast, one heart feeding two casts, an unlinked typo.
         Canvas(new Scene(bark).Glyph(Heart(0), "life").Glyph(Shape(0), "ward").Link(Heart(0), Shape(0)), "cast_one");

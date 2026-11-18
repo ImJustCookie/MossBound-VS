@@ -46,12 +46,11 @@ static class SpellEffects
         }
     }
 
-    // Opposite or overloaded elements backfire a little; a circle with no usable element just fizzles.
-    public static void ApplyMishap(ICoreServerAPI sapi, IServerPlayer caster, IReadOnlyList<Mishap> mishaps)
+    public static void ApplyMishap(ICoreServerAPI sapi, IServerPlayer caster, IReadOnlyList<Mishap> mishaps, SpellLimits limits)
     {
         var at = caster.Entity.Pos.XYZ.Add(0, 1, 0);
         Burst(sapi, at, smokeColour, 25);
-        if (mishaps.Contains(Mishap.Opposition) || mishaps.Contains(Mishap.Overload))
+        if (mishaps.Any(m => m.Backfires()))
         {
             caster.Entity.ReceiveDamage(new DamageSource { Source = EnumDamageSource.Internal, Type = EnumDamageType.Injury }, 1);
             caster.Tell("cast-backfire");
@@ -60,6 +59,9 @@ static class SpellEffects
         {
             caster.Tell("cast-fizzle");
         }
+        // A hint per mishap, so players learn the grammar. It never names a glyph: the script stays secret.
+        foreach (var mishap in mishaps)
+            caster.Tell("mishap-hint-" + mishap.ToString().ToLowerInvariant(), limits.Strength, limits.Scale, limits.Spells);
     }
 
     // Heals carry no source entity: the game applies knockback even to heals, from the source's
