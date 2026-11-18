@@ -16,7 +16,7 @@ enum RingsEnding { None, Release, Cancel }
 // cancel sinks them.
 sealed class CastRings
 {
-    public const int MaxRings = 3;
+    public const int MaxRings = 4;
     public const float ReadyCharge = 0.99f;
     const float WaistHeight = 0.95f, RingGap = 0.3f, RingRadius = 0.85f, StartHeight = 0.15f;
     const float ChargingBob = 0.04f, ReadyBob = 0.16f, GlyphSize = 0.36f, AppearShare = 0.8f;
@@ -32,7 +32,7 @@ sealed class CastRings
         public required Ring Ring;
         public required LoadedTexture Sprite;
         public required Vec4f Colour;
-        public float Angle, Distance, Height, RiseSpeed, Delay, BobPhase, BobSpeed;
+        public float Angle, Distance, Height, RiseSpeed, Delay, BobPhase, BobSpeed, Size;
     }
 
     static Random Rand => Random.Shared;
@@ -62,7 +62,7 @@ sealed class CastRings
             for (int i = 0; i < groups[r].Count; i++)
             {
                 float delay = AppearShare * castSeconds * appeared++ / total;
-                glyphs.Add(NewGlyph(ring, sprites.For(groups[r][i]), style, start + i * MathF.PI * 2 / groups[r].Count, delay, castSeconds));
+                glyphs.Add(NewGlyph(ring, groups[r][i], sprites, style, start + i * MathF.PI * 2 / groups[r].Count, delay, castSeconds));
             }
         }
     }
@@ -79,10 +79,12 @@ sealed class CastRings
         };
     }
 
-    static RingGlyph NewGlyph(Ring ring, LoadedTexture sprite, CastStyle style, float angle, float delay, float castSeconds) => new()
+    // Sized like the written glyph (size 1 small, 3 large), with a slight random variation.
+    static RingGlyph NewGlyph(Ring ring, PlacedGlyph glyph, GlyphSprites sprites, CastStyle style, float angle, float delay, float castSeconds) => new()
     {
         Ring = ring,
-        Sprite = sprite,
+        Sprite = sprites.For(glyph),
+        Size = GlyphSize * (0.5f + 0.3f * glyph.EffectiveSize) * Between(0.9f, 1.1f),
         Colour = ColorUtil.ToRGBAVec4f(style.Colours[Rand.Next(style.Colours.Length)]),
         Angle = angle,
         Distance = ring.Radius + Between(-0.15f, 0.15f),
@@ -122,7 +124,7 @@ sealed class CastRings
             float radius = g.Distance * spread;
             float angle = g.Angle + g.Ring.Spin;
             quads.Draw(g.Sprite, g.Colour, Math.Min(1, shownFor * 4) * (1 - end),
-                feet.X + Math.Cos(angle) * radius, feet.Y + height, feet.Z + Math.Sin(angle) * radius, angle, GlyphSize * scale);
+                feet.X + Math.Cos(angle) * radius, feet.Y + height, feet.Z + Math.Sin(angle) * radius, angle, g.Size * scale);
         }
     }
 

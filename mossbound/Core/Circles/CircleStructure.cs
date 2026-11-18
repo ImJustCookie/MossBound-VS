@@ -35,8 +35,8 @@ public static class CircleStructure
         return casts;
     }
 
-    // A written circle's glyphs grouped by cast (heart groups for a heart-only spell). Each glyph goes to its
-    // first group; glyphs in none join the first; groups past maxGroups merge into the last.
+    // A written circle's glyphs grouped by cast (heart groups for a heart-only spell). A heart feeding several
+    // casts is in each of their groups; glyphs in none join the first; groups past maxGroups merge into the last.
     public static List<List<PlacedGlyph>> CastGroups(Circle circle, int maxGroups)
     {
         var byKey = new Dictionary<SlotKey, PlacedGlyph>();
@@ -49,22 +49,16 @@ public static class CircleStructure
         var keyGroups = Casts(byKey.Keys, links).Select(c => c.Heart.Concat(c.Body)).ToList();
         if (keyGroups.Count == 0) keyGroups = Hearts(byKey.Keys, links).Select(h => h.AsEnumerable()).ToList();
 
-        var placed = new HashSet<SlotKey>();
-        var groups = new List<List<PlacedGlyph>>();
+        var groups = new List<List<SlotKey>>();
         foreach (var keys in keyGroups)
         {
-            var group = keys.Where(placed.Add).Select(k => byKey[k]).ToList();
-            if (group.Count == 0) continue;
-            if (groups.Count < maxGroups) groups.Add(group);
-            else groups[^1].AddRange(group);
+            if (groups.Count < maxGroups) groups.Add(keys.ToList());
+            else groups[^1] = groups[^1].Union(keys).ToList();
         }
-        var loose = byKey.Values.Where(g => placed.Add(g.Key)).ToList();
-        if (loose.Count > 0)
-        {
-            if (groups.Count == 0) groups.Add(loose);
-            else groups[0].AddRange(loose);
-        }
-        return groups;
+        var loose = byKey.Keys.Where(k => !groups.Any(g => g.Contains(k))).ToList();
+        if (groups.Count == 0) groups.Add(loose);
+        else groups[0].AddRange(loose);
+        return groups.Where(g => g.Count > 0).Select(g => g.Select(k => byKey[k]).ToList()).ToList();
     }
 
     static bool IsHeart(SlotKey k) => k.Ring == CircleRing.Heart;
