@@ -1,0 +1,264 @@
+{
+	"editor": {
+		"backDropShape": "",
+		"collapsedPaths": "",
+		"allAngles": false,
+		"entityTextureMode": false,
+		"singleTexture": false,
+		"vsFormatConverted": false
+	},
+	"textureWidth": 16,
+	"textureHeight": 16,
+	"textureSizes": {
+		"bark": [16, 16],
+		"oak": [16, 16],
+		"sigil": [16, 16]
+	},
+	"textures": {
+		"oak": "mossbound:item/bark_sigil_wood",
+		"bark": "mossbound:item/bark_sigil_bark",
+		"sigil": "mossbound:item/bark_sigil"
+	},
+	"elements": [
+		{
+			"name": "Origin",
+			"from": [0, 0, 0],
+			"to": [0, 0, 0],
+			"rotationOrigin": [8, 8, 8.25],
+			"rotationY": 180,
+			"faces": {
+				"north": {
+					"texture": "#null",
+					"uv": [0, 0, 0.5, 0.5],
+					"enabled": false
+				},
+				"east": {
+					"texture": "#null",
+					"uv": [0, 0, 0.5, 0.5],
+					"enabled": false
+				},
+				"south": {
+					"texture": "#null",
+					"uv": [0, 0, 0.5, 0.5],
+					"enabled": false
+				},
+				"west": {
+					"texture": "#null",
+					"uv": [0, 0, 0.5, 0.5],
+					"enabled": false
+				},
+				"up": {
+					"texture": "#null",
+					"uv": [0, 0, 0.5, 0.5],
+					"enabled": false
+				},
+				"down": {
+					"texture": "#null",
+					"uv": [0, 0, 0.5, 0.5],
+					"enabled": false
+				}
+			},
+			"children": [
+				{
+					"name": "base",
+					"from": [5.5, 4, 8],
+					"to": [7, 9, 8.5],
+					"rotationOrigin": [8, 8, 8],
+					"faces": {
+						"north": {"texture": "#oak", "uv": [13.5, 9, 15, 14]},
+						"east": {"texture": "#bark", "uv": [0, 3, 0.5, 8]},
+						"south": {"texture": "#bark", "uv": [9.5, 6, 11, 11]},
+						"west": {"texture": "#bark", "uv": [4, 6.5, 4.5, 11.5]},
+						"up": {"texture": "#bark", "uv": [4, 4, 5.5, 4.5]},
+						"down": {"texture": "#bark", "uv": [6.5, 5, 8, 5.5]}
+					},
+					"children": [
+						{
+							"name": "base_geo",
+							"from": [1.5, 0, 0],
+							"to": [1.5, 8, 0.5],
+							"rotationOrigin": [-0.5, 0, 0],
+							"faces": {
+								"north": {"texture": "#oak", "uv": [13.5, 6, 13.5, 14]},
+								"east": {"texture": "#bark", "uv": [0, 0, 0.5, 8]},
+								"south": {"texture": "#bark", "uv": [11, 3, 11, 11]},
+								"west": {"texture": "#bark", "uv": [4, 3.5, 4.5, 11.5]},
+								"up": {"texture": "#bark", "uv": [5.5, 4, 5.5, 4.5]},
+								"down": {"texture": "#bark", "uv": [6.5, 5, 6.5, 5.5]}
+							}
+						},
+						{
+							"name": "base_geo",
+							"from": [1.5, 0, 0],
+							"to": [4, 0.5, 0.5],
+							"rotationOrigin": [-0.5, 0, 0],
+							"faces": {
+								"north": {"texture": "#oak", "uv": [11, 13.5, 13.5, 14]},
+								"east": {"texture": "#bark", "uv": [0, 7.5, 0.5, 8]},
+								"south": {"texture": "#bark", "uv": [11, 10.5, 13.5, 11]},
+								"west": {"texture": "#bark", "uv": [4, 11, 4.5, 11.5]},
+								"up": {"texture": "#bark", "uv": [5.5, 4, 8, 4.5]},
+								"down": {"texture": "#bark", "uv": [4, 5, 6.5, 5.5]}
+							}
+						},
+						{
+							"name": "base_geo",
+							"from": [4.5, 0, 0],
+							"to": [5.5, 0.5, 0.5],
+							"rotationOrigin": [-0.5, 0, 0],
+							"faces": {
+								"north": {"texture": "#oak", "uv": [9.5, 13.5, 10.5, 14]},
+								"east": {"texture": "#bark", "uv": [0, 7.5, 0.5, 8]},
+								"south": {"texture": "#bark", "uv": [14, 10.5, 15, 11]},
+								"west": {"texture": "#bark", "uv": [4, 11, 4.5, 11.5]},
+								"up": {"texture": "#bark", "uv": [8.5, 4, 9.5, 4.5]},
+								"down": {"texture": "#bark", "uv": [2.5, 5, 3.5, 5.5]}
+							}
+						},
+						{
+							"name": "base_geo",
+							"from": [3.5, 8, 0],
+							"to": [4.5, 8.5, 0.5],
+							"rotationOrigin": [-1.5, 8, 0],
+							"faces": {
+								"north": {"texture": "#oak", "uv": [9.5, 13.5, 10.5, 14]},
+								"east": {"texture": "#bark", "uv": [0, 7.5, 0.5, 8]},
+								"south": {"texture": "#bark", "uv": [14, 10.5, 15, 11]},
+								"west": {"texture": "#bark", "uv": [4, 11, 4.5, 11.5]},
+								"up": {"texture": "#bark", "uv": [8.5, 4, 9.5, 4.5]},
+								"down": {"texture": "#bark", "uv": [2.5, 5, 3.5, 5.5]}
+							}
+						},
+						{
+							"name": "base_geo",
+							"from": [1.5, 0.5, 0],
+							"to": [5, 8, 0.5],
+							"rotationOrigin": [-0.5, 0, 0],
+							"faces": {
+								"north": {"texture": "#oak", "uv": [10, 6, 13.5, 13.5]},
+								"east": {"texture": "#bark", "uv": [0, 0, 0.5, 7.5]},
+								"south": {"texture": "#bark", "uv": [11, 3, 14.5, 10.5]},
+								"west": {"texture": "#bark", "uv": [4, 3.5, 4.5, 11]},
+								"up": {"texture": "#bark", "uv": [5.5, 4, 9, 4.5]},
+								"down": {"texture": "#bark", "uv": [3, 5, 6.5, 5.5]}
+							}
+						},
+						{
+							"name": "base_geo",
+							"from": [5, 0.5, 0],
+							"to": [5.5, 6, 0.5],
+							"rotationOrigin": [-0.5, 0, 0],
+							"faces": {
+								"north": {"texture": "#oak", "uv": [9.5, 8, 10, 13.5]},
+								"east": {"texture": "#bark", "uv": [0, 2, 0.5, 7.5]},
+								"south": {"texture": "#bark", "uv": [14.5, 5, 15, 10.5]},
+								"west": {"texture": "#bark", "uv": [4, 5.5, 4.5, 11]},
+								"up": {"texture": "#bark", "uv": [9, 4, 9.5, 4.5]},
+								"down": {"texture": "#bark", "uv": [2.5, 5, 3, 5.5]}
+							}
+						},
+						{
+							"name": "base_geo",
+							"from": [5, 7, 0],
+							"to": [5.5, 8, 0.5],
+							"rotationOrigin": [-0.5, 0, 0],
+							"faces": {
+								"north": {"texture": "#oak", "uv": [9.5, 6, 10, 7]},
+								"east": {"texture": "#bark", "uv": [0, 0, 0.5, 1]},
+								"south": {"texture": "#bark", "uv": [14.5, 3, 15, 4]},
+								"west": {"texture": "#bark", "uv": [4, 3.5, 4.5, 4.5]},
+								"up": {"texture": "#bark", "uv": [9, 4, 9.5, 4.5]},
+								"down": {"texture": "#bark", "uv": [2.5, 5, 3, 5.5]}
+							}
+						},
+						{
+							"name": "base_geo",
+							"from": [-0.5, 5, 0],
+							"to": [0, 7.5, 0.5],
+							"rotationOrigin": [-0.5, 0, 0],
+							"faces": {
+								"north": {"texture": "#oak", "uv": [15, 6.5, 15.5, 9]},
+								"east": {"texture": "#bark", "uv": [0, 0.5, 0.5, 3]},
+								"south": {"texture": "#bark", "uv": [9, 3.5, 9.5, 6]},
+								"west": {"texture": "#bark", "uv": [4, 4, 4.5, 6.5]},
+								"up": {"texture": "#bark", "uv": [3.5, 4, 4, 4.5]},
+								"down": {"texture": "#bark", "uv": [8, 5, 8.5, 5.5]}
+							}
+						},
+						{
+							"name": "base_geo",
+							"from": [1, 7, 0],
+							"to": [1.5, 7.5, 0.5],
+							"rotationOrigin": [1, -0.5, 0],
+							"faces": {
+								"north": {"texture": "#oak", "uv": [15, 6, 15.5, 6.5]},
+								"east": {"texture": "#bark", "uv": [0, 0, 0.5, 0.5]},
+								"south": {"texture": "#bark", "uv": [9, 3, 9.5, 3.5]},
+								"west": {"texture": "#bark", "uv": [4, 3.5, 4.5, 4]},
+								"up": {"texture": "#bark", "uv": [3.5, 4, 4, 4.5]},
+								"down": {"texture": "#bark", "uv": [8, 5, 8.5, 5.5]}
+							}
+						},
+						{
+							"name": "base_geo",
+							"from": [0, 5, 0],
+							"to": [0.5, 8, 0.5],
+							"rotationOrigin": [-0.5, 0, 0],
+							"faces": {
+								"north": {"texture": "#oak", "uv": [14.5, 6, 15, 9]},
+								"east": {"texture": "#bark", "uv": [0, 0, 0.5, 3]},
+								"south": {"texture": "#bark", "uv": [9.5, 3, 10, 6]},
+								"west": {"texture": "#bark", "uv": [4, 3.5, 4.5, 6.5]},
+								"up": {"texture": "#bark", "uv": [4, 4, 4.5, 4.5]},
+								"down": {"texture": "#bark", "uv": [7.5, 5, 8, 5.5]}
+							}
+						},
+						{
+							"name": "base_geo",
+							"from": [0.5, 5, 0],
+							"to": [1.5, 7, 0.5],
+							"rotationOrigin": [-0.5, 0, 0],
+							"faces": {
+								"north": {"texture": "#oak", "uv": [13.5, 7, 14.5, 9]},
+								"east": {"texture": "#bark", "uv": [0, 1, 0.5, 3]},
+								"south": {"texture": "#bark", "uv": [10, 4, 11, 6]},
+								"west": {"texture": "#bark", "uv": [4, 4.5, 4.5, 6.5]},
+								"up": {"texture": "#bark", "uv": [4.5, 4, 5.5, 4.5]},
+								"down": {"texture": "#bark", "uv": [6.5, 5, 7.5, 5.5]}
+							}
+						},
+						{
+							"name": "base_geo",
+							"from": [1.5, 5, 0],
+							"to": [1.5, 8, 0.5],
+							"rotationOrigin": [-0.5, 0, 0],
+							"faces": {
+								"north": {"texture": "#oak", "uv": [13.5, 6, 13.5, 9]},
+								"east": {"texture": "#bark", "uv": [0, 0, 0.5, 3]},
+								"south": {"texture": "#bark", "uv": [11, 3, 11, 6]},
+								"west": {"texture": "#bark", "uv": [4, 3.5, 4.5, 6.5]},
+								"up": {"texture": "#bark", "uv": [5.5, 4, 5.5, 4.5]},
+								"down": {"texture": "#bark", "uv": [6.5, 5, 6.5, 5.5]}
+							}
+						},
+						{
+							"name": "base_geo",
+							"from": [-0.5, 1, 0],
+							"to": [0, 5, 0.5],
+							"rotationOrigin": [-0.5, 1, 0],
+							"faces": {
+								"north": {"texture": "#oak", "uv": [15, 9, 15.5, 13]},
+								"east": {"texture": "#bark", "uv": [0, 3, 0.5, 7]},
+								"south": {"texture": "#bark", "uv": [9, 6, 9.5, 10]},
+								"west": {"texture": "#bark", "uv": [4, 6.5, 4.5, 10.5]},
+								"up": {"texture": "#bark", "uv": [3.5, 4, 4, 4.5]},
+								"down": {"texture": "#bark", "uv": [8, 5, 8.5, 5.5]}
+							}
+						}
+					]
+				}
+			]
+		}
+	],
+	"animations": []
+}
