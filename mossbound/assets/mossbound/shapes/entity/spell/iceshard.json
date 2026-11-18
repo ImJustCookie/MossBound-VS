@@ -1,0 +1,585 @@
+{
+	"editor": {
+		"allAngles": true
+	},
+	"textureWidth": 16,
+	"textureHeight": 16,
+	"textures": {
+		"ice": "mossbound:entity/spell/ice",
+		"ice-light": "mossbound:entity/spell/ice-light"
+	},
+	"elements": [
+		{
+			"name": "crystal",
+			"from": [
+				7,
+				7,
+				3
+			],
+			"to": [
+				9,
+				9,
+				12
+			],
+			"rotationOrigin": [
+				8.0,
+				8.0,
+				7.5
+			],
+			"faces": {
+				"north": {
+					"texture": "#ice",
+					"uv": [
+						2.5,
+						3.5,
+						4.5,
+						5.5
+					],
+					"glow": 40
+				},
+				"south": {
+					"texture": "#ice",
+					"uv": [
+						4.5,
+						0.5,
+						6.5,
+						2.5
+					],
+					"glow": 40
+				},
+				"east": {
+					"texture": "#ice",
+					"uv": [
+						3.5,
+						2.0,
+						12.5,
+						4.0
+					],
+					"glow": 40
+				},
+				"west": {
+					"texture": "#ice",
+					"uv": [
+						3.0,
+						2.0,
+						12.0,
+						4.0
+					],
+					"glow": 40
+				},
+				"up": {
+					"texture": "#ice",
+					"uv": [
+						1.5,
+						0.5,
+						3.5,
+						9.5
+					],
+					"glow": 40
+				},
+				"down": {
+					"texture": "#ice",
+					"uv": [
+						8.0,
+						2.5,
+						10.0,
+						11.5
+					],
+					"glow": 40
+				}
+			},
+			"rotationZ": 45
+		},
+		{
+			"name": "tip",
+			"from": [
+				7.4,
+				7.4,
+				1.5
+			],
+			"to": [
+				8.6,
+				8.6,
+				3
+			],
+			"rotationOrigin": [
+				8.0,
+				8.0,
+				2.25
+			],
+			"faces": {
+				"north": {
+					"texture": "#ice-light",
+					"uv": [
+						5.0,
+						6.5,
+						6.199999999999999,
+						7.699999999999999
+					],
+					"glow": 60
+				},
+				"south": {
+					"texture": "#ice-light",
+					"uv": [
+						4.5,
+						1.5,
+						5.699999999999999,
+						2.6999999999999993
+					],
+					"glow": 60
+				},
+				"east": {
+					"texture": "#ice-light",
+					"uv": [
+						12.5,
+						7.5,
+						14.0,
+						8.7
+					],
+					"glow": 60
+				},
+				"west": {
+					"texture": "#ice-light",
+					"uv": [
+						7.5,
+						6.0,
+						9.0,
+						7.199999999999999
+					],
+					"glow": 60
+				},
+				"up": {
+					"texture": "#ice-light",
+					"uv": [
+						14.5,
+						1.5,
+						15.7,
+						3.0
+					],
+					"glow": 60
+				},
+				"down": {
+					"texture": "#ice-light",
+					"uv": [
+						1.0,
+						5.5,
+						2.1999999999999993,
+						7.0
+					],
+					"glow": 60
+				}
+			},
+			"rotationZ": 45
+		},
+		{
+			"name": "side-a",
+			"from": [
+				8.5,
+				8.5,
+				6
+			],
+			"to": [
+				9.7,
+				9.7,
+				11
+			],
+			"rotationOrigin": [
+				9.1,
+				9.1,
+				8.5
+			],
+			"faces": {
+				"north": {
+					"texture": "#ice",
+					"uv": [
+						0.5,
+						8.5,
+						1.6999999999999993,
+						9.7
+					],
+					"glow": 40
+				},
+				"south": {
+					"texture": "#ice",
+					"uv": [
+						7.0,
+						14.0,
+						8.2,
+						15.2
+					],
+					"glow": 40
+				},
+				"east": {
+					"texture": "#ice",
+					"uv": [
+						2.0,
+						6.0,
+						7.0,
+						7.199999999999999
+					],
+					"glow": 40
+				},
+				"west": {
+					"texture": "#ice",
+					"uv": [
+						7.5,
+						0.5,
+						12.5,
+						1.6999999999999993
+					],
+					"glow": 40
+				},
+				"up": {
+					"texture": "#ice",
+					"uv": [
+						2.5,
+						3.0,
+						3.6999999999999993,
+						8.0
+					],
+					"glow": 40
+				},
+				"down": {
+					"texture": "#ice",
+					"uv": [
+						10.5,
+						8.5,
+						11.7,
+						13.5
+					],
+					"glow": 40
+				}
+			},
+			"rotationX": -14,
+			"rotationY": 14,
+			"rotationZ": 45
+		},
+		{
+			"name": "side-b",
+			"from": [
+				6.3,
+				6.6,
+				7
+			],
+			"to": [
+				7.3,
+				7.6,
+				11.5
+			],
+			"rotationOrigin": [
+				6.8,
+				7.1,
+				9.25
+			],
+			"faces": {
+				"north": {
+					"texture": "#ice",
+					"uv": [
+						5.5,
+						13.0,
+						6.5,
+						14.0
+					],
+					"glow": 40
+				},
+				"south": {
+					"texture": "#ice",
+					"uv": [
+						1.5,
+						0.5,
+						2.5,
+						1.5
+					],
+					"glow": 40
+				},
+				"east": {
+					"texture": "#ice",
+					"uv": [
+						9.0,
+						9.0,
+						13.5,
+						10.0
+					],
+					"glow": 40
+				},
+				"west": {
+					"texture": "#ice",
+					"uv": [
+						11.0,
+						5.5,
+						15.5,
+						6.5
+					],
+					"glow": 40
+				},
+				"up": {
+					"texture": "#ice",
+					"uv": [
+						14.5,
+						8.0,
+						15.5,
+						12.5
+					],
+					"glow": 40
+				},
+				"down": {
+					"texture": "#ice",
+					"uv": [
+						5.0,
+						10.0,
+						6.0,
+						14.5
+					],
+					"glow": 40
+				}
+			},
+			"rotationX": 12,
+			"rotationY": -12,
+			"rotationZ": 45
+		},
+		{
+			"name": "core",
+			"from": [
+				7.6,
+				7.6,
+				4
+			],
+			"to": [
+				8.4,
+				8.4,
+				11
+			],
+			"rotationOrigin": [
+				8.0,
+				8.0,
+				7.5
+			],
+			"faces": {
+				"north": {
+					"texture": "#ice-light",
+					"uv": [
+						13.5,
+						4.0,
+						14.3,
+						4.800000000000001
+					],
+					"glow": 90
+				},
+				"south": {
+					"texture": "#ice-light",
+					"uv": [
+						7.5,
+						13.5,
+						8.3,
+						14.3
+					],
+					"glow": 90
+				},
+				"east": {
+					"texture": "#ice-light",
+					"uv": [
+						6.5,
+						4.5,
+						13.5,
+						5.300000000000001
+					],
+					"glow": 90
+				},
+				"west": {
+					"texture": "#ice-light",
+					"uv": [
+						0.5,
+						10.5,
+						7.5,
+						11.3
+					],
+					"glow": 90
+				},
+				"up": {
+					"texture": "#ice-light",
+					"uv": [
+						15.0,
+						1.5,
+						15.8,
+						8.5
+					],
+					"glow": 90
+				},
+				"down": {
+					"texture": "#ice-light",
+					"uv": [
+						3.5,
+						8.5,
+						4.300000000000001,
+						15.5
+					],
+					"glow": 90
+				}
+			},
+			"rotationZ": 45
+		},
+		{
+			"name": "chip-1",
+			"from": [
+				8.450000000000001,
+				6.8500000000000005,
+				12.85
+			],
+			"to": [
+				9.15,
+				7.55,
+				13.549999999999999
+			],
+			"rotationOrigin": [
+				8.8,
+				7.2,
+				13.2
+			],
+			"faces": {
+				"north": {
+					"texture": "#ice-light",
+					"uv": [
+						3.5,
+						12.5,
+						4.199999999999999,
+						13.2
+					],
+					"glow": 60
+				},
+				"south": {
+					"texture": "#ice-light",
+					"uv": [
+						2.5,
+						13.5,
+						3.1999999999999993,
+						14.2
+					],
+					"glow": 60
+				},
+				"east": {
+					"texture": "#ice-light",
+					"uv": [
+						5.5,
+						1.5,
+						6.199999999999999,
+						2.1999999999999993
+					],
+					"glow": 60
+				},
+				"west": {
+					"texture": "#ice-light",
+					"uv": [
+						9.0,
+						8.5,
+						9.7,
+						9.2
+					],
+					"glow": 60
+				},
+				"up": {
+					"texture": "#ice-light",
+					"uv": [
+						10.5,
+						14.0,
+						11.2,
+						14.7
+					],
+					"glow": 60
+				},
+				"down": {
+					"texture": "#ice-light",
+					"uv": [
+						12.5,
+						1.5,
+						13.2,
+						2.1999999999999993
+					],
+					"glow": 60
+				}
+			},
+			"rotationX": 30,
+			"rotationY": 30
+		},
+		{
+			"name": "chip-2",
+			"from": [
+				6.75,
+				8.55,
+				14.25
+			],
+			"to": [
+				7.25,
+				9.05,
+				14.75
+			],
+			"rotationOrigin": [
+				7.0,
+				8.8,
+				14.5
+			],
+			"faces": {
+				"north": {
+					"texture": "#ice-light",
+					"uv": [
+						3.5,
+						14.5,
+						4.0,
+						15.0
+					],
+					"glow": 60
+				},
+				"south": {
+					"texture": "#ice-light",
+					"uv": [
+						1.5,
+						2.5,
+						2.0,
+						3.0
+					],
+					"glow": 60
+				},
+				"east": {
+					"texture": "#ice-light",
+					"uv": [
+						6.5,
+						6.5,
+						7.0,
+						7.0
+					],
+					"glow": 60
+				},
+				"west": {
+					"texture": "#ice-light",
+					"uv": [
+						1.0,
+						8.0,
+						1.5,
+						8.5
+					],
+					"glow": 60
+				},
+				"up": {
+					"texture": "#ice-light",
+					"uv": [
+						2.5,
+						3.0,
+						3.0,
+						3.5
+					],
+					"glow": 60
+				},
+				"down": {
+					"texture": "#ice-light",
+					"uv": [
+						10.0,
+						14.0,
+						10.5,
+						14.5
+					],
+					"glow": 60
+				}
+			},
+			"rotationZ": 30
+		}
+	]
+}

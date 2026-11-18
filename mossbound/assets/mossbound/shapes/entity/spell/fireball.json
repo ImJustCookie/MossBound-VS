@@ -1,0 +1,743 @@
+{
+	"editor": {
+		"allAngles": true
+	},
+	"textureWidth": 16,
+	"textureHeight": 16,
+	"textures": {
+		"fire-core": "mossbound:entity/spell/fire-core",
+		"fire-flame": "mossbound:entity/spell/fire-flame",
+		"fire-ember": "mossbound:entity/spell/fire-ember"
+	},
+	"elements": [
+		{
+			"name": "core",
+			"from": [
+				6.5,
+				6.5,
+				6.5
+			],
+			"to": [
+				9.5,
+				9.5,
+				9.5
+			],
+			"rotationOrigin": [
+				8.0,
+				8.0,
+				8.0
+			],
+			"faces": {
+				"north": {
+					"texture": "#fire-core",
+					"uv": [
+						10.0,
+						11.0,
+						13.0,
+						14.0
+					],
+					"glow": 255
+				},
+				"south": {
+					"texture": "#fire-core",
+					"uv": [
+						7.0,
+						10.5,
+						10.0,
+						13.5
+					],
+					"glow": 255
+				},
+				"east": {
+					"texture": "#fire-core",
+					"uv": [
+						9.0,
+						2.0,
+						12.0,
+						5.0
+					],
+					"glow": 255
+				},
+				"west": {
+					"texture": "#fire-core",
+					"uv": [
+						5.5,
+						3.0,
+						8.5,
+						6.0
+					],
+					"glow": 255
+				},
+				"up": {
+					"texture": "#fire-core",
+					"uv": [
+						12.0,
+						8.0,
+						15.0,
+						11.0
+					],
+					"glow": 255
+				},
+				"down": {
+					"texture": "#fire-core",
+					"uv": [
+						2.5,
+						9.0,
+						5.5,
+						12.0
+					],
+					"glow": 255
+				}
+			}
+		},
+		{
+			"name": "shell-a",
+			"from": [
+				5.75,
+				5.75,
+				5.75
+			],
+			"to": [
+				10.25,
+				10.25,
+				10.25
+			],
+			"rotationOrigin": [
+				8.0,
+				8.0,
+				8.0
+			],
+			"faces": {
+				"north": {
+					"texture": "#fire-flame",
+					"uv": [
+						11.0,
+						10.0,
+						15.5,
+						14.5
+					],
+					"glow": 200
+				},
+				"south": {
+					"texture": "#fire-flame",
+					"uv": [
+						3.0,
+						3.0,
+						7.5,
+						7.5
+					],
+					"glow": 200
+				},
+				"east": {
+					"texture": "#fire-flame",
+					"uv": [
+						11.0,
+						10.5,
+						15.5,
+						15.0
+					],
+					"glow": 200
+				},
+				"west": {
+					"texture": "#fire-flame",
+					"uv": [
+						3.0,
+						4.5,
+						7.5,
+						9.0
+					],
+					"glow": 200
+				},
+				"up": {
+					"texture": "#fire-flame",
+					"uv": [
+						6.0,
+						4.0,
+						10.5,
+						8.5
+					],
+					"glow": 200
+				},
+				"down": {
+					"texture": "#fire-flame",
+					"uv": [
+						3.5,
+						1.5,
+						8.0,
+						6.0
+					],
+					"glow": 200
+				}
+			},
+			"rotationX": 45,
+			"rotationY": 45
+		},
+		{
+			"name": "shell-b",
+			"from": [
+				5.75,
+				5.75,
+				5.75
+			],
+			"to": [
+				10.25,
+				10.25,
+				10.25
+			],
+			"rotationOrigin": [
+				8.0,
+				8.0,
+				8.0
+			],
+			"faces": {
+				"north": {
+					"texture": "#fire-flame",
+					"uv": [
+						8.0,
+						10.5,
+						12.5,
+						15.0
+					],
+					"glow": 200
+				},
+				"south": {
+					"texture": "#fire-flame",
+					"uv": [
+						6.5,
+						4.0,
+						11.0,
+						8.5
+					],
+					"glow": 200
+				},
+				"east": {
+					"texture": "#fire-flame",
+					"uv": [
+						6.5,
+						11.5,
+						11.0,
+						16.0
+					],
+					"glow": 200
+				},
+				"west": {
+					"texture": "#fire-flame",
+					"uv": [
+						0.5,
+						6.0,
+						5.0,
+						10.5
+					],
+					"glow": 200
+				},
+				"up": {
+					"texture": "#fire-flame",
+					"uv": [
+						10.0,
+						3.5,
+						14.5,
+						8.0
+					],
+					"glow": 200
+				},
+				"down": {
+					"texture": "#fire-flame",
+					"uv": [
+						3.0,
+						3.0,
+						7.5,
+						7.5
+					],
+					"glow": 200
+				}
+			},
+			"rotationZ": 45
+		},
+		{
+			"name": "lick-up",
+			"from": [
+				7,
+				9.5,
+				9
+			],
+			"to": [
+				9,
+				11,
+				12.5
+			],
+			"rotationOrigin": [
+				8.0,
+				10.25,
+				10.75
+			],
+			"faces": {
+				"north": {
+					"texture": "#fire-flame",
+					"uv": [
+						11.5,
+						0.5,
+						13.5,
+						2.0
+					],
+					"glow": 180
+				},
+				"south": {
+					"texture": "#fire-flame",
+					"uv": [
+						5.5,
+						7.0,
+						7.5,
+						8.5
+					],
+					"glow": 180
+				},
+				"east": {
+					"texture": "#fire-flame",
+					"uv": [
+						9.5,
+						6.5,
+						13.0,
+						8.0
+					],
+					"glow": 180
+				},
+				"west": {
+					"texture": "#fire-flame",
+					"uv": [
+						8.5,
+						13.0,
+						12.0,
+						14.5
+					],
+					"glow": 180
+				},
+				"up": {
+					"texture": "#fire-flame",
+					"uv": [
+						8.0,
+						10.0,
+						10.0,
+						13.5
+					],
+					"glow": 180
+				},
+				"down": {
+					"texture": "#fire-flame",
+					"uv": [
+						6.0,
+						8.5,
+						8.0,
+						12.0
+					],
+					"glow": 180
+				}
+			},
+			"rotationX": 20
+		},
+		{
+			"name": "lick-left",
+			"from": [
+				5.2,
+				7,
+				9
+			],
+			"to": [
+				6.7,
+				9,
+				12
+			],
+			"rotationOrigin": [
+				5.95,
+				8.0,
+				10.5
+			],
+			"faces": {
+				"north": {
+					"texture": "#fire-flame",
+					"uv": [
+						2.0,
+						12.5,
+						3.5,
+						14.5
+					],
+					"glow": 180
+				},
+				"south": {
+					"texture": "#fire-flame",
+					"uv": [
+						8.0,
+						1.5,
+						9.5,
+						3.5
+					],
+					"glow": 180
+				},
+				"east": {
+					"texture": "#fire-flame",
+					"uv": [
+						1.5,
+						8.0,
+						4.5,
+						10.0
+					],
+					"glow": 180
+				},
+				"west": {
+					"texture": "#fire-flame",
+					"uv": [
+						12.5,
+						14.0,
+						15.5,
+						16.0
+					],
+					"glow": 180
+				},
+				"up": {
+					"texture": "#fire-flame",
+					"uv": [
+						9.5,
+						0.5,
+						11.0,
+						3.5
+					],
+					"glow": 180
+				},
+				"down": {
+					"texture": "#fire-flame",
+					"uv": [
+						8.0,
+						3.0,
+						9.5,
+						6.0
+					],
+					"glow": 180
+				}
+			},
+			"rotationY": -18
+		},
+		{
+			"name": "lick-right",
+			"from": [
+				9.3,
+				6.5,
+				9
+			],
+			"to": [
+				10.8,
+				8.5,
+				12.5
+			],
+			"rotationOrigin": [
+				10.05,
+				7.5,
+				10.75
+			],
+			"faces": {
+				"north": {
+					"texture": "#fire-flame",
+					"uv": [
+						14.0,
+						8.0,
+						15.5,
+						10.0
+					],
+					"glow": 180
+				},
+				"south": {
+					"texture": "#fire-flame",
+					"uv": [
+						9.0,
+						12.5,
+						10.5,
+						14.5
+					],
+					"glow": 180
+				},
+				"east": {
+					"texture": "#fire-flame",
+					"uv": [
+						0.5,
+						13.0,
+						4.0,
+						15.0
+					],
+					"glow": 180
+				},
+				"west": {
+					"texture": "#fire-flame",
+					"uv": [
+						4.0,
+						5.5,
+						7.5,
+						7.5
+					],
+					"glow": 180
+				},
+				"up": {
+					"texture": "#fire-flame",
+					"uv": [
+						11.0,
+						7.5,
+						12.5,
+						11.0
+					],
+					"glow": 180
+				},
+				"down": {
+					"texture": "#fire-flame",
+					"uv": [
+						10.0,
+						12.0,
+						11.5,
+						15.5
+					],
+					"glow": 180
+				}
+			},
+			"rotationY": 18
+		},
+		{
+			"name": "ember-1",
+			"from": [
+				7.4,
+				7.9,
+				12.9
+			],
+			"to": [
+				8.6,
+				9.1,
+				14.1
+			],
+			"rotationOrigin": [
+				8.0,
+				8.5,
+				13.5
+			],
+			"faces": {
+				"north": {
+					"texture": "#fire-ember",
+					"uv": [
+						6.0,
+						3.5,
+						7.199999999999999,
+						4.699999999999999
+					],
+					"glow": 150
+				},
+				"south": {
+					"texture": "#fire-ember",
+					"uv": [
+						3.5,
+						7.0,
+						4.699999999999999,
+						8.2
+					],
+					"glow": 150
+				},
+				"east": {
+					"texture": "#fire-ember",
+					"uv": [
+						8.5,
+						14.5,
+						9.7,
+						15.7
+					],
+					"glow": 150
+				},
+				"west": {
+					"texture": "#fire-ember",
+					"uv": [
+						9.0,
+						7.0,
+						10.2,
+						8.2
+					],
+					"glow": 150
+				},
+				"up": {
+					"texture": "#fire-ember",
+					"uv": [
+						5.5,
+						11.0,
+						6.699999999999999,
+						12.2
+					],
+					"glow": 150
+				},
+				"down": {
+					"texture": "#fire-ember",
+					"uv": [
+						6.5,
+						4.5,
+						7.699999999999999,
+						5.699999999999999
+					],
+					"glow": 150
+				}
+			},
+			"rotationZ": 30
+		},
+		{
+			"name": "ember-2",
+			"from": [
+				6.1,
+				9.1,
+				14.4
+			],
+			"to": [
+				6.9,
+				9.9,
+				15.200000000000001
+			],
+			"rotationOrigin": [
+				6.5,
+				9.5,
+				14.8
+			],
+			"faces": {
+				"north": {
+					"texture": "#fire-ember",
+					"uv": [
+						11.0,
+						6.0,
+						11.8,
+						6.800000000000001
+					],
+					"glow": 120
+				},
+				"south": {
+					"texture": "#fire-ember",
+					"uv": [
+						11.0,
+						6.0,
+						11.8,
+						6.800000000000001
+					],
+					"glow": 120
+				},
+				"east": {
+					"texture": "#fire-ember",
+					"uv": [
+						14.5,
+						10.5,
+						15.3,
+						11.3
+					],
+					"glow": 120
+				},
+				"west": {
+					"texture": "#fire-ember",
+					"uv": [
+						0.0,
+						4.0,
+						0.8000000000000007,
+						4.800000000000001
+					],
+					"glow": 120
+				},
+				"up": {
+					"texture": "#fire-ember",
+					"uv": [
+						14.0,
+						0.5,
+						14.8,
+						1.3000000000000007
+					],
+					"glow": 120
+				},
+				"down": {
+					"texture": "#fire-ember",
+					"uv": [
+						5.5,
+						9.0,
+						6.300000000000001,
+						9.8
+					],
+					"glow": 120
+				}
+			},
+			"rotationX": 40
+		},
+		{
+			"name": "ember-3",
+			"from": [
+				9.15,
+				6.65,
+				15.15
+			],
+			"to": [
+				9.85,
+				7.35,
+				15.85
+			],
+			"rotationOrigin": [
+				9.5,
+				7.0,
+				15.5
+			],
+			"faces": {
+				"north": {
+					"texture": "#fire-ember",
+					"uv": [
+						5.0,
+						14.5,
+						5.699999999999999,
+						15.2
+					],
+					"glow": 100
+				},
+				"south": {
+					"texture": "#fire-ember",
+					"uv": [
+						14.0,
+						12.5,
+						14.7,
+						13.2
+					],
+					"glow": 100
+				},
+				"east": {
+					"texture": "#fire-ember",
+					"uv": [
+						4.5,
+						4.0,
+						5.199999999999999,
+						4.699999999999999
+					],
+					"glow": 100
+				},
+				"west": {
+					"texture": "#fire-ember",
+					"uv": [
+						7.0,
+						9.0,
+						7.699999999999999,
+						9.7
+					],
+					"glow": 100
+				},
+				"up": {
+					"texture": "#fire-ember",
+					"uv": [
+						1.0,
+						6.5,
+						1.6999999999999993,
+						7.199999999999999
+					],
+					"glow": 100
+				},
+				"down": {
+					"texture": "#fire-ember",
+					"uv": [
+						8.0,
+						8.0,
+						8.7,
+						8.7
+					],
+					"glow": 100
+				}
+			},
+			"rotationY": 25
+		}
+	]
+}
