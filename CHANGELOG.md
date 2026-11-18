@@ -13,6 +13,7 @@ First version.
 - Circle rules: hearts mix their elements when linked, casts, the linking rule; 8 elements and 13 mixes.
 - Casting at test scale: hold right-click to charge, release to cast; Life heals, Ember burns, Wind pushes; mishaps backfire or fizzle.
 - Held medium poses: it floats and turns above the palm, and spins up while a cast charges (first and third person).
+- Casting effects: a spinning spark ring at the caster's feet, and the medium's own glyphs rising into rings around the caster, one ring per cast in the spell.
 - Admin commands: `/mossbound glyphs` and `/mossbound inspect`.
 - Every text in `lang/en.json`, shown in each player's language.
 - Licence: CC BY-NC-SA 4.0 for code, art and documentation.

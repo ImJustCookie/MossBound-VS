@@ -16,7 +16,6 @@ readonly record struct SpellTarget(Entity? Entity, Vec3d Position);
 // consumes the strip, then applies the spell or its mishap. All work happens once, at cast time.
 class SpellCaster
 {
-    public const float CastSeconds = 1f;
     const long CooldownMs = 2000;
     const double TouchRange = 5; // shortcut: only the Touch form exists; Seed/Ring come with form glyphs
 
@@ -45,7 +44,7 @@ class SpellCaster
             return;
         }
         lastCastMs[player.PlayerUID] = now;
-        CastVisuals.Release(sapi.World, player.Entity, ItemCircleMedium.CastStyleFor(slot.Itemstack));
+        CastSparks.Release(sapi.World, player.Entity, ItemCircleMedium.CastStyleFor(slot.Itemstack));
 
         // Creative players keep the strip so they can recast while experimenting.
         if (player.WorldData.CurrentGameMode != EnumGameMode.Creative)

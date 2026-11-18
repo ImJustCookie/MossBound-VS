@@ -2,7 +2,6 @@ using System;
 using System.Text;
 using Mossbound.Client;
 using Mossbound.Core;
-using Mossbound.Server;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 using Vintagestory.API.Common.Entities;
@@ -19,12 +18,19 @@ public class ItemCircleMedium : Item
     public const string CircleAttribute = "mossbound:circle";
 
     public CircleTier Tier { get; private set; } = CircleTier.Moss;
+    float castSeconds = 1;
 
     public override void OnLoaded(ICoreAPI api)
     {
         base.OnLoaded(api);
         Tier = CircleTier.ForLevel(Attributes?["circleTier"].AsInt(1) ?? 1);
+        castSeconds = Attributes?["castSeconds"].AsFloat(1) ?? 1;
     }
+
+    // Charge time before release fires: `castSeconds` in the item JSON. Over ~9 s, lengthen the 300-frame cast
+    // animations in patches/player-cast-animation.json (the game restarts a use animation once 95% done).
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0060", Justification = "Per-spell cast times will read the stack")]
+    public float CastSecondsFor(ItemStack? stack) => castSeconds;
 
     public static Circle? ReadCircle(ItemStack? stack)
     {
@@ -40,33 +46,28 @@ public class ItemCircleMedium : Item
     static bool IsEditing(ItemSlot slot, EntityAgent byEntity) =>
         slot.Itemstack?.Attributes.HasAttribute(CircleAttribute) != true || byEntity.Controls.ShiftKey;
 
-    // Player animations added by patches/player-cast-animation.json. Every client picks them from the
-    // holder's synced held item and controls, so other players see them too.
+    // From patches/player-cast-animation.json.
     const string HoldAnimation = "mossbound-hold";
     const string CastAnimation = "mossbound-cast";
     const string ReadyAnimation = "mossbound-ready";
 
-    // The particle look of a cast (Items/CastVisuals.cs), used by every client while charging and by the server
-    // on release. One look for now. Per spell: have the server write the look's code on the stack when inscribing
-    // (clients can't read a circle's meaning without the world's secret script) and map it to a CastStyle here.
+    // Per spell later: clients can't read a circle's meaning, so the server would write a look code on the stack.
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0060", Justification = "Per-spell looks will read the stack")]
     public static CastStyle CastStyleFor(ItemStack? stack) => CastStyle.Default;
 
     public override string? GetHeldTpIdleAnimation(ItemSlot activeHotbarSlot, Entity forEntity, EnumHand hand) =>
         hand == EnumHand.Right ? HoldAnimation : base.GetHeldTpIdleAnimation(activeHotbarSlot, forEntity, hand);
 
-    // The game plays the "ready" pose after a use ends and on switching items; vanilla's holds the arm
-    // further out, so the arm would jump there between casts. Ours is the hold pose under its own code.
+    // Played after a use and on switching items; vanilla's holds the arm further out, so it jumped between casts.
     public override string? GetHeldReadyAnimation(ItemSlot activeHotbarSlot, Entity forEntity, EnumHand hand) =>
         hand == EnumHand.Right ? ReadyAnimation : base.GetHeldReadyAnimation(activeHotbarSlot, forEntity, hand);
 
-    // Writing keeps the hold pose (the game stops the idle pose during any use, so it must be named here too).
+    // The game stops the idle pose during any use, so writing names the hold pose too.
     public override string? GetHeldTpUseAnimation(ItemSlot activeHotbarSlot, Entity forEntity) =>
         forEntity is EntityAgent agent && IsEditing(activeHotbarSlot, agent) ? HoldAnimation : CastAnimation;
 
     readonly HeldMediumMotion motion = new();
 
-    // Each frame the medium is drawn in a hand: move it (spin, bob, lift) and, while charging, spawn its particles.
     public override void OnBeforeRender(ICoreClientAPI capi, ItemStack itemstack, EnumItemRenderTarget target, ref ItemRenderInfo renderinfo)
     {
         base.OnBeforeRender(capi, itemstack, target, ref renderinfo);
@@ -75,16 +76,23 @@ public class ItemCircleMedium : Item
 
         long now = capi.ElapsedMilliseconds;
         var cast = holder.AnimManager.GetAnimationState(CastAnimation);
-        float charge = Charge(cast);
+        float seconds = CastSecondsFor(itemstack);
+        float charge = Charge(cast, seconds);
         float dt = motion.Advance(holder, charge, now);
-        if (cast is { Active: true }) CastVisuals.Charge(capi.World, holder, CastStyleFor(itemstack), charge, dt);
+        var style = CastStyleFor(itemstack);
+        bool casting = cast is { Active: true };
+        if (casting) CastSparks.Charge(capi.World, holder, style, charge, dt);
+        capi.ModLoader.GetModSystem<MossboundModSystem>().Glyphs?.Update(holder, itemstack, style, charge, casting, seconds);
         renderinfo.Transform = motion.Apply(renderinfo.Transform, holder, now);
     }
 
-    // 0-1: how far the cast animation is into its first second, scaled by how much it is blended in
-    // (so it falls smoothly when the cast is released or cancelled).
-    static float Charge(RunningAnimation? cast) =>
-        cast is { Running: true } ? Math.Clamp(cast.CurrentFrame / 29f, 0, 1) * cast.EasingFactor : 0;
+    // 0-1, scaled by the animation's blend so it falls smoothly on release or cancel.
+    static float Charge(RunningAnimation? cast, float castSeconds)
+    {
+        if (cast is not { Running: true }) return 0;
+        float played = cast.CurrentFrame / (30f * (cast.meta?.AnimationSpeed ?? 1));
+        return Math.Clamp(played / castSeconds, 0, 1) * cast.EasingFactor;
+    }
 
     public override void OnHeldInteractStart(ItemSlot slot, EntityAgent byEntity, BlockSelection blockSel,
         EntitySelection entitySel, bool firstEvent, ref EnumHandHandling handling)
@@ -98,15 +106,14 @@ public class ItemCircleMedium : Item
         }
     }
 
-    // Charge while held; the spell fires on release (Stop) once charged, like drawing a bow. Firing on release
-    // keeps the medium in hand while the button is down: firing at full charge emptied the hand mid-hold, and
-    // the game then played its empty-hand reach animation. Releasing early cancels.
+    // Fires on release once charged, like a bow: firing at full charge emptied the hand mid-hold, and the game
+    // then played its empty-hand reach animation.
     public override bool OnHeldInteractStep(float secondsUsed, ItemSlot slot, EntityAgent byEntity, BlockSelection blockSel, EntitySelection entitySel) =>
         !IsEditing(slot, byEntity);
 
     public override void OnHeldInteractStop(float secondsUsed, ItemSlot slot, EntityAgent byEntity, BlockSelection blockSel, EntitySelection entitySel)
     {
-        if (secondsUsed < SpellCaster.CastSeconds || IsEditing(slot, byEntity)) return;
+        if (secondsUsed < CastSecondsFor(slot.Itemstack) || IsEditing(slot, byEntity)) return;
         if (byEntity.World.Api is ICoreServerAPI sapi && byEntity is EntityPlayer { Player: IServerPlayer player })
         {
             sapi.ModLoader.GetModSystem<MossboundModSystem>().Caster?.Cast(player, slot, entitySel, blockSel);
