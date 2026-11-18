@@ -8,6 +8,6 @@
 		width: 2,
 		height: 1,
 		shapeless: true,
-		output: { type: "item", code: "mossbound:barkstrip", quantity: 4 }
+		output: { type: "item", code: "mossbound:barksigil", quantity: 4 }
 	}
 ]

@@ -35,6 +35,38 @@ public static class CircleStructure
         return casts;
     }
 
+    // A written circle's glyphs grouped by cast (heart groups for a heart-only spell). Each glyph goes to its
+    // first group; glyphs in none join the first; groups past maxGroups merge into the last.
+    public static List<List<PlacedGlyph>> CastGroups(Circle circle, int maxGroups)
+    {
+        var byKey = new Dictionary<SlotKey, PlacedGlyph>();
+        foreach (var g in circle.Glyphs) byKey.TryAdd(g.Key, g);
+        var links = circle.Links
+            .Where(l => l.From >= 0 && l.To >= 0 && l.From < circle.Glyphs.Count && l.To < circle.Glyphs.Count)
+            .Select(l => (circle.Glyphs[l.From].Key, circle.Glyphs[l.To].Key))
+            .ToList();
+
+        var keyGroups = Casts(byKey.Keys, links).Select(c => c.Heart.Concat(c.Body)).ToList();
+        if (keyGroups.Count == 0) keyGroups = Hearts(byKey.Keys, links).Select(h => h.AsEnumerable()).ToList();
+
+        var placed = new HashSet<SlotKey>();
+        var groups = new List<List<PlacedGlyph>>();
+        foreach (var keys in keyGroups)
+        {
+            var group = keys.Where(placed.Add).Select(k => byKey[k]).ToList();
+            if (group.Count == 0) continue;
+            if (groups.Count < maxGroups) groups.Add(group);
+            else groups[^1].AddRange(group);
+        }
+        var loose = byKey.Values.Where(g => placed.Add(g.Key)).ToList();
+        if (loose.Count > 0)
+        {
+            if (groups.Count == 0) groups.Add(loose);
+            else groups[0].AddRange(loose);
+        }
+        return groups;
+    }
+
     static bool IsHeart(SlotKey k) => k.Ring == CircleRing.Heart;
 
     static bool AreLinked(List<SlotKey> a, List<SlotKey> b, List<(SlotKey A, SlotKey B)> links) =>

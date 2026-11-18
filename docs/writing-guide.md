@@ -4,10 +4,10 @@ How to write and cast a spell, one concept per picture. Every circle shown is dr
 
 ## Getting started
 
-1. Get a medium. Bark strip: craft a knife with a placed log in the crafting grid. Moss sigil and hide parchment: creative inventory for now.
+1. Get a medium. Bark sigil: craft a knife with a placed log in the crafting grid. Moss sigil and parchment sigil: creative inventory for now.
 2. Hold the medium and right-click. The inscription window opens.
 3. Write glyphs, link them, and press **Inscribe**. The server checks the circle and writes it on one medium.
-4. Hold right-click with the inscribed medium for one second to cast it. Sneak + right-click edits it again.
+4. Hold right-click with the inscribed medium: it spins faster as it charges. After one second, release to cast it; releasing sooner cancels. Sneak + right-click edits it again.
 
 ## 1. A glyph
 
@@ -100,7 +100,7 @@ If any heart fails, the whole circle fails.
 | Panel | Click / right-click a point | Cycle / clear its mark |
 | Buttons | Clear glyph | Erase the selected glyph |
 | Buttons | Inscribe | Send the circle to the server, which checks it and writes it on the medium |
-| In hand | Hold right-click | Cast, on what you look at, or on yourself |
+| In hand | Hold right-click 1 s, release | Cast, on what you look at, or on yourself |
 | In hand | Sneak + right-click | Edit the circle again |
 
 ### Casting today

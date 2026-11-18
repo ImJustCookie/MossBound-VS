@@ -16,6 +16,9 @@ public class MossboundModSystem : ModSystem
 
     IClientNetworkChannel? clientChannel;
 
+    // Client only: glyph particles around casters (disposed with the mod).
+    internal GlyphRings? Glyphs { get; private set; }
+
     // Server only: the world's secret glyph script, built from the seed once the save is loaded.
     public WorldScript? Script { get; private set; }
     internal SpellCaster? Caster { get; private set; }
@@ -43,7 +46,10 @@ public class MossboundModSystem : ModSystem
     {
         clientChannel = api.Network.GetChannel(ChannelName)
             .SetMessageHandler<GlyphAtlas>(atlas => new GuiDialogGlyphAtlas(api, atlas).TryOpen());
+        Glyphs = new GlyphRings(api);
     }
+
+    public override void Dispose() => Glyphs?.Dispose();
 
     public void SendInscribe(Circle circle) => clientChannel?.SendPacket(new InscribeRequest { Circle = circle });
 }

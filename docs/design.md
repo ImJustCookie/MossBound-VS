@@ -21,8 +21,8 @@ A **medium** holds one **circle**. The circle has rings of **slots**, and each s
 | Ring | Says | Tier | Status |
 |---|---|---|---|
 | Heart (centre) | what: elements | I, moss sigil | built |
-| Shape (inner) | how: forms and behaviours | II, bark strip | planned |
-| Aim (outer) | at whom: targets | III, hide parchment | planned |
+| Shape (inner) | how: forms and behaviours | II, bark sigil | planned |
+| Aim (outer) | at whom: targets | III, parchment sigil | planned |
 | Rim (edge) | when: triggers and nested circles | IV, carved stone | planned |
 
 The **border** shows the **source**, which pays for the spell: the medium, the caster or the land (from tier II).
@@ -41,10 +41,11 @@ There are 8 elements: Water, Ember, Frost, Stone, Life, Rot, Wind, Ward. Element
 
 ## Casting (built, test scale)
 
-Inscribe the circle, then hold right-click for one second to cast it. The medium is used up. Today every spell acts by touch, and only Life, Ember and Wind have real effects. → [Appendix G](design-appendix.md#g-casting)
+Inscribe the circle, then hold right-click for at least one second and release to cast it. The medium is used up. Today every spell acts by touch, and only Life, Ember and Wind have real effects. → [Appendix G](design-appendix.md#g-casting)
 
 ## Planned systems
 
+- **Spell system** (M5 onward): how a circle becomes a spell: one aspect per heart and one form per form group, sizes as strength and scale, hand-made spells over aspect personalities, modifiers, origins, rendering. → [spell-system.md](spell-system.md)
 - **Forms and behaviours** (shape ring, M5): how a cast travels (Touch, Seed, Ring, Mist...) and how it acts (Seeking, Delayed, Gentle...). Amounts become marks on a form's letter. → [D](design-appendix.md#d-forms-and-behaviours)
 - **Targeting** (aim ring, M6): glyphs read as a chain, each narrowing the last: *creatures → near → not kin → closest*. → [E](design-appendix.md#e-targeting)
 - **Triggers and nested circles** (rim, M8): a rim glyph fires a nested circle on an event; nested circles work like functions, with strict limits. → [F](design-appendix.md#f-triggers-and-nested-circles)

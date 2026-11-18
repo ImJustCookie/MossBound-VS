@@ -139,9 +139,18 @@ public class GuiDialogCircleCanvas : GuiDialog
     void DrawPanel(Context ctx, ImageSurface surface, ElementBounds bounds) =>
         CanvasRenderer.DrawPanel(ctx, bounds.InnerWidth, draft.FigureAt(input.Selected), GlyphPainter.SlotSeed(input.Selected), style, panelArt, input.PanelView);
 
+    // Each open makes a new dialog. The game keeps closed dialogs loaded and redraws them on a window
+    // resize (moving to another screen), so unload this one before freeing the art it draws with.
     public override void OnGuiClosed()
     {
         base.OnGuiClosed();
+        capi.Gui.LoadedGuis.Remove(this);
+        Dispose();
+    }
+
+    public override void Dispose()
+    {
+        base.Dispose();
         canvasArt?.Dispose();
         panelArt?.Dispose();
     }

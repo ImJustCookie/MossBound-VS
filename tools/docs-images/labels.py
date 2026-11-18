@@ -205,8 +205,8 @@ card("07-written-vs-drawn", "What you write, and what the game draws",
 card("08-media", "Each medium holds more",
      "Better media add rings and slots, so a circle can say more. Higher tiers are more precise, not more powerful.",
      [("empty_moss", "Moss sigil (I)", "A heart of 2. Sizes up to 2. Always draws on the medium.", TEXT, []),
-      ("empty_bark", "Bark strip (II)", "A heart of 3 and a shape ring of 4. Choose the source.", TEXT, []),
-      ("empty_parchment", "Hide parchment (III)", "Heart 4, shape 6 and an aim ring of 8.", TEXT, [])],
+      ("empty_bark", "Bark sigil (II)", "A heart of 3 and a shape ring of 4. Choose the source.", TEXT, []),
+      ("empty_parchment", "Parchment sigil (III)", "Heart 4, shape 6 and an aim ring of 8.", TEXT, [])],
      notes="Planned: carved stone (IV) adds a rim of 4 for triggers, and circles that call other circles.")
 
 
@@ -305,8 +305,8 @@ diagram()
 
 def interfaces():
     tiers = [("moss", "Moss sigil (tier I)", "A heart of 2 slots. Coarse, finger-drawn lichen ink."),
-             ("bark", "Bark strip (tier II)", "A heart of 3 and a shape ring of 4. Charcoal; here drawn from yourself."),
-             ("parchment", "Hide parchment (tier III)", "Heart 4, shape 6, aim 8. A steady pen line and a doubled border.")]
+             ("bark", "Bark sigil (tier II)", "A heart of 3 and a shape ring of 4. Charcoal; here drawn from yourself."),
+             ("parchment", "Parchment sigil (tier III)", "Heart 4, shape 6, aim 8. A steady pen line and a doubled border.")]
     C, P = 400, 200
     W = 3 * C + 4 * PAD
     top = 130

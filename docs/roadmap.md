@@ -22,7 +22,7 @@ Milestones in build order. The design they implement is in [design.md](design.md
 ## Next steps
 
 1. Test M3 and M3b on the dedicated server: sizes, the source on the border, linking, reopening a medium, old media still casting, `/mossbound inspect`.
-2. M4, in the phases below. Art needed: models for each flattening stage (moss and bark), sheet textures for carving, stump stages, block animations (optional), and items (living moss, moss sigil fresh and wilted, fresh bark, bark strip, charcoal stick).
+2. M4, in the phases below. Art needed: models for each flattening stage (moss and bark), sheet textures for carving, stump stages, block animations (optional), and items (living moss, moss sigil fresh and wilted, fresh bark, bark sigil, charcoal stick).
 3. M5: Touch, Seed and Ring forms, modifier marks, self-cost, and effects for Water, Frost and Moss.
 4. A release build with the mod icon, after a dedicated server test.
 
@@ -33,8 +33,8 @@ Milestones in build order. The design they implement is in [design.md](design.md
 | 1. Work steps | The step format, tool matching and variant mapping (unit-tested); the `Workable` block behaviour: hold to work, player animation, sound, particles, tool wear, claims | Scraping moss off mossy blocks; stripping bark off placed logs |
 | 2. Block animations | Animations stretched to the step's length, and an overlay for vanilla blocks, synced to nearby players | Bark peeling while it is stripped |
 | 3. Moss | Laying 5 living moss on stone, the flattening stages, the carving surface (10×10, knife, recipes, pattern picker) | Moss flattened into a sheet and carved into a sigil |
-| 4. Station | The scribing stump (chopped in stages), slots that show their items, bark flattening and carving on the stump, the charcoal stick | A bark strip made on the stump; whittling charcoal |
-| 5. Inscribing on surfaces | Opening the window from a surface or station, tier rings in the canvas, server checks | Writing and casting a moss sigil and a bark strip |
+| 4. Station | The scribing stump (chopped in stages), slots that show their items, bark flattening and carving on the stump, the charcoal stick | A bark sigil made on the stump; whittling charcoal |
+| 5. Inscribing on surfaces | Opening the window from a surface or station, tier rings in the canvas, server checks | Writing and casting a moss sigil and a bark sigil |
 
 ## Modifier marks: open decisions
 
