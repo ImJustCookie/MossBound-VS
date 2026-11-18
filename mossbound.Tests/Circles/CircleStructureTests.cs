@@ -32,4 +32,36 @@ public class CircleStructureTests
         var links = new[] { (Heart(0), Shape(1)), (Shape(1), Aim(2)), (Aim(2), Aim(1)) };
         Assert.Equal(Aim(1), Assert.Single(CircleStructure.Casts(glyphs, links)).AimEnd);
     }
+
+    [Fact]
+    public void CastGroupsSplitAWrittenCircleByCast()
+    {
+        // Two casts, plus Aim(5) linked to nothing: it joins the first group.
+        var circle = Written(new[] { Heart(0), Shape(0), Heart(2), Shape(3), Aim(5) },
+            (Heart(0), Shape(0)), (Heart(2), Shape(3)));
+        var groups = CircleStructure.CastGroups(circle, maxGroups: 3);
+        Assert.Equal(2, groups.Count);
+        Assert.Equal(new[] { Heart(0), Shape(0), Aim(5) }, groups[0].Select(g => g.Key));
+        Assert.Equal(new[] { Heart(2), Shape(3) }, groups[1].Select(g => g.Key));
+
+        // Capped: the second cast merges into the last allowed group.
+        Assert.Single(CircleStructure.CastGroups(circle, maxGroups: 1));
+        Assert.Equal(5, CircleStructure.CastGroups(circle, maxGroups: 1)[0].Count);
+    }
+
+    [Fact]
+    public void CastGroupsOfAHeartOnlySpellAreItsHeartGroups()
+    {
+        var circle = Written(new[] { Heart(0), Heart(1) });
+        Assert.Equal(2, CircleStructure.CastGroups(circle, maxGroups: 3).Count);
+    }
+
+    static Circle Written(SlotKey[] keys, params (SlotKey A, SlotKey B)[] links)
+    {
+        var circle = new Circle();
+        foreach (var k in keys) circle.Glyphs.Add(new PlacedGlyph { Ring = k.Ring, Slot = k.Slot, Lines = 1 });
+        int Index(SlotKey k) => Array.IndexOf(keys, k);
+        foreach (var (a, b) in links) circle.Links.Add(new CircleLink { From = Index(a), To = Index(b) });
+        return circle;
+    }
 }
