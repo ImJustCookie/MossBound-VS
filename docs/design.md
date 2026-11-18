@@ -45,6 +45,7 @@ Inscribe the circle, then hold right-click for at least one second and release t
 
 ## Planned systems
 
+- **Spell system** (M5 onward): how a circle becomes a spell: one aspect per heart and one form per form group, sizes as strength and scale, hand-made spells over aspect personalities, modifiers, origins, rendering. → [spell-system.md](spell-system.md)
 - **Forms and behaviours** (shape ring, M5): how a cast travels (Touch, Seed, Ring, Mist...) and how it acts (Seeking, Delayed, Gentle...). Amounts become marks on a form's letter. → [D](design-appendix.md#d-forms-and-behaviours)
 - **Targeting** (aim ring, M6): glyphs read as a chain, each narrowing the last: *creatures → near → not kin → closest*. → [E](design-appendix.md#e-targeting)
 - **Triggers and nested circles** (rim, M8): a rim glyph fires a nested circle on an event; nested circles work like functions, with strict limits. → [F](design-appendix.md#f-triggers-and-nested-circles)
