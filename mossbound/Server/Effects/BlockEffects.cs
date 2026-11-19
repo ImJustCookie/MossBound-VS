@@ -55,7 +55,8 @@ sealed class FreezeWater : ISpellEffect
     }
 }
 
-// Ice around the spot melts back into water, snow melts away, and snow-covered plants come out from under it.
+// Ice around the spot melts back into water, snow melts away, and snow-covered plants come out from under it. Ice and
+// snow are found by block material, so every kind counts (lake and glacier ice, snow layers and blocks, modded ones).
 sealed class Melt : ISpellEffect
 {
     public void Apply(SpellHit hit, float amount, float seconds)
@@ -65,13 +66,12 @@ sealed class Melt : ISpellEffect
         Around.Change(hit, amount, pos =>
         {
             var block = blocks.GetBlock(pos);
-            string path = block.Code?.Path ?? "";
-            if (path.StartsWith("lakeice"))
+            if (block.BlockMaterial == EnumBlockMaterial.Ice)
             {
                 blocks.SetBlock(0, pos);
                 blocks.SetBlock(water.BlockId, pos, BlockLayersAccess.Fluid);
             }
-            else if (path.StartsWith("snowlayer") || path.StartsWith("snowblock")) blocks.SetBlock(0, pos);
+            else if (block.BlockMaterial == EnumBlockMaterial.Snow) blocks.SetBlock(0, pos);
             else if (block.GetSnowLevel(pos) > 0 && block.GetSnowCoveredVariant(pos, 0) is { } bare && bare.BlockId != block.BlockId)
                 blocks.SetBlock(bare.BlockId, pos);
         });
