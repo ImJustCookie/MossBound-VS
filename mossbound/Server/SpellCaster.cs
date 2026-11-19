@@ -74,13 +74,15 @@ class SpellCaster
 
         if (entitySel?.Entity is Entity e && e.Alive && e.Pos.DistanceTo(eye) <= TouchRange + e.SelectionBox.XSize)
         {
-            return new SpellTarget(e, e.Pos.XYZ.Add(0, e.SelectionBox.Y2 / 2, 0));
+            return new SpellTarget(e, LastingEffect.Middle(e));
         }
         if (blockSel != null)
         {
-            var point = blockSel.Position.ToVec3d().Add(0.5, 1, 0.5);
+            // Just above the block looked at; a plant counts as the ground it grows on, so the soil under it is reached too.
+            bool plant = caster.World.BlockAccessor.GetBlock(blockSel.Position).BlockMaterial == EnumBlockMaterial.Plant;
+            var point = blockSel.Position.ToVec3d().Add(0.5, plant ? 0 : 1, 0.5);
             if (point.DistanceTo(eye) <= TouchRange + 1) return new SpellTarget(null, point);
         }
-        return new SpellTarget(caster, caster.Pos.XYZ.Add(0, 1, 0));
+        return new SpellTarget(caster, LastingEffect.Middle(caster));
     }
 }

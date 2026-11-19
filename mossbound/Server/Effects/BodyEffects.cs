@@ -24,9 +24,18 @@ sealed class Cure : ISpellEffect
         hit.Beneficiary.GetBehavior<EntityBehaviorHealth>()?.StopDoTEffect((int)EnumDamageOverTimeEffectType.Poison);
 }
 
+// Thrown upward, less the bigger it is (its hitbox against a player's): a chicken flies, a bear barely hops.
 sealed class Lift : ISpellEffect
 {
-    public void Apply(SpellHit hit, float amount, float seconds) => hit.Harmable?.Pos.Motion.Add(0, 0.2 * amount, 0);
+    const double PlayerVolume = 0.6 * 0.6 * 1.85;
+
+    public void Apply(SpellHit hit, float amount, float seconds)
+    {
+        if (hit.Harmable is not { } target) return;
+        var box = target.SelectionBox;
+        double size = Math.Clamp(box.XSize * box.YSize * box.ZSize / PlayerVolume, 0.5, 4);
+        Knockback.Give(target, 0, 0.15 * amount / size, 0);
+    }
 }
 
 // Dropped items around the spot are thrown up and outward.

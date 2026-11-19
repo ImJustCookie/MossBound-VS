@@ -64,8 +64,11 @@ class SpellEffects
         var reactions = target.Entity is { } entity ? Reactions.For(Conditions.On(entity), cell.Aspect) : new List<Reaction>();
         foreach (var reaction in reactions) React(reaction, hit, target.Entity!, cell.Strength);
         if (reactions.Any(Reactions.ReplacesPayload)) return;
-        foreach (var step in personality.Payload) effects[step.Effect].Apply(hit, step.Amount * cell.Strength, step.Seconds);
+        foreach (var step in personality.Payload) effects[step.Effect].Apply(hit, step.Amount * cell.Strength * Jitter(), step.Seconds * Jitter());
     }
+
+    // Each effect lands a little stronger or weaker, and lasts a little longer or shorter, so no two casts are alike.
+    float Jitter() => 0.85f + 0.3f * (float)sapi.World.Rand.NextDouble();
 
     void React(Reaction reaction, SpellHit hit, Entity target, int strength)
     {
