@@ -11,8 +11,12 @@ public enum Motion { Straight, Arc, Heavy, Drift, Wobble, Hover }
 public enum Impact { Burst, Splash, Shatter, Stick, PassThrough }
 public enum Trace { None, Patch, Cloud }
 
-// What a spell does to what it hits. Burn, Freeze, Bash and Poison are damage of that kind.
-public enum EffectKind { Burn, Freeze, Bash, Poison, Heal, Push, Ignite, Extinguish, Slow, Shield }
+// What a spell does to what it hits. Burn, Freeze and Bash are damage of that kind; Soak and Chill leave a condition.
+public enum EffectKind
+{
+    Burn, Freeze, Bash, Heal, Push, Ignite, Extinguish, Slow, Shield,
+    Soak, Chill, FreezeWater, Root, Regrow, Cure, PoisonOverTime, HealOverTime, Wither, Lift, Scatter, Calm,
+}
 
 // How an aspect's particles move: each aspect has its own, so spells read apart by motion, not only colour.
 public enum ParticleStyle { Flame, Splash, Shards, Dust, Motes, Ooze, Gust, Bubble, Steam, Rain, Smoke }

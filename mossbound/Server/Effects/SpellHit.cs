@@ -12,6 +12,10 @@ readonly record struct SpellHit(ICoreServerAPI Sapi, IServerPlayer Caster, Entit
 {
     public Entity? Harmable => Entity is EntityPlayer player && player != Caster.Entity ? null : Entity;
     public Entity Beneficiary => Entity ?? Caster.Entity;
+
+    // Spells change blocks only where the caster may build.
+    public bool CanChange(BlockPos pos) =>
+        Sapi.World.Claims.TestAccess(Caster, pos, EnumBlockAccessFlags.BuildOrBreak) == EnumWorldAccessResponse.Granted;
 }
 
 // One effect of a payload. Seconds is how long it lasts, or 0 for the effect's own default.

@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using Vintagestory.API.Common;
 using Vintagestory.API.Common.Entities;
-using Vintagestory.API.MathTools;
 using Vintagestory.API.Server;
 
 namespace Mossbound.Server;
@@ -64,7 +63,7 @@ sealed class ShieldBubbles : ISpellEffect
         if (!bubbles.TryGetValue(owner.EntityId, out var bubble)) return damage;
         float absorbed = Math.Min(damage, bubble.Left);
         bubble.Left -= absorbed;
-        var at = Middle(owner);
+        var at = LastingEffect.Middle(owner);
         KitParticles.Burst(sapi.World, bubble.Hit.Kit, at, 1);
         sapi.World.PlaySoundAt(new AssetLocation(bubble.Hit.Kit.Sound), at.X, at.Y, at.Z, null, true, 16);
         if (bubble.Left <= 0) End(bubble);
@@ -74,7 +73,7 @@ sealed class ShieldBubbles : ISpellEffect
     void Shimmer(Bubble bubble)
     {
         if (!bubble.Owner.Alive) End(bubble);
-        else KitParticles.Burst(sapi.World, bubble.Hit.Kit, Middle(bubble.Owner), 0);
+        else KitParticles.Burst(sapi.World, bubble.Hit.Kit, LastingEffect.Middle(bubble.Owner), 0);
     }
 
     void End(Bubble bubble)
@@ -82,10 +81,9 @@ sealed class ShieldBubbles : ISpellEffect
         if (!bubbles.Remove(bubble.Owner.EntityId)) return;
         bubble.Owner.WatchedAttributes.RemoveAttribute(Flag);
         sapi.Event.UnregisterGameTickListener(bubble.ShimmerListener);
-        var at = Middle(bubble.Owner);
+        var at = LastingEffect.Middle(bubble.Owner);
         if (bubble.Hit.Kit.EndSound is string sound) sapi.World.PlaySoundAt(new AssetLocation(sound), at.X, at.Y, at.Z, null, true, 16);
         KitParticles.Burst(sapi.World, bubble.Hit.Kit, at, 2);
     }
 
-    static Vec3d Middle(Entity entity) => entity.Pos.XYZ.Add(0, entity.SelectionBox.Y2 / 2, 0);
 }

@@ -23,7 +23,7 @@ sealed class Ignite : ISpellEffect
         int reach = Math.Clamp((int)amount - 1, 0, 3);
         for (int x = -reach; x <= reach; x++)
             for (int z = -reach; z <= reach; z++)
-                if (FireSpot(world, centre.AddCopy(x, 0, z)) is { } firePos && CanBuild(hit, firePos))
+                if (FireSpot(world, centre.AddCopy(x, 0, z)) is { } firePos && hit.CanChange(firePos))
                     Light(world, fire, firePos, hit.Caster.PlayerUID);
     }
 
@@ -37,9 +37,6 @@ sealed class Ignite : ISpellEffect
         }
         return null;
     }
-
-    static bool CanBuild(SpellHit hit, BlockPos pos) =>
-        hit.Sapi.World.Claims.TestAccess(hit.Caster, pos, EnumBlockAccessFlags.BuildOrBreak) == EnumWorldAccessResponse.Granted;
 
     static void Light(IWorldAccessor world, Block fire, BlockPos firePos, string casterUid)
     {

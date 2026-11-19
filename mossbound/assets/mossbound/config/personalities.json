@@ -2,7 +2,7 @@
 	"aspects": {
 		"water": {
 			"motion": "Arc", "impact": "Splash", "trace": "Patch",
-			"payload": [ { "effect": "Extinguish", "amount": 1 }, { "effect": "Push", "amount": 0.5 } ],
+			"payload": [ { "effect": "Extinguish", "amount": 1 }, { "effect": "Push", "amount": 0.5 }, { "effect": "Soak", "amount": 1, "seconds": 10 } ],
 			"kit": { "colours": [ "#3c78dc", "#8cc4ec" ], "particles": "Splash", "sound": "game:sounds/environment/smallsplash" }
 		},
 		"ember": {
@@ -12,27 +12,27 @@
 		},
 		"frost": {
 			"motion": "Straight", "impact": "Shatter", "trace": "Patch",
-			"payload": [ { "effect": "Freeze", "amount": 1 }, { "effect": "Slow", "amount": 1, "seconds": 3 } ],
+			"payload": [ { "effect": "Freeze", "amount": 1 }, { "effect": "Slow", "amount": 1, "seconds": 3 }, { "effect": "Chill", "amount": 1, "seconds": 8 }, { "effect": "FreezeWater", "amount": 1 } ],
 			"kit": { "colours": [ "#c8ebff", "#8ab8e8" ], "particles": "Shards", "sound": "game:sounds/block/ice" }
 		},
 		"stone": {
 			"motion": "Heavy", "impact": "Shatter", "trace": "None",
-			"payload": [ { "effect": "Bash", "amount": 2 }, { "effect": "Push", "amount": 1 } ],
+			"payload": [ { "effect": "Bash", "amount": 2 }, { "effect": "Push", "amount": 1 }, { "effect": "Root", "amount": 1, "seconds": 1.5 } ],
 			"kit": { "colours": [ "#827870", "#5a5047" ], "particles": "Dust", "sound": "game:sounds/effect/stonecrush" }
 		},
 		"life": {
 			"motion": "Drift", "impact": "Burst", "trace": "None",
-			"payload": [ { "effect": "Heal", "amount": 2 } ],
+			"payload": [ { "effect": "Heal", "amount": 2 }, { "effect": "Cure", "amount": 1 }, { "effect": "Regrow", "amount": 1 } ],
 			"kit": { "colours": [ "#5ac850", "#c8f08c" ], "particles": "Motes", "sound": "game:sounds/block/plant" }
 		},
 		"rot": {
 			"motion": "Heavy", "impact": "Splash", "trace": "Patch",
-			"payload": [ { "effect": "Poison", "amount": 1 }, { "effect": "Slow", "amount": 0.5, "seconds": 4 } ],
+			"payload": [ { "effect": "PoisonOverTime", "amount": 3, "seconds": 6 }, { "effect": "Slow", "amount": 0.5, "seconds": 4 }, { "effect": "Wither", "amount": 1 } ],
 			"kit": { "colours": [ "#6e5a32", "#3d4a24" ], "particles": "Ooze", "sound": "game:sounds/effect/squish1" }
 		},
 		"wind": {
 			"motion": "Wobble", "impact": "PassThrough", "trace": "None",
-			"payload": [ { "effect": "Push", "amount": 2 } ],
+			"payload": [ { "effect": "Push", "amount": 2 }, { "effect": "Lift", "amount": 1 }, { "effect": "Scatter", "amount": 1 } ],
 			"kit": { "colours": [ "#e1e1d2", "#ffffff" ], "particles": "Gust", "sound": "game:sounds/effect/swoosh" }
 		},
 		"ward": {
@@ -47,12 +47,12 @@
 		},
 		"rain": {
 			"motion": "Drift", "impact": "Splash", "trace": "Patch",
-			"payload": [ { "effect": "Heal", "amount": 1 }, { "effect": "Extinguish", "amount": 1 } ],
+			"payload": [ { "effect": "HealOverTime", "amount": 3, "seconds": 6 }, { "effect": "Extinguish", "amount": 2 } ],
 			"kit": { "colours": [ "#8cc4ec", "#5ac850" ], "particles": "Rain", "sound": "game:sounds/environment/drip1" }
 		},
 		"smoke": {
 			"motion": "Drift", "impact": "Burst", "trace": "Cloud",
-			"payload": [ { "effect": "Slow", "amount": 1, "seconds": 5 } ],
+			"payload": [ { "effect": "Slow", "amount": 1, "seconds": 5 }, { "effect": "Calm", "amount": 1, "seconds": 6 } ],
 			"kit": { "colours": [ "#5a5a5a", "#8c8c8c" ], "particles": "Smoke", "sound": "game:sounds/effect/extinguish2" }
 		}
 	},
