@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Mossbound.Core;
 
@@ -14,6 +16,10 @@ public static class Recipes
             (new[] { Element.Ember, Element.Wind }, Aspect.Smoke),
         },
         new[] { (Element.Ember, Element.Frost), (Element.Wind, Element.Ward) });
+
+    // Every aspect a heart can become: each element alone, and each mix.
+    public static IEnumerable<Aspect> CastableAspects =>
+        Enum.GetValues<Element>().Select(e => Enum.Parse<Aspect>(e.ToString())).Concat(Hearts.MixResults);
 
     public static readonly Mixer<Form, Form> Forms = new(
         form => form,
