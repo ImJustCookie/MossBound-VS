@@ -168,7 +168,7 @@ nested circle  aim: If [Ground is soil] at There
 | Target | Creature looked at within 5 blocks, else the block looked at, else the caster |
 | Cooldown | 2 seconds per player |
 | Medium | Used up, except in creative mode |
-| Effects | A coloured burst per aspect; Life heals, Ember burns creatures, Wind pushes creatures. Never damages or pushes players |
+| Effects | Each aspect has its own particles, sound and effects (from `config/personalities.json`, see [spell system](spell-system.md)): Ember burns and sets on fire (a wider patch of ground with more strength); Water puts out fire and pushes lightly; Frost chills and slows; Stone bashes and knocks back; Life heals; Rot poisons and slows; Wind pushes hard; Ward puts a bubble on its target that absorbs damage until it pops or fades; Steam scalds; Rain heals and puts out fire; Smoke slows. Strength multiplies every effect. Harmful effects never reach other players; a spell cast at nothing lands on yourself |
 | Mishaps | Opposites and going over a limit slightly hurt the caster; others fizzle. A hint follows each |
 
 ## H. Life cost

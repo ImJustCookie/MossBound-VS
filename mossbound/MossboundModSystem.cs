@@ -1,3 +1,4 @@
+using HarmonyLib;
 using Mossbound.Client;
 using Mossbound.Core;
 using Mossbound.Items;
@@ -5,6 +6,7 @@ using Mossbound.Network;
 using Mossbound.Server;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
+using Vintagestory.API.Common.Entities;
 using Vintagestory.API.Server;
 
 namespace Mossbound;
@@ -22,10 +24,13 @@ public class MossboundModSystem : ModSystem
     // Server only: the world's secret glyph script, built from the seed once the save is loaded.
     public WorldScript? Script { get; private set; }
     internal SpellCaster? Caster { get; private set; }
+    internal ShieldBubbles? Shields { get; private set; }
+    Harmony? harmony;
 
     // Both sides, same order: item classes and network message types.
     public override void Start(ICoreAPI api)
     {
+        PatchGame();
         api.RegisterItemClass("mossbound.ItemCircleMedium", typeof(ItemCircleMedium));
         api.Network.RegisterChannel(ChannelName)
             .RegisterMessageType<InscribeRequest>()
@@ -37,7 +42,8 @@ public class MossboundModSystem : ModSystem
     {
         api.Event.SaveGameLoaded += () => Script = new WorldScript(api.World.Seed);
         var channel = api.Network.GetChannel(ChannelName).SetMessageHandler<InscribeRequest>(new Inscription(api).OnRequest);
-        Caster = new SpellCaster(api, () => Script);
+        Shields = new ShieldBubbles(api);
+        Caster = new SpellCaster(api, () => Script, Shields);
         AdminCommands.Register(api, channel, () => Script);
     }
 
@@ -49,7 +55,23 @@ public class MossboundModSystem : ModSystem
         Glyphs = new GlyphRings(api);
     }
 
-    public override void Dispose() => Glyphs?.Dispose();
+    // The mod's only Harmony patches: the Ward bubble cancels absorbed hits, and slows scale walking. Applied once per
+    // process (singleplayer starts this system twice), on both sides: clients predict hits and move their own player.
+    void PatchGame()
+    {
+        if (Harmony.HasAnyPatches(Mod.Info.ModID)) return;
+        harmony = new Harmony(Mod.Info.ModID);
+        harmony.Patch(AccessTools.Method(typeof(Entity), nameof(Entity.ReceiveDamage)),
+            prefix: new HarmonyMethod(typeof(ShieldBubbles), nameof(ShieldBubbles.BeforeReceiveDamage)));
+        harmony.Patch(AccessTools.Method(typeof(EntityAgent), nameof(EntityAgent.GetWalkSpeedMultiplier)),
+            postfix: new HarmonyMethod(typeof(Slows), nameof(Slows.AfterWalkSpeed)));
+    }
+
+    public override void Dispose()
+    {
+        Glyphs?.Dispose();
+        harmony?.UnpatchAll(Mod.Info.ModID);
+    }
 
     public void SendInscribe(Circle circle) => clientChannel?.SendPacket(new InscribeRequest { Circle = circle });
 }

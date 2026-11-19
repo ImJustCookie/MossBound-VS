@@ -9,7 +9,7 @@ using Vintagestory.API.Server;
 
 namespace Mossbound.Server;
 
-// Where a spell lands: a creature, or else a point (looked-at block or the caster).
+// Where a spell lands: the creature looked at, else the block looked at (no entity), else the caster.
 readonly record struct SpellTarget(Entity? Entity, Vec3d Position);
 
 // Casting an inscribed medium. The server reads the circle with the world's secret script,
@@ -21,12 +21,14 @@ class SpellCaster
 
     readonly ICoreServerAPI sapi;
     readonly Func<WorldScript?> script;
+    readonly SpellEffects effects;
     readonly Dictionary<string, long> lastCastMs = new();
 
-    public SpellCaster(ICoreServerAPI sapi, Func<WorldScript?> script)
+    public SpellCaster(ICoreServerAPI sapi, Func<WorldScript?> script, ShieldBubbles shields)
     {
         this.sapi = sapi;
         this.script = script;
+        effects = new SpellEffects(sapi, shields);
         sapi.Event.PlayerDisconnect += player => lastCastMs.Remove(player.PlayerUID);
     }
 
@@ -57,11 +59,11 @@ class SpellCaster
         var target = ResolveTouch(player, entitySel, blockSel);
         if (plan.Fizzles)
         {
-            SpellEffects.ApplyMishap(sapi, player, plan.Mishaps, medium.Tier.Limits);
+            effects.ApplyMishap(player, plan.Mishaps, medium.Tier.Limits);
             return;
         }
         // shortcut: every spell acts by touch whatever its form; deliveries come with the spell framework.
-        foreach (var cell in plan.Cells) SpellEffects.Apply(sapi, player, target, cell.Aspect, cell.Strength);
+        foreach (var cell in plan.Cells) effects.Apply(player, target, cell);
     }
 
     // The client says what the player looks at; the server only accepts it within reach.
@@ -79,6 +81,6 @@ class SpellCaster
             var point = blockSel.Position.ToVec3d().Add(0.5, 1, 0.5);
             if (point.DistanceTo(eye) <= TouchRange + 1) return new SpellTarget(null, point);
         }
-        return new SpellTarget(null, caster.Pos.XYZ.Add(0, 1, 0));
+        return new SpellTarget(caster, caster.Pos.XYZ.Add(0, 1, 0));
     }
 }

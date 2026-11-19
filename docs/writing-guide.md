@@ -108,7 +108,7 @@ If any heart fails, the whole circle fails. After a mishap, a message says what 
 | In hand | Sneak + right-click | Edit the circle again |
 
 ### Casting today
-Every aspect shows a burst of its colour. Life heals, Ember burns creatures, Wind pushes creatures away. Spells never damage or push other players. Two seconds between casts. The medium is used up, except in creative mode.
+Each aspect has its own particles, sound and effects (from `config/personalities.json`): Ember burns and sets on fire (a wider patch of ground with more strength); Water puts out fire and pushes lightly; Frost chills and slows; Stone bashes and knocks back; Life heals; Rot poisons and slows; Wind pushes hard; Ward puts a bubble on its target that absorbs damage until it pops or fades; Steam scalds; Rain heals and puts out fire; Smoke slows. Strength multiplies every effect. Harmful effects never reach other players; a spell cast at nothing lands on yourself. Every spell still acts by touch, whatever its form. Two seconds between casts. The medium is used up, except in creative mode.
 
 ### Planned
 Form, behaviour and aim glyphs; modifier marks on forms; carved stone with triggers and nested circles; the life-essence cost; making media in the world; learning glyphs from the world. See [design.md](design.md) and the [roadmap](roadmap.md).
