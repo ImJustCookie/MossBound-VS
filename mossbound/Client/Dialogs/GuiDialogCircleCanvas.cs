@@ -1,5 +1,6 @@
 using Cairo;
 using Mossbound.Core;
+using Mossbound.Network;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 using static Mossbound.Client.CanvasLayout;
@@ -12,10 +13,10 @@ public class GuiDialogCircleCanvas : GuiDialog
 {
     const double Gap = 20;
 
-    readonly CircleDraft draft;
-    readonly CanvasLayout layout;
+    protected readonly CircleDraft draft;
+    private protected readonly CanvasLayout layout;
     readonly InkStyle style;
-    readonly CanvasInput input;
+    private protected readonly CanvasInput input;
     readonly ImageSurface? canvasArt;
     readonly ImageSurface? panelArt;
     ElementBounds canvasBounds = null!;
@@ -39,24 +40,38 @@ public class GuiDialogCircleCanvas : GuiDialog
         double top = GuiStyle.TitleBarHeight, right = CanvasSize + Gap;
         canvasBounds = ElementBounds.Fixed(0, top, CanvasSize, CanvasSize);
         panelBounds = ElementBounds.Fixed(right, top, PanelSize, PanelSize);
-        var hintBounds = ElementBounds.Fixed(right, top + PanelSize + 10, PanelSize, 110);
+        var sideBounds = ElementBounds.Fixed(right, top + PanelSize + 10, PanelSize, CanvasSize - PanelSize - 50);
         var clearBounds = ElementBounds.Fixed(right, top + CanvasSize - 30, 120, 30);
         var inscribeBounds = ElementBounds.Fixed(right + PanelSize - 120, top + CanvasSize - 30, 120, 30);
 
         var background = ElementBounds.Fill.WithFixedPadding(GuiStyle.ElementToDialogPadding);
         background.BothSizing = ElementSizing.FitToChildren;
-        background.WithChildren(canvasBounds, panelBounds, hintBounds, clearBounds, inscribeBounds);
+        background.WithChildren(canvasBounds, panelBounds, sideBounds, clearBounds, inscribeBounds);
 
-        SingleComposer = capi.Gui
+        var compo = capi.Gui
             .CreateCompo("mossbound-circlecanvas", ElementStdBounds.AutosizedMainDialog.WithAlignment(EnumDialogArea.CenterMiddle))
             .AddShadedDialogBG(background)
-            .AddDialogTitleBar(ModText.Get("canvas-title"), () => TryClose())
+            .AddDialogTitleBar(ModText.Get(TitleKey), () => TryClose())
             .AddDynamicCustomDraw(canvasBounds, DrawCanvas, "canvas")
             .AddDynamicCustomDraw(panelBounds, DrawPanel, "panel")
-            .AddStaticText(ModText.Get("canvas-hint"), CairoFont.WhiteDetailText(), hintBounds)
             .AddSmallButton(ModText.Get("canvas-clear"), OnClear, clearBounds)
-            .AddSmallButton(ModText.Get("canvas-inscribe"), OnInscribe, inscribeBounds)
-            .Compose();
+            .AddSmallButton(ModText.Get(InscribeKey), OnInscribe, inscribeBounds);
+        AddSide(compo, sideBounds);
+        SingleComposer = compo.Compose();
+    }
+
+    protected virtual string TitleKey => "canvas-title";
+    protected virtual string InscribeKey => "canvas-inscribe";
+
+    // Under the glyph panel: how to write, by default.
+    protected virtual void AddSide(GuiComposer compo, ElementBounds bounds) =>
+        compo.AddStaticText(ModText.Get("canvas-hint"), CairoFont.WhiteDetailText(), bounds);
+
+    // Sends the finished circle; by default to be inscribed on the held medium.
+    protected virtual void Inscribe(Circle circle)
+    {
+        capi.ModLoader.GetModSystem<MossboundModSystem>().Send(new InscribeRequest { Circle = circle });
+        TryClose();
     }
 
 
@@ -121,13 +136,12 @@ public class GuiDialogCircleCanvas : GuiDialog
             capi.ShowChatMessage(ModText.Get("canvas-empty"));
             return true;
         }
-        capi.ModLoader.GetModSystem<MossboundModSystem>().SendInscribe(circle);
-        TryClose();
+        Inscribe(circle);
         return true;
     }
 
 
-    void RedrawPanes(Redraw redraw)
+    private protected virtual void RedrawPanes(Redraw redraw)
     {
         if (redraw.HasFlag(Redraw.Canvas)) SingleComposer.GetCustomDraw("canvas").Redraw();
         if (redraw.HasFlag(Redraw.Panel)) SingleComposer.GetCustomDraw("panel").Redraw();

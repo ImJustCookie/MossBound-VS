@@ -122,4 +122,22 @@ public class CircleDraftTests
         Assert.Equal(3, back.SizeOf(c0));
         Assert.Equal(LifeSource.Self, back.Source);
     }
+
+    [Fact]
+    public void FittingToASmallerTierKeepsOnlyWhatItCanHold()
+    {
+        var d = Written(c0, c1, s0);
+        d.Link(c0, c1, parchment);
+        d.Link(c0, s0, parchment);
+        d.SetSize(c0, 3);
+        d.Source = LifeSource.Land;
+
+        d.FitTo(CircleTier.Moss);
+
+        Assert.Equal(new[] { c0, c1 }, d.Figures.Keys.Order());
+        Assert.True(d.HasLink(c0, c1));
+        Assert.Single(d.Links);
+        Assert.Equal(CircleTier.Moss.MaxSize, d.SizeOf(c0));
+        Assert.Equal(LifeSource.Medium, d.Source);
+    }
 }

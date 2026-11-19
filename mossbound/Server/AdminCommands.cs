@@ -31,13 +31,7 @@ static class AdminCommands
     static TextCommandResult SendAtlas(TextCommandCallingArgs args, IServerNetworkChannel channel, WorldScript? script)
     {
         if (CheckCaller(args, script) is { } error) return error;
-        var atlas = new GlyphAtlas();
-        foreach (var glyph in GlyphRegistry.All)
-        {
-            var f = script!.FigureOf(glyph.Code);
-            atlas.Entries.Add(new GlyphAtlasEntry { Code = glyph.Code, Lines = f.Lines, Marks = f.Marks });
-        }
-        channel.SendPacket(atlas, (IServerPlayer)args.Caller.Player);
+        channel.SendPacket(GlyphAtlas.Of(script!), (IServerPlayer)args.Caller.Player);
         return TextCommandResult.Success();
     }
 

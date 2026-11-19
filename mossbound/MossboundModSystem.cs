@@ -32,9 +32,12 @@ public class MossboundModSystem : ModSystem
     {
         PatchGame();
         api.RegisterItemClass("mossbound.ItemCircleMedium", typeof(ItemCircleMedium));
+        api.RegisterItemClass("mossbound.ItemDevBook", typeof(ItemDevBook));
         api.Network.RegisterChannel(ChannelName)
             .RegisterMessageType<InscribeRequest>()
-            .RegisterMessageType<GlyphAtlas>();
+            .RegisterMessageType<GlyphAtlas>()
+            .RegisterMessageType<DevBookOpen>()
+            .RegisterMessageType<DevBookWrite>();
     }
 
     // Authoritative game logic: validation, spell execution, costs.
@@ -45,13 +48,15 @@ public class MossboundModSystem : ModSystem
         Shields = new ShieldBubbles(api);
         Caster = new SpellCaster(api, () => Script, Shields);
         AdminCommands.Register(api, channel, () => Script);
+        var devBook = new DevBook(api, channel, () => Script);
+        channel.SetMessageHandler<DevBookOpen>(devBook.OnOpen).SetMessageHandler<DevBookWrite>(devBook.OnWrite);
     }
 
     // Presentation only: GUI and input. Never decides gameplay.
     public override void StartClientSide(ICoreClientAPI api)
     {
         clientChannel = api.Network.GetChannel(ChannelName)
-            .SetMessageHandler<GlyphAtlas>(atlas => new GuiDialogGlyphAtlas(api, atlas).TryOpen());
+            .SetMessageHandler<GlyphAtlas>(atlas => (atlas.ForDevBook ? new GuiDialogDevBook(api, atlas, CircleTier.Parchment, null) : (GuiDialog)new GuiDialogGlyphAtlas(api, atlas)).TryOpen());
         Glyphs = new GlyphRings(api);
     }
 
@@ -73,5 +78,5 @@ public class MossboundModSystem : ModSystem
         harmony?.UnpatchAll(Mod.Info.ModID);
     }
 
-    public void SendInscribe(Circle circle) => clientChannel?.SendPacket(new InscribeRequest { Circle = circle });
+    public void Send<T>(T message) => clientChannel?.SendPacket(message);
 }

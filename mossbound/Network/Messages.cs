@@ -18,6 +18,18 @@ public class InscribeRequest
 public class GlyphAtlas
 {
     [ProtoMember(1)] public List<GlyphAtlasEntry> Entries { get; set; } = new();
+    [ProtoMember(2)] public bool ForDevBook { get; set; } // open the dev book's canvas instead of the atlas window
+
+    public static GlyphAtlas Of(WorldScript script)
+    {
+        var atlas = new GlyphAtlas();
+        foreach (var glyph in GlyphRegistry.All)
+        {
+            var f = script.FigureOf(glyph.Code);
+            atlas.Entries.Add(new GlyphAtlasEntry { Code = glyph.Code, Lines = f.Lines, Marks = f.Marks });
+        }
+        return atlas;
+    }
 }
 
 [ProtoContract]
@@ -26,4 +38,18 @@ public class GlyphAtlasEntry
     [ProtoMember(1)] public string Code { get; set; } = "";
     [ProtoMember(2)] public uint Lines { get; set; }
     [ProtoMember(3)] public uint Marks { get; set; }
+}
+
+// Client → server: "open the dev book I'm holding". Answered with the glyph atlas (ForDevBook) after the checks.
+[ProtoContract]
+public class DevBookOpen
+{
+}
+
+// Client → server: "give me a medium of this tier with this circle on it", from the dev book.
+[ProtoContract]
+public class DevBookWrite
+{
+    [ProtoMember(1)] public Circle? Circle { get; set; }
+    [ProtoMember(2)] public int TierLevel { get; set; }
 }

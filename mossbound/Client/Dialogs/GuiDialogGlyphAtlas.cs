@@ -17,9 +17,6 @@ public class GuiDialogGlyphAtlas : GuiDialog
     const double Label = 22;
     const double Heading = 30;
 
-    // No wobble, no colour drift, no grain: every hand-drawn imperfection scales with these to zero.
-    static readonly InkStyle clean = new(new(0.10, 0.08, 0.07), 0, 0, 1, 1, 0, 1);
-
     public override string? ToggleKeyCombinationCode => null;
 
     public GuiDialogGlyphAtlas(ICoreClientAPI capi, GlyphAtlas atlas) : base(capi)
@@ -69,7 +66,7 @@ public class GuiDialogGlyphAtlas : GuiDialog
             Ink.Use(ctx, Ink.Paper, 1);
             ctx.Rectangle(cell * 0.04, cell * 0.04, cell * 0.92, cell * 0.92);
             ctx.Fill();
-            GlyphPainter.DrawGlyph(ctx, cell / 2, cell / 2, r, 0, new GlyphFigure(e.Lines, e.Marks), r * 0.06, 0, clean,
+            GlyphPainter.DrawGlyph(ctx, cell / 2, cell / 2, r, 0, new GlyphFigure(e.Lines, e.Marks), r * 0.06, 0, InkStyle.Clean,
                 LetterCircle.Guides, guideAlpha: 0.45, guideDot: 0.035); // points well below a Dot mark (0.07)
             ctx.Restore();
         }
