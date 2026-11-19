@@ -192,7 +192,7 @@ Modifiers never add mechanics; a swarm of slow fireballs is five fireballs, smal
 | Burning | Wind | Fanned: fire at the target's feet |
 | Chilled | Ember | Thawed: the chill and its slow end |
 
-**After v0:** the rest of the world table below. Block effects already built: Frost freezes still water, Life thickens grass, Rot withers grass and flowers.
+**After v0:** the rest of the world table below. Block effects already built: Frost freezes still water, Life thickens grass, Rot kills grass and flowers into dead plants. They spread outward over about a second, in a ragged patch.
 
 A small interaction table, applied by effects on what they hit (examples):
 
