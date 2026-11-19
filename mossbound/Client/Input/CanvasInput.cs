@@ -40,6 +40,7 @@ sealed class CanvasInput
     }
 
     public SlotKey Selected { get; private set; } = new(CircleRing.Heart, 0);
+    public void Select(SlotKey slot) => Selected = slot;
     public bool IsDrawingOnPanel => stroke != null;
     public bool IsLinkingOnCanvas => linkingFrom != null;
     public CanvasView CanvasView => new(Selected, linkingFrom, removing, cursor);

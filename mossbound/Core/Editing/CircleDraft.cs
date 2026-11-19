@@ -80,6 +80,16 @@ public sealed class CircleDraft
     }
 
 
+    // Keeps what this tier can hold: glyphs in slots it has, sizes up to its maximum, links it allows, a source only if
+    // it chooses one.
+    public void FitTo(CircleTier tier)
+    {
+        foreach (var slot in figures.Keys.Where(k => !tier.HasSlot(k)).ToList()) Erase(slot);
+        foreach (var slot in sizes.Keys.ToList()) SetSize(slot, Math.Min(sizes[slot], tier.MaxSize));
+        links.RemoveWhere(l => !tier.AllowsLink(l.A, l.B));
+        if (!tier.ChoosesSource) Source = LifeSource.Medium;
+    }
+
     // Only valid glyphs are saved; links to anything else are dropped.
     public Circle ToCircle()
     {

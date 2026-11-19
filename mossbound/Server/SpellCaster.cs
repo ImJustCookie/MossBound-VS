@@ -9,7 +9,7 @@ using Vintagestory.API.Server;
 
 namespace Mossbound.Server;
 
-// Where a spell lands: a creature, or else a point (looked-at block or the caster).
+// Where a spell lands: the creature looked at, else the block looked at (no entity), else the caster.
 readonly record struct SpellTarget(Entity? Entity, Vec3d Position);
 
 // Casting an inscribed medium. The server reads the circle with the world's secret script,
@@ -21,12 +21,14 @@ class SpellCaster
 
     readonly ICoreServerAPI sapi;
     readonly Func<WorldScript?> script;
+    readonly SpellEffects effects;
     readonly Dictionary<string, long> lastCastMs = new();
 
-    public SpellCaster(ICoreServerAPI sapi, Func<WorldScript?> script)
+    public SpellCaster(ICoreServerAPI sapi, Func<WorldScript?> script, ShieldBubbles shields)
     {
         this.sapi = sapi;
         this.script = script;
+        effects = new SpellEffects(sapi, shields);
         sapi.Event.PlayerDisconnect += player => lastCastMs.Remove(player.PlayerUID);
     }
 
@@ -35,7 +37,8 @@ class SpellCaster
         var worldScript = script();
         var circle = ItemCircleMedium.ReadCircle(slot.Itemstack);
         if (worldScript == null || circle == null || slot.Itemstack?.Collectible is not ItemCircleMedium medium
-            || !CircleValidation.FitsTier(circle, medium.Tier)) return;
+            || !CircleValidation.FitsTier(circle, medium.TierOf(slot.Itemstack))) return;
+        var tier = medium.TierOf(slot.Itemstack);
 
         long now = sapi.World.ElapsedMilliseconds;
         if (lastCastMs.TryGetValue(player.PlayerUID, out long last) && now - last < CooldownMs)
@@ -53,15 +56,15 @@ class SpellCaster
             slot.MarkDirty();
         }
 
-        var plan = SpellReading.Read(circle, worldScript, medium.Tier);
+        var plan = SpellReading.Read(circle, worldScript, tier);
         var target = ResolveTouch(player, entitySel, blockSel);
         if (plan.Fizzles)
         {
-            SpellEffects.ApplyMishap(sapi, player, plan.Mishaps, medium.Tier.Limits);
+            effects.ApplyMishap(player, plan.Mishaps, tier.Limits);
             return;
         }
         // shortcut: every spell acts by touch whatever its form; deliveries come with the spell framework.
-        foreach (var cell in plan.Cells) SpellEffects.Apply(sapi, player, target, cell.Aspect, cell.Strength);
+        foreach (var cell in plan.Cells) effects.Apply(player, target, cell);
     }
 
     // The client says what the player looks at; the server only accepts it within reach.
@@ -72,13 +75,15 @@ class SpellCaster
 
         if (entitySel?.Entity is Entity e && e.Alive && e.Pos.DistanceTo(eye) <= TouchRange + e.SelectionBox.XSize)
         {
-            return new SpellTarget(e, e.Pos.XYZ.Add(0, e.SelectionBox.Y2 / 2, 0));
+            return new SpellTarget(e, LastingEffect.Middle(e));
         }
         if (blockSel != null)
         {
-            var point = blockSel.Position.ToVec3d().Add(0.5, 1, 0.5);
+            // Just above the block looked at; a plant counts as the ground it grows on, so the soil under it is reached too.
+            bool plant = caster.World.BlockAccessor.GetBlock(blockSel.Position).BlockMaterial == EnumBlockMaterial.Plant;
+            var point = blockSel.Position.ToVec3d().Add(0.5, plant ? 0 : 1, 0.5);
             if (point.DistanceTo(eye) <= TouchRange + 1) return new SpellTarget(null, point);
         }
-        return new SpellTarget(null, caster.Pos.XYZ.Add(0, 1, 0));
+        return new SpellTarget(caster, LastingEffect.Middle(caster));
     }
 }

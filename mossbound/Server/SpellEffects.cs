@@ -1,55 +1,108 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Mossbound.Core;
 using Vintagestory.API.Common;
+using Vintagestory.API.Common.Entities;
 using Vintagestory.API.MathTools;
 using Vintagestory.API.Server;
 
 namespace Mossbound.Server;
 
-// What each aspect does when it lands. Test scale for v1: every aspect shows its colour, and Life,
-// Ember and Wind have a real effect. Spells never hurt or push players (no PvP griefing).
-static class SpellEffects
+// What a spell does where it lands: its aspect's particles and sound, then its reactions with what it finds on the
+// target (docs/spell-system.md), then each effect of its payload, scaled by the spell's strength.
+class SpellEffects
 {
-    static readonly Dictionary<Aspect, int> colours = new()
-    {
-        [Aspect.Water] = ColorUtil.ToRgba(255, 60, 120, 220),
-        [Aspect.Ember] = ColorUtil.ToRgba(255, 240, 120, 40),
-        [Aspect.Frost] = ColorUtil.ToRgba(255, 200, 235, 255),
-        [Aspect.Stone] = ColorUtil.ToRgba(255, 130, 120, 110),
-        [Aspect.Life] = ColorUtil.ToRgba(255, 90, 200, 80),
-        [Aspect.Rot] = ColorUtil.ToRgba(255, 110, 90, 50),
-        [Aspect.Wind] = ColorUtil.ToRgba(255, 225, 225, 210),
-        [Aspect.Ward] = ColorUtil.ToRgba(255, 220, 200, 120),
-        [Aspect.Moss] = ColorUtil.ToRgba(255, 70, 140, 50),
-    };
-    static readonly int compoundColour = ColorUtil.ToRgba(255, 170, 140, 210);
-    static readonly int smokeColour = ColorUtil.ToRgba(180, 70, 70, 70);
+    readonly ICoreServerAPI sapi;
+    readonly PersonalityTable personalities;
+    readonly Dictionary<EffectKind, ISpellEffect> effects;
+    readonly Afflict wet, chill;
+    readonly Slows slow, root;
 
-    public static void Apply(ICoreServerAPI sapi, IServerPlayer caster, SpellTarget target, Aspect aspect, int intensity)
+    public SpellEffects(ICoreServerAPI sapi, ShieldBubbles shields)
     {
-        Burst(sapi, target.Position, colours.GetValueOrDefault(aspect, compoundColour), 10 + 10 * intensity);
-
-        var creature = target.Entity is EntityPlayer ? null : target.Entity;
-        switch (aspect)
+        this.sapi = sapi;
+        personalities = Personalities.Load(sapi);
+        wet = new Afflict(sapi, Condition.Wet, 10);
+        chill = new Afflict(sapi, Condition.Chilled, 8);
+        slow = Slows.Slow(sapi);
+        root = Slows.Root(sapi);
+        effects = new()
         {
-            case Aspect.Life:
-                (target.Entity ?? caster.Entity).ReceiveDamage(Source(caster, EnumDamageType.Heal), 2 * intensity);
+            [EffectKind.Burn] = new Damage(EnumDamageType.Fire),
+            [EffectKind.Freeze] = new Damage(EnumDamageType.Frost),
+            [EffectKind.Bash] = new Damage(EnumDamageType.BluntAttack),
+            [EffectKind.Heal] = new Heal(),
+            [EffectKind.Push] = new Push(),
+            [EffectKind.Ignite] = new Ignite(),
+            [EffectKind.Extinguish] = new Extinguish(),
+            [EffectKind.Slow] = slow,
+            [EffectKind.Shield] = shields,
+            [EffectKind.Soak] = wet,
+            [EffectKind.Chill] = chill,
+            [EffectKind.FreezeWater] = new FreezeWater(),
+            [EffectKind.Root] = root,
+            [EffectKind.Regrow] = new Regrow(),
+            [EffectKind.Cure] = new Cure(),
+            [EffectKind.PoisonOverTime] = new OverTime(EnumDamageType.Poison, EnumDamageOverTimeEffectType.Poison, harmful: true),
+            [EffectKind.HealOverTime] = new OverTime(EnumDamageType.Heal, EnumDamageOverTimeEffectType.Unknown, harmful: false),
+            [EffectKind.Wither] = new Wither(),
+            [EffectKind.Lift] = new Lift(),
+            [EffectKind.Scatter] = new Scatter(),
+            [EffectKind.Calm] = new Calms(sapi),
+            [EffectKind.Melt] = new Melt(),
+        };
+        var missing = Enum.GetValues<EffectKind>().Where(kind => !effects.ContainsKey(kind)).ToList();
+        if (missing.Count > 0) throw new InvalidOperationException("[mossbound] effects with no class: " + string.Join(", ", missing));
+    }
+
+    public void Apply(IServerPlayer caster, SpellTarget target, SpellCell cell)
+    {
+        if (!personalities.Aspects.TryGetValue(cell.Aspect, out var personality)) return;
+        var hit = new SpellHit(sapi, caster, target.Entity, target.Position, personality.Kit);
+        Show(personality.Kit, target.Position, cell.Strength);
+
+        var reactions = target.Entity is { } entity ? Reactions.For(Conditions.On(entity), cell.Aspect) : new List<Reaction>();
+        foreach (var reaction in reactions) React(reaction, hit, target.Entity!, cell.Strength);
+        if (reactions.Any(Reactions.ReplacesPayload)) return;
+        foreach (var step in personality.Payload) effects[step.Effect].Apply(hit, step.Amount * cell.Strength * Jitter(), step.Seconds * Jitter());
+    }
+
+    // Each effect lands a little stronger or weaker, and lasts a little longer or shorter, so no two casts are alike.
+    float Jitter() => 0.85f + 0.3f * (float)sapi.World.Rand.NextDouble();
+
+    void React(Reaction reaction, SpellHit hit, Entity target, int strength)
+    {
+        switch (reaction)
+        {
+            case Reaction.Frozen:
+                wet.End(target);
+                root.Apply(hit with { Kit = KitOf(Aspect.Frost) }, 1, 2f * strength);
+                Show(KitOf(Aspect.Frost), hit.Position, strength + 1);
                 break;
-            case Aspect.Ember:
-                creature?.ReceiveDamage(Source(caster, EnumDamageType.Fire), 2 * intensity);
+            case Reaction.SteamBurst:
+                wet.End(target);
+                Show(KitOf(Aspect.Steam), hit.Position, strength + 1);
+                effects[EffectKind.Burn].Apply(hit with { Kit = KitOf(Aspect.Steam) }, strength, 0);
                 break;
-            case Aspect.Wind when creature != null && creature.Pos.XYZ.SquareDistanceTo(caster.Entity.Pos.XYZ) > 0.01:
-                var away = creature.Pos.XYZ.Sub(caster.Entity.Pos.XYZ).Normalize(); // guarded: a zero vector normalises to NaN
-                creature.Pos.Motion.Add(away.X * 0.3 * intensity, 0.15 * intensity, away.Z * 0.3 * intensity);
+            case Reaction.Doused:
+                Show(KitOf(Aspect.Steam), hit.Position, 1);
+                break;
+            case Reaction.Fanned:
+                effects[EffectKind.Ignite].Apply(hit with { Entity = null, Position = target.Pos.XYZ }, strength, 0);
+                break;
+            case Reaction.Thawed:
+                chill.End(target);
+                slow.End(target);
                 break;
         }
     }
 
-    public static void ApplyMishap(ICoreServerAPI sapi, IServerPlayer caster, IReadOnlyList<Mishap> mishaps, SpellLimits limits)
+    Kit KitOf(Aspect aspect) => personalities.Aspects.TryGetValue(aspect, out var p) ? p.Kit : personalities.Mishap;
+
+    public void ApplyMishap(IServerPlayer caster, IReadOnlyList<Mishap> mishaps, SpellLimits limits)
     {
-        var at = caster.Entity.Pos.XYZ.Add(0, 1, 0);
-        Burst(sapi, at, smokeColour, 25);
+        Show(personalities.Mishap, caster.Entity.Pos.XYZ.Add(0, 1, 0), 2);
         if (mishaps.Any(m => m.Backfires()))
         {
             caster.Entity.ReceiveDamage(new DamageSource { Source = EnumDamageSource.Internal, Type = EnumDamageType.Injury }, 1);
@@ -64,28 +117,9 @@ static class SpellEffects
             caster.Tell("mishap-hint-" + mishap.ToString().ToLowerInvariant(), limits.Strength, limits.Scale, limits.Spells);
     }
 
-    // Heals carry no source entity: the game applies knockback even to heals, from the source's
-    // position, and healing yourself makes that direction (you - you).Normalize() = NaN, which
-    // crashes the client.
-    static DamageSource Source(IServerPlayer caster, EnumDamageType type) => type == EnumDamageType.Heal
-        ? new() { Source = EnumDamageSource.Internal, Type = type }
-        : new() { Source = EnumDamageSource.Player, SourceEntity = caster.Entity, CauseEntity = caster.Entity, Type = type };
-
-    // Spawned server-side with no "except player": every nearby client sees it.
-    static void Burst(ICoreServerAPI sapi, Vec3d at, int colour, int quantity) =>
-        sapi.World.SpawnParticles(new SimpleParticleProperties
-        {
-            MinQuantity = quantity,
-            AddQuantity = quantity / 2f,
-            Color = colour,
-            MinPos = at.AddCopy(-0.5, -0.5, -0.5),
-            AddPos = new Vec3d(1, 1, 1),
-            MinVelocity = new Vec3f(-0.4f, 0.2f, -0.4f),
-            AddVelocity = new Vec3f(0.8f, 0.6f, 0.8f),
-            LifeLength = 1.2f,
-            GravityEffect = -0.03f,
-            MinSize = 0.3f,
-            MaxSize = 0.7f,
-            ParticleModel = EnumParticleModel.Quad,
-        });
+    void Show(Kit kit, Vec3d at, int strength)
+    {
+        KitParticles.Burst(sapi.World, kit, at, strength);
+        sapi.World.PlaySoundAt(new AssetLocation(kit.Sound), at.X, at.Y, at.Z, null, true, 24);
+    }
 }

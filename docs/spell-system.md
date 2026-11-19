@@ -23,8 +23,11 @@ The first build: the smallest version that is fun to play. It keeps the same str
 | Modifiers | none | marks, behaviours |
 | Origin and aim | caster; what the caster looks at | other origins, the aim chain (M6) |
 | Effects | what the first personalities need | more |
-| World reactions | only inside hand-made spells | the interaction table |
-| Rendering | one archetype per form, painted by the aspect's material kit; Seed as a projectile entity with a variant per aspect | more archetypes, client-animated areas |
+| World reactions | conditions (Wet, Chilled, plus the game's burning and poison) and the reactions between them and an incoming aspect; block effects per aspect (ice, grass) | the full interaction table |
+| Traces | patch (on the ground) and cloud (in the air), one ticking-zone runner | growth |
+| Ward | a bubble that absorbs a set amount of damage, then pops or fades | |
+| Discovery | a successful cast records each heart as written, for the caster; discovered hearts show their own colours in that player's charge visuals, undiscovered ones look neutral. The base for a future player journal | the journal |
+| Rendering | one archetype per form, painted by the aspect's material kit; Seed as a projectile entity with a variant per aspect; Ring as one server message animated by every client | more archetypes |
 | Saving spells | not needed | saveable `ResolvedSpell` (Imbue, Delayed, triggers) |
 
 ## Words
@@ -179,7 +182,17 @@ Modifiers never add mechanics; a swarm of slow fireballs is five fireballs, smal
 
 ## The world reacts
 
-**After v0.** Until then, hand-made spells handle their own reactions.
+**Conditions and reactions are built** (`Core/Spells/Reactions.cs`, `Server/Effects/Conditions.cs`). A target can carry conditions: Wet (Water) and Chilled (Frost), each lasting a few seconds and synced as entity attributes, plus the game's own burning and poison. A spell that lands on a target with a condition first runs the reactions it triggers:
+
+| Condition | Incoming | Reaction |
+|---|---|---|
+| Wet | Frost | Frozen: rooted in place, the wet ends |
+| Wet | Ember | Steam burst: scalding damage **instead of** Ember's payload, the wet ends |
+| Burning | Water, Rain | Doused: a puff of steam (the payload puts the fire out) |
+| Burning | Wind | Fanned: fire at the target's feet |
+| Chilled | Ember | Thawed: the chill and its slow end |
+
+**After v0:** the rest of the world table below. Block effects already built: Ember lights the ground and melts ice and snow, Frost freezes still water, Life thickens grass, Rot kills grass and flowers into dead plants. They spread outward over about a second, in a ragged patch.
 
 A small interaction table, applied by effects on what they hit (examples):
 
@@ -243,7 +256,8 @@ sequenceDiagram
 - **Material kits:** each aspect paints the archetype:
   - render style: solid, glow, or particles only (Wind, Steam, Smoke, Spore);
   - textures for the slots every archetype model uses (`#core`, `#edge`, `#glow`);
-  - particle presets, a motion flavour (flicker, heavy, sway, ooze), light and sound.
+  - particle presets, a motion flavour (flicker, heavy, sway, ooze) and light;
+  - sounds, by role: `sound` once when the spell lands; `loopSound` while something of it lasts (a seed in flight, a trace, a cloud, the Ward bubble), played and stopped by each client; `endSound` once when that ends (the bubble popping). The form decides which roles it uses. Built: `sound` and `endSound`.
 - **Projectiles** are server entities, one entity type with a variant per aspect (textures filled from the aspect code), synced by the game.
 - **Areas and instant effects** are one small server message (cell, scale, position, start time, seed); every client animates them locally with the same result.
 - **Hand-made spells** have their own models and animations.
@@ -261,7 +275,7 @@ sequenceDiagram
 
 ## What changes in built behaviour
 
-The heart rules below, the form glyphs Seed and Ring, and the tier limits are built (`Core/Spells/SpellReading.cs`); every spell still acts by touch until the deliveries exist.
+The heart rules below, the form glyphs Seed and Ring, and the tier limits are built (`Core/Spells/SpellReading.cs`), and so are the personalities' payloads and kits (`config/personalities.json`, `Server/Effects/`); every spell still acts by touch until the deliveries exist.
 
 | Built today ([Appendix C](design-appendix.md#c-elements-and-mixing)) | Becomes |
 |---|---|

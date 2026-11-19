@@ -17,6 +17,9 @@ namespace Mossbound.Client;
 readonly record struct InkStyle(Ink.Colour Colour, double ColourVariation, double Roughness,
     double CanvasGrain, double PanelGrain, double Noise, double Weight, bool DoubleBorder = false, bool Doubles = false)
 {
+    // Reference figures: no wobble, no colour drift, no grain, every hand-drawn imperfection scaled to zero.
+    public static readonly InkStyle Clean = new(new(0.10, 0.08, 0.07), 0, 0, 1, 1, 0, 1);
+
 #pragma warning disable IDE0055 // a table, aligned by hand
     public static InkStyle For(CircleTier tier) => tier.Level switch
     {

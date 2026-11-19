@@ -20,6 +20,8 @@ public sealed class Mixer<TPart, TResult> where TPart : struct, Enum where TResu
         this.opposites = opposites;
     }
 
+    public IEnumerable<TResult> MixResults => recipes.Select(r => r.result);
+
     public (TResult? result, Mishap? mishap) Mix(IReadOnlyCollection<TPart> parts)
     {
         if (parts.Count == 1) return (alone(parts.First()), null);
