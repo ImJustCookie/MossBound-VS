@@ -6,9 +6,17 @@ using Vintagestory.API.MathTools;
 namespace Mossbound.Server;
 
 // An aspect's particles: each style moves its own way (speed, direction, gravity, life), so spells read apart even
-// at a glance. Spawned on the server, one call per colour: every nearby client sees the same burst.
+// at a glance. Bursts are spawned on the server, one call per colour, so every nearby client sees the same burst;
+// trails are spawned by each client where it draws what leaves them (EntitySeed).
 static class KitParticles
 {
+    // A burst with the aspect's sound: how a spell shows where it lands.
+    public static void Show(IWorldAccessor world, Kit kit, Vec3d at, int strength, float range = 24)
+    {
+        Burst(world, kit, at, strength);
+        world.PlaySoundAt(new AssetLocation(kit.Sound), at.X, at.Y, at.Z, null, true, range);
+    }
+
     public static void Burst(IWorldAccessor world, Kit kit, Vec3d at, int strength)
     {
         int quantity = 10 + 8 * strength;
@@ -18,6 +26,38 @@ static class KitParticles
             particles.Color = ColorUtil.Hex2Int(hex) | unchecked((int)0xFF000000);
             particles.MinQuantity = quantity / kit.Colours.Count;
             particles.AddQuantity = particles.MinQuantity / 2;
+            world.SpawnParticles(particles);
+        }
+    }
+
+    // One puff of a meteor trail along the path of something in flight: the aspect's own particles, left hanging where
+    // they fall (no rising or falling), drifting slowly outward, growing and fading, so the trail widens and dissipates
+    // behind it. Heavy styles (dust, ooze) keep their weight and rain down from the path. Airy styles (gusts, steam,
+    // smoke) have no solid body to show, so their trail is thicker and wider.
+    public static void Trail(IWorldAccessor world, Kit kit, Vec3d at)
+    {
+        var rand = world.Rand;
+        bool airy = kit.Particles is ParticleStyle.Gust or ParticleStyle.Steam or ParticleStyle.Smoke;
+        bool heavy = kit.Particles is ParticleStyle.Dust or ParticleStyle.Ooze;
+        double jitter = airy ? 0.25 : 0.12;
+        float drift = airy ? 0.35f : 0.18f;
+        foreach (string hex in kit.Colours)
+        {
+            var particles = For(kit.Particles, at);
+            var centre = at.AddCopy((rand.NextDouble() * 2 - 1) * jitter, (rand.NextDouble() * 2 - 1) * jitter, (rand.NextDouble() * 2 - 1) * jitter);
+            particles.Color = ColorUtil.Hex2Int(hex) | unchecked((int)0xFF000000);
+            particles.MinPos = centre.AddCopy(-0.06, -0.06, -0.06);
+            particles.AddPos = new Vec3d(0.12, 0.12, 0.12);
+            particles.MinVelocity = new Vec3f(-drift, -drift, -drift);
+            particles.AddVelocity = new Vec3f(2 * drift, 2 * drift, 2 * drift);
+            if (!heavy) particles.GravityEffect = 0;
+            particles.LifeLength = (airy ? 0.8f : 0.45f) * (0.7f + 0.6f * (float)rand.NextDouble());
+            particles.addLifeLength = particles.LifeLength * 0.5f;
+            particles.MinSize *= 0.5f + 0.5f * (float)rand.NextDouble();
+            particles.SizeEvolve = EvolvingNatFloat.create(EnumTransformFunction.LINEAR, particles.MaxSize * (airy ? 1.8f : 0.8f));
+            particles.OpacityEvolve = EvolvingNatFloat.create(EnumTransformFunction.LINEAR, -255);
+            particles.MinQuantity = airy ? 3 : 1;
+            particles.AddQuantity = airy ? 2 : 1;
             world.SpawnParticles(particles);
         }
     }

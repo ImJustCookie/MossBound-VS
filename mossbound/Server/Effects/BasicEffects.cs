@@ -19,7 +19,7 @@ sealed class Damage(EnumDamageType type) : ISpellEffect
 sealed class Heal : ISpellEffect
 {
     public void Apply(SpellHit hit, float amount, float seconds) =>
-        hit.Beneficiary.ReceiveDamage(new DamageSource { Source = EnumDamageSource.Internal, Type = EnumDamageType.Heal }, amount);
+        hit.Entity?.ReceiveDamage(new DamageSource { Source = EnumDamageSource.Internal, Type = EnumDamageType.Heal }, amount);
 }
 
 // Pushes away from the caster; cast on yourself, it throws you where you look.

@@ -24,9 +24,11 @@ public enum ParticleStyle { Flame, Splash, Shards, Dust, Motes, Ooze, Gust, Bubb
 // One effect of a payload: its amount at strength 1, and how long it lasts (0 for the effect's own default).
 public sealed record PayloadEffect(EffectKind Effect, float Amount, float Seconds = 0);
 
-// How an aspect looks and sounds: colours as "#rrggbb", its particle style, the sound when it lands, and the sound
-// when something it left behind ends (the Ward bubble popping).
-public sealed record Kit(IReadOnlyList<string> Colours, ParticleStyle Particles, string Sound, string? EndSound = null);
+// How an aspect looks and sounds: colours as "#rrggbb", its particle style, the sound when it lands, the sound when
+// something it left behind ends (the Ward bubble popping), the loop played while it travels (a Seed in flight), and
+// how fast what it sends spins around its length (turns per second).
+public sealed record Kit(IReadOnlyList<string> Colours, ParticleStyle Particles, string Sound, string? EndSound = null, string? LoopSound = null,
+    float Spin = 0);
 
 // An aspect's character (docs/spell-system.md): every form expresses it in its own way.
 public sealed record Personality(Motion Motion, Impact Impact, Trace Trace, IReadOnlyList<PayloadEffect> Payload, Kit Kit);

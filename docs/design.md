@@ -41,7 +41,7 @@ There are 8 elements: Water, Ember, Frost, Stone, Life, Rot, Wind, Ward. Element
 
 ## Casting (built, test scale)
 
-Inscribe the circle, then hold right-click for at least one second and release to cast it. The medium is used up. Today every spell acts by touch, and only Life, Ember and Wind have real effects. → [Appendix G](design-appendix.md#g-casting)
+Inscribe the circle, then hold right-click for at least one second and release to cast it. The medium is used up. Today Seed spells fly and the rest act by touch, and every aspect has its own effects. → [Appendix G](design-appendix.md#g-casting)
 
 ## Planned systems
 

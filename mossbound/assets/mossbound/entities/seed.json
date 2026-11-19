@@ -1,0 +1,49 @@
+{
+	// A Seed spell in flight (Entities/EntitySeed.cs): moved by the server, drawn by clients. One variant per aspect
+	// (Core/Spells/Aspect), which picks its model (shapes/entity/seed/) and paints it with its own textures.
+	code: "seed",
+	class: "mossbound.EntitySeed",
+	tags: ["inanimate", "projectile"],
+	variantgroups: [
+		{ code: "aspect", states: ["water", "ember", "frost", "stone", "life", "rot", "wind", "ward", "steam", "rain", "smoke"] }
+	],
+	// Twice EntitySeed.CentreHeight tall: the game turns the model around half the hitbox height, its centre.
+	hitboxSize: { x: 0.25, y: 1 },
+	client: {
+		renderer: "Shape",
+		// The model per aspect, from shapes/entity/seed/.
+		shapeByType: {
+			"*-ember": { base: "mossbound:entity/seed/orb-flame" },
+			"*-water": { base: "mossbound:entity/seed/orb-bolt" },
+			"*-rain": { base: "mossbound:entity/seed/orb-bolt" },
+			"*-frost": { base: "mossbound:entity/seed/shard-ice" },
+			"*-stone": { base: "mossbound:entity/seed/boulder-round" },
+			"*-rot": { base: "mossbound:entity/seed/boulder-jagged" },
+			"*-life": { base: "mossbound:entity/seed/orb-seedpod" },
+			"*-ward": { base: "mossbound:entity/seed/orb-bubble" },
+			"*": { base: "mossbound:entity/seed/orb-flame" }
+		},
+		// The textures each aspect's model paints, from the shared slots: core (glowing heart), shell (opaque outer layer),
+		// glass (see-through shell), rock (boulder body), vein (bright veins, edges, rings). A model swapped in for an aspect
+		// needs that aspect's textures for its slots (SeedAssetTests names any missing).
+		texturesByType: {
+			"*-water": { "core": { base: "mossbound:entity/seed/water/core" }, "shell": { base: "mossbound:entity/seed/water/shell" } },
+			"*-ember": { "core": { base: "mossbound:entity/seed/ember/core" }, "shell": { base: "mossbound:entity/seed/ember/shell" }, "vein": { base: "mossbound:entity/seed/ember/vein" } },
+			"*-frost": { "core": { base: "mossbound:entity/seed/frost/core" }, "vein": { base: "mossbound:entity/seed/frost/vein" } },
+			"*-stone": { "rock": { base: "mossbound:entity/seed/stone/rock" }, "vein": { base: "mossbound:entity/seed/stone/vein" } },
+			"*-life": { "core": { base: "mossbound:entity/seed/life/core" }, "shell": { base: "mossbound:entity/seed/life/shell" }, "vein": { base: "mossbound:entity/seed/life/vein" } },
+			"*-rot": { "rock": { base: "mossbound:entity/seed/rot/rock" }, "vein": { base: "mossbound:entity/seed/rot/vein" } },
+			"*-wind": { "core": { base: "mossbound:entity/seed/wind/core" }, "shell": { base: "mossbound:entity/seed/wind/shell" }, "vein": { base: "mossbound:entity/seed/wind/vein" } },
+			"*-ward": { "core": { base: "mossbound:entity/seed/ward/core" }, "glass": { base: "mossbound:entity/seed/ward/glass" } },
+			"*-steam": { "core": { base: "mossbound:entity/seed/steam/core" }, "shell": { base: "mossbound:entity/seed/steam/shell" }, "vein": { base: "mossbound:entity/seed/steam/vein" } },
+			"*-rain": { "core": { base: "mossbound:entity/seed/rain/core" }, "shell": { base: "mossbound:entity/seed/rain/shell" } },
+			"*-smoke": { "core": { base: "mossbound:entity/seed/smoke/core" }, "shell": { base: "mossbound:entity/seed/smoke/shell" }, "vein": { base: "mossbound:entity/seed/smoke/vein" } }
+		},
+		size: 1,
+		behaviors: [{ code: "interpolateposition" }]
+	},
+	server: {
+		behaviors: []
+	},
+	sounds: {}
+}

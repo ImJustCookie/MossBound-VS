@@ -12,7 +12,7 @@ Milestones in build order. The design they implement is in [design.md](design.md
 | M3 | First casting | test scale | Hold to cast, sneak to edit, medium used up except in creative, cooldown; Touch only; Life, Ember and Wind effects; a coloured burst per aspect; backfire and fizzle; `/mossbound glyphs` |
 | M3b | Circle grammar and look | done | Letter, word and mix circles, bites, aim lines, doubled lines; glyph sizes; source on the border; hearts mix only when linked; the linking rule; `/mossbound inspect`; the writing guide and `tools/docs-images` |
 | M4 | Making the media (tiers I and II) | next | Work steps with block animations, a knapping-style carving surface and a station. Moss: scrape, lay, flatten, carve, inscribe with a stick. Bark: strip, build the scribing stump, flatten, carve, charcoal stick. Each medium unlocks its rings |
-| M5 | Forms (tier II) | | Form and behaviour glyphs on the shape ring (Touch, Seed, Ring first); modifier marks; self-cost (hunger, then health); real effects for more aspects |
+| M5 | Forms (tier II) | in progress: Seed flies, every aspect has its effects; Ring next | Form and behaviour glyphs on the shape ring (Touch, Seed, Ring first); modifier marks; self-cost (hunger, then health); real effects for more aspects |
 | M6 | Aim (tier III) | | Aim glyphs read as a chain; the tier III medium and its workstation |
 | M7 | Learning glyphs | | Listening for elements, fragments and rubbings, resonance, the field notebook |
 | M8 | Functions (tier IV) | | Carved stone and ground circles; rim triggers; nested circles with parameters, named circles, If, Echo, Each; hard limits |

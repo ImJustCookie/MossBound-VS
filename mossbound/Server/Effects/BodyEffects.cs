@@ -11,7 +11,7 @@ sealed class OverTime(EnumDamageType type, EnumDamageOverTimeEffectType kind, bo
 
     public void Apply(SpellHit hit, float amount, float seconds)
     {
-        var target = harmful ? hit.Harmable : hit.Beneficiary;
+        var target = harmful ? hit.Harmable : hit.Entity;
         float duration = seconds > 0 ? seconds : DefaultSeconds;
         target?.GetBehavior<EntityBehaviorHealth>()?.ApplyDoTEffect(
             harmful ? EnumDamageSource.Player : EnumDamageSource.Internal, type, 0, amount, TimeSpan.FromSeconds(duration), (int)Math.Ceiling(duration), kind);
@@ -21,7 +21,7 @@ sealed class OverTime(EnumDamageType type, EnumDamageOverTimeEffectType kind, bo
 sealed class Cure : ISpellEffect
 {
     public void Apply(SpellHit hit, float amount, float seconds) =>
-        hit.Beneficiary.GetBehavior<EntityBehaviorHealth>()?.StopDoTEffect((int)EnumDamageOverTimeEffectType.Poison);
+        hit.Entity?.GetBehavior<EntityBehaviorHealth>()?.StopDoTEffect((int)EnumDamageOverTimeEffectType.Poison);
 }
 
 // Thrown upward, less the bigger it is (its hitbox against a player's): a chicken flies, a bear barely hops.

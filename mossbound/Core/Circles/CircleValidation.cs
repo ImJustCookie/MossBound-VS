@@ -24,5 +24,9 @@ public static class CircleValidation
     public static bool LinksFollowTheGrammar(Circle circle, CircleTier tier) =>
         circle.Links.All(l => tier.AllowsLink(circle.Glyphs[l.From].Key, circle.Glyphs[l.To].Key));
 
+    // What may be written on a medium: something, that fits it, linked by the rules.
+    public static bool IsWritable(Circle circle, CircleTier tier) =>
+        circle.Glyphs.Count > 0 && FitsTier(circle, tier) && LinksFollowTheGrammar(circle, tier);
+
     static bool IsGlyphIndex(Circle circle, int i) => i >= 0 && i < circle.Glyphs.Count;
 }

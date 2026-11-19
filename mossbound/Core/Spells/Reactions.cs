@@ -3,9 +3,8 @@ using System.Linq;
 
 namespace Mossbound.Core;
 
-// A state a spell can find on what it hits. Wet and Chilled are left by spells; Burning and Poisoned are the
-// game's own fire and poison.
-public enum Condition { Wet, Chilled, Burning, Poisoned }
+// A state a spell can find on what it hits. Wet and Chilled are left by spells; Burning is the game's own fire.
+public enum Condition { Wet, Chilled, Burning }
 
 public enum Reaction
 {

@@ -32,7 +32,7 @@ sealed class ShieldBubbles : ISpellEffect
 
     public void Apply(SpellHit hit, float amount, float seconds)
     {
-        var owner = hit.Beneficiary;
+        if (hit.Entity is not { } owner) return;
         if (bubbles.TryGetValue(owner.EntityId, out var existing))
         {
             existing.Left += amount;
@@ -64,8 +64,7 @@ sealed class ShieldBubbles : ISpellEffect
         float absorbed = Math.Min(damage, bubble.Left);
         bubble.Left -= absorbed;
         var at = LastingEffect.Middle(owner);
-        KitParticles.Burst(sapi.World, bubble.Hit.Kit, at, 1);
-        sapi.World.PlaySoundAt(new AssetLocation(bubble.Hit.Kit.Sound), at.X, at.Y, at.Z, null, true, 16);
+        KitParticles.Show(sapi.World, bubble.Hit.Kit, at, 1, range: 16);
         if (bubble.Left <= 0) End(bubble);
         return damage - absorbed;
     }

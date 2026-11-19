@@ -1,6 +1,7 @@
 using HarmonyLib;
 using Mossbound.Client;
 using Mossbound.Core;
+using Mossbound.Entities;
 using Mossbound.Items;
 using Mossbound.Network;
 using Mossbound.Server;
@@ -27,12 +28,13 @@ public class MossboundModSystem : ModSystem
     internal ShieldBubbles? Shields { get; private set; }
     Harmony? harmony;
 
-    // Both sides, same order: item classes and network message types.
+    // Both sides, same order: item and entity classes, network message types.
     public override void Start(ICoreAPI api)
     {
         PatchGame();
         api.RegisterItemClass("mossbound.ItemCircleMedium", typeof(ItemCircleMedium));
         api.RegisterItemClass("mossbound.ItemDevBook", typeof(ItemDevBook));
+        api.RegisterEntity("mossbound.EntitySeed", typeof(EntitySeed));
         api.Network.RegisterChannel(ChannelName)
             .RegisterMessageType<InscribeRequest>()
             .RegisterMessageType<GlyphAtlas>()

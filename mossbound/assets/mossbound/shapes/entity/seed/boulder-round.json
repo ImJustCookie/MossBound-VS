@@ -1,0 +1,987 @@
+{
+	"editor": {
+		"note": "A rounded boulder with glowing veins running over it."
+	},
+	"textureWidth": 16,
+	"textureHeight": 16,
+	"textures": {
+		"rock": "mossbound:entity/seed/ember/rock",
+		"vein": "mossbound:entity/seed/ember/vein"
+	},
+	"elements": [
+		{
+			"name": "body",
+			"from": [
+				4,
+				4,
+				4
+			],
+			"to": [
+				12,
+				11,
+				12
+			],
+			"rotationOrigin": [
+				8,
+				8,
+				8
+			],
+			"faces": {
+				"north": {
+					"texture": "#rock",
+					"uv": [
+						2,
+						2,
+						10,
+						9
+					]
+				},
+				"south": {
+					"texture": "#rock",
+					"uv": [
+						4,
+						7,
+						12,
+						14
+					]
+				},
+				"east": {
+					"texture": "#rock",
+					"uv": [
+						0,
+						4,
+						8,
+						11
+					]
+				},
+				"west": {
+					"texture": "#rock",
+					"uv": [
+						5,
+						5,
+						13,
+						12
+					]
+				},
+				"up": {
+					"texture": "#rock",
+					"uv": [
+						8,
+						5,
+						16,
+						13
+					]
+				},
+				"down": {
+					"texture": "#rock",
+					"uv": [
+						3,
+						0,
+						11,
+						8
+					]
+				}
+			}
+		},
+		{
+			"name": "bottom",
+			"from": [
+				5,
+				3,
+				5
+			],
+			"to": [
+				11,
+				4,
+				11
+			],
+			"rotationOrigin": [
+				8,
+				8,
+				8
+			],
+			"faces": {
+				"north": {
+					"texture": "#rock",
+					"uv": [
+						4,
+						6,
+						10,
+						7
+					]
+				},
+				"south": {
+					"texture": "#rock",
+					"uv": [
+						5,
+						5,
+						11,
+						6
+					]
+				},
+				"east": {
+					"texture": "#rock",
+					"uv": [
+						0,
+						10,
+						6,
+						11
+					]
+				},
+				"west": {
+					"texture": "#rock",
+					"uv": [
+						6,
+						2,
+						12,
+						3
+					]
+				},
+				"up": {
+					"texture": "#rock",
+					"uv": [
+						7,
+						4,
+						13,
+						10
+					]
+				},
+				"down": {
+					"texture": "#rock",
+					"uv": [
+						8,
+						10,
+						14,
+						16
+					]
+				}
+			}
+		},
+		{
+			"name": "top",
+			"from": [
+				5,
+				11,
+				5
+			],
+			"to": [
+				11,
+				12,
+				11
+			],
+			"rotationOrigin": [
+				8,
+				8,
+				8
+			],
+			"faces": {
+				"north": {
+					"texture": "#rock",
+					"uv": [
+						3,
+						7,
+						9,
+						8
+					]
+				},
+				"south": {
+					"texture": "#rock",
+					"uv": [
+						8,
+						0,
+						14,
+						1
+					]
+				},
+				"east": {
+					"texture": "#rock",
+					"uv": [
+						1,
+						8,
+						7,
+						9
+					]
+				},
+				"west": {
+					"texture": "#rock",
+					"uv": [
+						1,
+						4,
+						7,
+						5
+					]
+				},
+				"up": {
+					"texture": "#rock",
+					"uv": [
+						6,
+						9,
+						12,
+						15
+					]
+				},
+				"down": {
+					"texture": "#rock",
+					"uv": [
+						0,
+						6,
+						6,
+						12
+					]
+				}
+			}
+		},
+		{
+			"name": "east",
+			"from": [
+				12,
+				5,
+				5
+			],
+			"to": [
+				13,
+				10,
+				11
+			],
+			"rotationOrigin": [
+				8,
+				8,
+				8
+			],
+			"faces": {
+				"north": {
+					"texture": "#rock",
+					"uv": [
+						0,
+						4,
+						1,
+						9
+					]
+				},
+				"south": {
+					"texture": "#rock",
+					"uv": [
+						9,
+						10,
+						10,
+						15
+					]
+				},
+				"east": {
+					"texture": "#rock",
+					"uv": [
+						3,
+						1,
+						9,
+						6
+					]
+				},
+				"west": {
+					"texture": "#rock",
+					"uv": [
+						9,
+						8,
+						15,
+						13
+					]
+				},
+				"up": {
+					"texture": "#rock",
+					"uv": [
+						4,
+						10,
+						5,
+						16
+					]
+				},
+				"down": {
+					"texture": "#rock",
+					"uv": [
+						12,
+						5,
+						13,
+						11
+					]
+				}
+			}
+		},
+		{
+			"name": "west",
+			"from": [
+				3,
+				5,
+				5
+			],
+			"to": [
+				4,
+				10,
+				11
+			],
+			"rotationOrigin": [
+				8,
+				8,
+				8
+			],
+			"faces": {
+				"north": {
+					"texture": "#rock",
+					"uv": [
+						15,
+						2,
+						16,
+						7
+					]
+				},
+				"south": {
+					"texture": "#rock",
+					"uv": [
+						9,
+						11,
+						10,
+						16
+					]
+				},
+				"east": {
+					"texture": "#rock",
+					"uv": [
+						9,
+						10,
+						15,
+						15
+					]
+				},
+				"west": {
+					"texture": "#rock",
+					"uv": [
+						2,
+						0,
+						8,
+						5
+					]
+				},
+				"up": {
+					"texture": "#rock",
+					"uv": [
+						13,
+						8,
+						14,
+						14
+					]
+				},
+				"down": {
+					"texture": "#rock",
+					"uv": [
+						4,
+						8,
+						5,
+						14
+					]
+				}
+			}
+		},
+		{
+			"name": "north",
+			"from": [
+				5,
+				5,
+				3
+			],
+			"to": [
+				11,
+				10,
+				4
+			],
+			"rotationOrigin": [
+				8,
+				8,
+				8
+			],
+			"faces": {
+				"north": {
+					"texture": "#rock",
+					"uv": [
+						8,
+						9,
+						14,
+						14
+					]
+				},
+				"south": {
+					"texture": "#rock",
+					"uv": [
+						0,
+						10,
+						6,
+						15
+					]
+				},
+				"east": {
+					"texture": "#rock",
+					"uv": [
+						7,
+						1,
+						8,
+						6
+					]
+				},
+				"west": {
+					"texture": "#rock",
+					"uv": [
+						0,
+						0,
+						1,
+						5
+					]
+				},
+				"up": {
+					"texture": "#rock",
+					"uv": [
+						2,
+						11,
+						8,
+						12
+					]
+				},
+				"down": {
+					"texture": "#rock",
+					"uv": [
+						1,
+						12,
+						7,
+						13
+					]
+				}
+			}
+		},
+		{
+			"name": "south",
+			"from": [
+				5,
+				5,
+				12
+			],
+			"to": [
+				11,
+				10,
+				13
+			],
+			"rotationOrigin": [
+				8,
+				8,
+				8
+			],
+			"faces": {
+				"north": {
+					"texture": "#rock",
+					"uv": [
+						7,
+						8,
+						13,
+						13
+					]
+				},
+				"south": {
+					"texture": "#rock",
+					"uv": [
+						0,
+						10,
+						6,
+						15
+					]
+				},
+				"east": {
+					"texture": "#rock",
+					"uv": [
+						0,
+						10,
+						1,
+						15
+					]
+				},
+				"west": {
+					"texture": "#rock",
+					"uv": [
+						7,
+						7,
+						8,
+						12
+					]
+				},
+				"up": {
+					"texture": "#rock",
+					"uv": [
+						4,
+						0,
+						10,
+						1
+					]
+				},
+				"down": {
+					"texture": "#rock",
+					"uv": [
+						7,
+						2,
+						13,
+						3
+					]
+				}
+			}
+		},
+		{
+			"name": "veinTop",
+			"from": [
+				4.5,
+				11.8,
+				7.2
+			],
+			"to": [
+				11.5,
+				12.5,
+				8.4
+			],
+			"rotationOrigin": [
+				8,
+				8,
+				8
+			],
+			"faces": {
+				"north": {
+					"texture": "#vein",
+					"uv": [
+						8,
+						2,
+						15,
+						3
+					]
+				},
+				"south": {
+					"texture": "#vein",
+					"uv": [
+						8,
+						2,
+						15,
+						3
+					]
+				},
+				"east": {
+					"texture": "#vein",
+					"uv": [
+						15,
+						8,
+						16,
+						9
+					]
+				},
+				"west": {
+					"texture": "#vein",
+					"uv": [
+						2,
+						8,
+						3,
+						9
+					]
+				},
+				"up": {
+					"texture": "#vein",
+					"uv": [
+						3,
+						6,
+						10,
+						7
+					]
+				},
+				"down": {
+					"texture": "#vein",
+					"uv": [
+						3,
+						14,
+						10,
+						15
+					]
+				}
+			},
+			"rotationY": 30,
+			"glow": 160
+		},
+		{
+			"name": "veinTop2",
+			"from": [
+				7,
+				11.8,
+				5
+			],
+			"to": [
+				8.1,
+				12.4,
+				9
+			],
+			"rotationOrigin": [
+				8,
+				8,
+				8
+			],
+			"faces": {
+				"north": {
+					"texture": "#vein",
+					"uv": [
+						15,
+						12,
+						16,
+						13
+					]
+				},
+				"south": {
+					"texture": "#vein",
+					"uv": [
+						2,
+						15,
+						3,
+						16
+					]
+				},
+				"east": {
+					"texture": "#vein",
+					"uv": [
+						10,
+						9,
+						14,
+						10
+					]
+				},
+				"west": {
+					"texture": "#vein",
+					"uv": [
+						12,
+						1,
+						16,
+						2
+					]
+				},
+				"up": {
+					"texture": "#vein",
+					"uv": [
+						6,
+						1,
+						7,
+						5
+					]
+				},
+				"down": {
+					"texture": "#vein",
+					"uv": [
+						4,
+						5,
+						5,
+						9
+					]
+				}
+			},
+			"rotationY": -20,
+			"glow": 160
+		},
+		{
+			"name": "veinEast",
+			"from": [
+				12.8,
+				4.5,
+				6.5
+			],
+			"to": [
+				13.5,
+				10.5,
+				7.6
+			],
+			"rotationOrigin": [
+				13,
+				8,
+				8
+			],
+			"faces": {
+				"north": {
+					"texture": "#vein",
+					"uv": [
+						8,
+						10,
+						9,
+						16
+					]
+				},
+				"south": {
+					"texture": "#vein",
+					"uv": [
+						9,
+						9,
+						10,
+						15
+					]
+				},
+				"east": {
+					"texture": "#vein",
+					"uv": [
+						4,
+						0,
+						5,
+						6
+					]
+				},
+				"west": {
+					"texture": "#vein",
+					"uv": [
+						15,
+						0,
+						16,
+						6
+					]
+				},
+				"up": {
+					"texture": "#vein",
+					"uv": [
+						15,
+						8,
+						16,
+						9
+					]
+				},
+				"down": {
+					"texture": "#vein",
+					"uv": [
+						3,
+						6,
+						4,
+						7
+					]
+				}
+			},
+			"rotationX": 25,
+			"glow": 160
+		},
+		{
+			"name": "veinSouth",
+			"from": [
+				5,
+				6.5,
+				12.8
+			],
+			"to": [
+				11,
+				7.6,
+				13.5
+			],
+			"rotationOrigin": [
+				8,
+				8,
+				13
+			],
+			"faces": {
+				"north": {
+					"texture": "#vein",
+					"uv": [
+						10,
+						15,
+						16,
+						16
+					]
+				},
+				"south": {
+					"texture": "#vein",
+					"uv": [
+						4,
+						9,
+						10,
+						10
+					]
+				},
+				"east": {
+					"texture": "#vein",
+					"uv": [
+						14,
+						14,
+						15,
+						15
+					]
+				},
+				"west": {
+					"texture": "#vein",
+					"uv": [
+						14,
+						3,
+						15,
+						4
+					]
+				},
+				"up": {
+					"texture": "#vein",
+					"uv": [
+						8,
+						6,
+						14,
+						7
+					]
+				},
+				"down": {
+					"texture": "#vein",
+					"uv": [
+						4,
+						2,
+						10,
+						3
+					]
+				}
+			},
+			"rotationZ": -25,
+			"glow": 160
+		},
+		{
+			"name": "veinNorth",
+			"from": [
+				6,
+				5,
+				2.5
+			],
+			"to": [
+				7.1,
+				10,
+				3.2
+			],
+			"rotationOrigin": [
+				8,
+				8,
+				3
+			],
+			"faces": {
+				"north": {
+					"texture": "#vein",
+					"uv": [
+						15,
+						0,
+						16,
+						5
+					]
+				},
+				"south": {
+					"texture": "#vein",
+					"uv": [
+						9,
+						7,
+						10,
+						12
+					]
+				},
+				"east": {
+					"texture": "#vein",
+					"uv": [
+						2,
+						8,
+						3,
+						13
+					]
+				},
+				"west": {
+					"texture": "#vein",
+					"uv": [
+						14,
+						4,
+						15,
+						9
+					]
+				},
+				"up": {
+					"texture": "#vein",
+					"uv": [
+						12,
+						6,
+						13,
+						7
+					]
+				},
+				"down": {
+					"texture": "#vein",
+					"uv": [
+						6,
+						2,
+						7,
+						3
+					]
+				}
+			},
+			"rotationZ": 15,
+			"glow": 160
+		},
+		{
+			"name": "veinWest",
+			"from": [
+				2.5,
+				5.5,
+				7.5
+			],
+			"to": [
+				3.2,
+				10.5,
+				8.6
+			],
+			"rotationOrigin": [
+				3,
+				8,
+				8
+			],
+			"faces": {
+				"north": {
+					"texture": "#vein",
+					"uv": [
+						2,
+						2,
+						3,
+						7
+					]
+				},
+				"south": {
+					"texture": "#vein",
+					"uv": [
+						8,
+						5,
+						9,
+						10
+					]
+				},
+				"east": {
+					"texture": "#vein",
+					"uv": [
+						4,
+						9,
+						5,
+						14
+					]
+				},
+				"west": {
+					"texture": "#vein",
+					"uv": [
+						8,
+						1,
+						9,
+						6
+					]
+				},
+				"up": {
+					"texture": "#vein",
+					"uv": [
+						11,
+						7,
+						12,
+						8
+					]
+				},
+				"down": {
+					"texture": "#vein",
+					"uv": [
+						15,
+						15,
+						16,
+						16
+					]
+				}
+			},
+			"rotationX": -15,
+			"glow": 160
+		}
+	]
+}

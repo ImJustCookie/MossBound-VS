@@ -7,17 +7,10 @@ namespace Mossbound.Tests;
 // A key missing from en.json shows up in game as the raw key, so every key the code uses must exist.
 public class LangTests
 {
-    static readonly string repo = FindRepo();
+    static readonly string repo = TestAssets.Repo;
     static readonly HashSet<string> keys = JsonSerializer
         .Deserialize<Dictionary<string, string>>(File.ReadAllText(Path.Combine(repo, "mossbound/assets/mossbound/lang/en.json")))!
         .Keys.ToHashSet();
-
-    static string FindRepo()
-    {
-        var dir = new DirectoryInfo(AppContext.BaseDirectory);
-        while (!File.Exists(Path.Combine(dir.FullName, "mossbound.sln"))) dir = dir.Parent!;
-        return dir.FullName;
-    }
 
     static string Key<T>(string prefix, T value) where T : Enum => prefix + value.ToString().ToLowerInvariant();
 

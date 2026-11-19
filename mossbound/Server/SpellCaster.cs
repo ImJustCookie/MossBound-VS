@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Mossbound.Core;
+using Mossbound.Entities;
 using Mossbound.Items;
 using Vintagestory.API.Common;
 using Vintagestory.API.Common.Entities;
@@ -63,8 +64,27 @@ class SpellCaster
             effects.ApplyMishap(player, plan.Mishaps, tier.Limits);
             return;
         }
-        // shortcut: every spell acts by touch whatever its form; deliveries come with the spell framework.
-        foreach (var cell in plan.Cells) effects.Apply(player, target, cell);
+        // shortcut: Ring still acts by touch until its delivery exists (roadmap phase 3).
+        foreach (var cell in plan.Cells)
+        {
+            if (cell.Form == Form.Seed) Sow(player, cell);
+            else effects.Apply(player, target, cell);
+        }
+    }
+
+    // A Seed flies from just below the caster's eyes where they look, in its aspect's motion, and applies the spell where it lands.
+    void Sow(IServerPlayer player, SpellCell cell)
+    {
+        if (effects.PersonalityOf(cell.Aspect) is not { } personality) return;
+        var type = sapi.World.GetEntityType(new AssetLocation("mossbound", "seed-" + cell.Aspect.ToString().ToLowerInvariant()));
+        if (type == null || sapi.World.ClassRegistry.CreateEntity(type) is not EntitySeed seed) return;
+
+        var caster = player.Entity;
+        var look = caster.Pos.GetViewVector().ToVec3d();
+        var start = caster.Pos.XYZ.Add(0, caster.LocalEyePos.Y - 0.2, 0).Add(look.X * 0.8, look.Y * 0.8, look.Z * 0.8);
+        seed.Launch(caster, start, look, SeedFlight.For(personality.Motion, cell.Scale), personality.Kit,
+            personality.Impact == Impact.PassThrough, target => effects.Apply(player, target, cell));
+        sapi.World.SpawnEntity(seed);
     }
 
     // The client says what the player looks at; the server only accepts it within reach.

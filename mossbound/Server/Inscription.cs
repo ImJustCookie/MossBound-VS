@@ -21,8 +21,7 @@ class Inscription
             return;
         }
         var tier = medium.TierOf(slot.Itemstack);
-        if (msg.Circle is not { Glyphs.Count: > 0 } circle || !CircleValidation.FitsTier(circle, tier)
-            || !CircleValidation.LinksFollowTheGrammar(circle, tier))
+        if (msg.Circle is not { } circle || !CircleValidation.IsWritable(circle, tier))
         {
             sapi.Logger.Warning("[mossbound] rejected malformed inscription from {0}", player.PlayerName);
             return;

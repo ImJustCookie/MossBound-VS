@@ -1,0 +1,1014 @@
+{
+	"editor": {
+		"note": "A big glowing core in a turned cage of bright bars."
+	},
+	"textureWidth": 16,
+	"textureHeight": 16,
+	"textures": {
+		"core": "mossbound:entity/seed/ember/core",
+		"vein": "mossbound:entity/seed/ember/vein"
+	},
+	"elements": [
+		{
+			"name": "core",
+			"from": [
+				6.0,
+				6.0,
+				6.0
+			],
+			"to": [
+				10.0,
+				10.0,
+				10.0
+			],
+			"rotationOrigin": [
+				8,
+				8,
+				8
+			],
+			"faces": {
+				"north": {
+					"texture": "#core",
+					"uv": [
+						10,
+						1,
+						14,
+						5
+					]
+				},
+				"south": {
+					"texture": "#core",
+					"uv": [
+						11,
+						4,
+						15,
+						8
+					]
+				},
+				"east": {
+					"texture": "#core",
+					"uv": [
+						8,
+						5,
+						12,
+						9
+					]
+				},
+				"west": {
+					"texture": "#core",
+					"uv": [
+						2,
+						5,
+						6,
+						9
+					]
+				},
+				"up": {
+					"texture": "#core",
+					"uv": [
+						12,
+						3,
+						16,
+						7
+					]
+				},
+				"down": {
+					"texture": "#core",
+					"uv": [
+						8,
+						8,
+						12,
+						12
+					]
+				}
+			},
+			"rotationX": 35,
+			"rotationY": 45,
+			"glow": 220
+		},
+		{
+			"name": "bar0",
+			"from": [
+				4.5,
+				4.5,
+				4.5
+			],
+			"to": [
+				11.5,
+				5.2,
+				5.2
+			],
+			"rotationOrigin": [
+				8,
+				8,
+				8
+			],
+			"faces": {
+				"north": {
+					"texture": "#vein",
+					"uv": [
+						8,
+						10,
+						15,
+						11
+					]
+				},
+				"south": {
+					"texture": "#vein",
+					"uv": [
+						3,
+						6,
+						10,
+						7
+					]
+				},
+				"east": {
+					"texture": "#vein",
+					"uv": [
+						7,
+						12,
+						8,
+						13
+					]
+				},
+				"west": {
+					"texture": "#vein",
+					"uv": [
+						7,
+						6,
+						8,
+						7
+					]
+				},
+				"up": {
+					"texture": "#vein",
+					"uv": [
+						8,
+						15,
+						15,
+						16
+					]
+				},
+				"down": {
+					"texture": "#vein",
+					"uv": [
+						5,
+						0,
+						12,
+						1
+					]
+				}
+			},
+			"rotationX": 35,
+			"rotationY": 45,
+			"glow": 120
+		},
+		{
+			"name": "bar1",
+			"from": [
+				4.5,
+				4.5,
+				10.8
+			],
+			"to": [
+				11.5,
+				5.2,
+				11.5
+			],
+			"rotationOrigin": [
+				8,
+				8,
+				8
+			],
+			"faces": {
+				"north": {
+					"texture": "#vein",
+					"uv": [
+						0,
+						8,
+						7,
+						9
+					]
+				},
+				"south": {
+					"texture": "#vein",
+					"uv": [
+						7,
+						8,
+						14,
+						9
+					]
+				},
+				"east": {
+					"texture": "#vein",
+					"uv": [
+						6,
+						11,
+						7,
+						12
+					]
+				},
+				"west": {
+					"texture": "#vein",
+					"uv": [
+						14,
+						11,
+						15,
+						12
+					]
+				},
+				"up": {
+					"texture": "#vein",
+					"uv": [
+						5,
+						2,
+						12,
+						3
+					]
+				},
+				"down": {
+					"texture": "#vein",
+					"uv": [
+						3,
+						3,
+						10,
+						4
+					]
+				}
+			},
+			"rotationX": 35,
+			"rotationY": 45,
+			"glow": 120
+		},
+		{
+			"name": "bar2",
+			"from": [
+				4.5,
+				10.8,
+				4.5
+			],
+			"to": [
+				11.5,
+				11.5,
+				5.2
+			],
+			"rotationOrigin": [
+				8,
+				8,
+				8
+			],
+			"faces": {
+				"north": {
+					"texture": "#vein",
+					"uv": [
+						3,
+						15,
+						10,
+						16
+					]
+				},
+				"south": {
+					"texture": "#vein",
+					"uv": [
+						3,
+						10,
+						10,
+						11
+					]
+				},
+				"east": {
+					"texture": "#vein",
+					"uv": [
+						6,
+						15,
+						7,
+						16
+					]
+				},
+				"west": {
+					"texture": "#vein",
+					"uv": [
+						0,
+						15,
+						1,
+						16
+					]
+				},
+				"up": {
+					"texture": "#vein",
+					"uv": [
+						5,
+						2,
+						12,
+						3
+					]
+				},
+				"down": {
+					"texture": "#vein",
+					"uv": [
+						1,
+						12,
+						8,
+						13
+					]
+				}
+			},
+			"rotationX": 35,
+			"rotationY": 45,
+			"glow": 120
+		},
+		{
+			"name": "bar3",
+			"from": [
+				4.5,
+				10.8,
+				10.8
+			],
+			"to": [
+				11.5,
+				11.5,
+				11.5
+			],
+			"rotationOrigin": [
+				8,
+				8,
+				8
+			],
+			"faces": {
+				"north": {
+					"texture": "#vein",
+					"uv": [
+						3,
+						15,
+						10,
+						16
+					]
+				},
+				"south": {
+					"texture": "#vein",
+					"uv": [
+						2,
+						13,
+						9,
+						14
+					]
+				},
+				"east": {
+					"texture": "#vein",
+					"uv": [
+						10,
+						2,
+						11,
+						3
+					]
+				},
+				"west": {
+					"texture": "#vein",
+					"uv": [
+						12,
+						14,
+						13,
+						15
+					]
+				},
+				"up": {
+					"texture": "#vein",
+					"uv": [
+						6,
+						2,
+						13,
+						3
+					]
+				},
+				"down": {
+					"texture": "#vein",
+					"uv": [
+						2,
+						5,
+						9,
+						6
+					]
+				}
+			},
+			"rotationX": 35,
+			"rotationY": 45,
+			"glow": 120
+		},
+		{
+			"name": "bar4",
+			"from": [
+				4.5,
+				4.5,
+				4.5
+			],
+			"to": [
+				5.2,
+				11.5,
+				5.2
+			],
+			"rotationOrigin": [
+				8,
+				8,
+				8
+			],
+			"faces": {
+				"north": {
+					"texture": "#vein",
+					"uv": [
+						4,
+						0,
+						5,
+						7
+					]
+				},
+				"south": {
+					"texture": "#vein",
+					"uv": [
+						4,
+						9,
+						5,
+						16
+					]
+				},
+				"east": {
+					"texture": "#vein",
+					"uv": [
+						14,
+						2,
+						15,
+						9
+					]
+				},
+				"west": {
+					"texture": "#vein",
+					"uv": [
+						15,
+						5,
+						16,
+						12
+					]
+				},
+				"up": {
+					"texture": "#vein",
+					"uv": [
+						4,
+						4,
+						5,
+						5
+					]
+				},
+				"down": {
+					"texture": "#vein",
+					"uv": [
+						0,
+						0,
+						1,
+						1
+					]
+				}
+			},
+			"rotationX": 35,
+			"rotationY": 45,
+			"glow": 120
+		},
+		{
+			"name": "bar5",
+			"from": [
+				4.5,
+				4.5,
+				10.8
+			],
+			"to": [
+				5.2,
+				11.5,
+				11.5
+			],
+			"rotationOrigin": [
+				8,
+				8,
+				8
+			],
+			"faces": {
+				"north": {
+					"texture": "#vein",
+					"uv": [
+						3,
+						8,
+						4,
+						15
+					]
+				},
+				"south": {
+					"texture": "#vein",
+					"uv": [
+						4,
+						6,
+						5,
+						13
+					]
+				},
+				"east": {
+					"texture": "#vein",
+					"uv": [
+						6,
+						3,
+						7,
+						10
+					]
+				},
+				"west": {
+					"texture": "#vein",
+					"uv": [
+						0,
+						4,
+						1,
+						11
+					]
+				},
+				"up": {
+					"texture": "#vein",
+					"uv": [
+						6,
+						9,
+						7,
+						10
+					]
+				},
+				"down": {
+					"texture": "#vein",
+					"uv": [
+						7,
+						10,
+						8,
+						11
+					]
+				}
+			},
+			"rotationX": 35,
+			"rotationY": 45,
+			"glow": 120
+		},
+		{
+			"name": "bar6",
+			"from": [
+				10.8,
+				4.5,
+				4.5
+			],
+			"to": [
+				11.5,
+				11.5,
+				5.2
+			],
+			"rotationOrigin": [
+				8,
+				8,
+				8
+			],
+			"faces": {
+				"north": {
+					"texture": "#vein",
+					"uv": [
+						8,
+						8,
+						9,
+						15
+					]
+				},
+				"south": {
+					"texture": "#vein",
+					"uv": [
+						13,
+						2,
+						14,
+						9
+					]
+				},
+				"east": {
+					"texture": "#vein",
+					"uv": [
+						1,
+						5,
+						2,
+						12
+					]
+				},
+				"west": {
+					"texture": "#vein",
+					"uv": [
+						14,
+						9,
+						15,
+						16
+					]
+				},
+				"up": {
+					"texture": "#vein",
+					"uv": [
+						13,
+						4,
+						14,
+						5
+					]
+				},
+				"down": {
+					"texture": "#vein",
+					"uv": [
+						4,
+						0,
+						5,
+						1
+					]
+				}
+			},
+			"rotationX": 35,
+			"rotationY": 45,
+			"glow": 120
+		},
+		{
+			"name": "bar7",
+			"from": [
+				10.8,
+				4.5,
+				10.8
+			],
+			"to": [
+				11.5,
+				11.5,
+				11.5
+			],
+			"rotationOrigin": [
+				8,
+				8,
+				8
+			],
+			"faces": {
+				"north": {
+					"texture": "#vein",
+					"uv": [
+						14,
+						2,
+						15,
+						9
+					]
+				},
+				"south": {
+					"texture": "#vein",
+					"uv": [
+						0,
+						2,
+						1,
+						9
+					]
+				},
+				"east": {
+					"texture": "#vein",
+					"uv": [
+						5,
+						2,
+						6,
+						9
+					]
+				},
+				"west": {
+					"texture": "#vein",
+					"uv": [
+						15,
+						9,
+						16,
+						16
+					]
+				},
+				"up": {
+					"texture": "#vein",
+					"uv": [
+						3,
+						1,
+						4,
+						2
+					]
+				},
+				"down": {
+					"texture": "#vein",
+					"uv": [
+						10,
+						15,
+						11,
+						16
+					]
+				}
+			},
+			"rotationX": 35,
+			"rotationY": 45,
+			"glow": 120
+		},
+		{
+			"name": "bar8",
+			"from": [
+				4.5,
+				4.5,
+				4.5
+			],
+			"to": [
+				5.2,
+				5.2,
+				11.5
+			],
+			"rotationOrigin": [
+				8,
+				8,
+				8
+			],
+			"faces": {
+				"north": {
+					"texture": "#vein",
+					"uv": [
+						3,
+						1,
+						4,
+						2
+					]
+				},
+				"south": {
+					"texture": "#vein",
+					"uv": [
+						7,
+						6,
+						8,
+						7
+					]
+				},
+				"east": {
+					"texture": "#vein",
+					"uv": [
+						4,
+						1,
+						11,
+						2
+					]
+				},
+				"west": {
+					"texture": "#vein",
+					"uv": [
+						1,
+						14,
+						8,
+						15
+					]
+				},
+				"up": {
+					"texture": "#vein",
+					"uv": [
+						0,
+						1,
+						1,
+						8
+					]
+				},
+				"down": {
+					"texture": "#vein",
+					"uv": [
+						14,
+						5,
+						15,
+						12
+					]
+				}
+			},
+			"rotationX": 35,
+			"rotationY": 45,
+			"glow": 120
+		},
+		{
+			"name": "bar9",
+			"from": [
+				4.5,
+				10.8,
+				4.5
+			],
+			"to": [
+				5.2,
+				11.5,
+				11.5
+			],
+			"rotationOrigin": [
+				8,
+				8,
+				8
+			],
+			"faces": {
+				"north": {
+					"texture": "#vein",
+					"uv": [
+						6,
+						8,
+						7,
+						9
+					]
+				},
+				"south": {
+					"texture": "#vein",
+					"uv": [
+						14,
+						15,
+						15,
+						16
+					]
+				},
+				"east": {
+					"texture": "#vein",
+					"uv": [
+						8,
+						7,
+						15,
+						8
+					]
+				},
+				"west": {
+					"texture": "#vein",
+					"uv": [
+						8,
+						8,
+						15,
+						9
+					]
+				},
+				"up": {
+					"texture": "#vein",
+					"uv": [
+						6,
+						7,
+						7,
+						14
+					]
+				},
+				"down": {
+					"texture": "#vein",
+					"uv": [
+						4,
+						6,
+						5,
+						13
+					]
+				}
+			},
+			"rotationX": 35,
+			"rotationY": 45,
+			"glow": 120
+		},
+		{
+			"name": "bar10",
+			"from": [
+				10.8,
+				4.5,
+				4.5
+			],
+			"to": [
+				11.5,
+				5.2,
+				11.5
+			],
+			"rotationOrigin": [
+				8,
+				8,
+				8
+			],
+			"faces": {
+				"north": {
+					"texture": "#vein",
+					"uv": [
+						3,
+						12,
+						4,
+						13
+					]
+				},
+				"south": {
+					"texture": "#vein",
+					"uv": [
+						14,
+						10,
+						15,
+						11
+					]
+				},
+				"east": {
+					"texture": "#vein",
+					"uv": [
+						1,
+						7,
+						8,
+						8
+					]
+				},
+				"west": {
+					"texture": "#vein",
+					"uv": [
+						6,
+						2,
+						13,
+						3
+					]
+				},
+				"up": {
+					"texture": "#vein",
+					"uv": [
+						6,
+						4,
+						7,
+						11
+					]
+				},
+				"down": {
+					"texture": "#vein",
+					"uv": [
+						3,
+						2,
+						4,
+						9
+					]
+				}
+			},
+			"rotationX": 35,
+			"rotationY": 45,
+			"glow": 120
+		},
+		{
+			"name": "bar11",
+			"from": [
+				10.8,
+				10.8,
+				4.5
+			],
+			"to": [
+				11.5,
+				11.5,
+				11.5
+			],
+			"rotationOrigin": [
+				8,
+				8,
+				8
+			],
+			"faces": {
+				"north": {
+					"texture": "#vein",
+					"uv": [
+						11,
+						4,
+						12,
+						5
+					]
+				},
+				"south": {
+					"texture": "#vein",
+					"uv": [
+						8,
+						4,
+						9,
+						5
+					]
+				},
+				"east": {
+					"texture": "#vein",
+					"uv": [
+						7,
+						7,
+						14,
+						8
+					]
+				},
+				"west": {
+					"texture": "#vein",
+					"uv": [
+						1,
+						12,
+						8,
+						13
+					]
+				},
+				"up": {
+					"texture": "#vein",
+					"uv": [
+						15,
+						2,
+						16,
+						9
+					]
+				},
+				"down": {
+					"texture": "#vein",
+					"uv": [
+						7,
+						2,
+						8,
+						9
+					]
+				}
+			},
+			"rotationX": 35,
+			"rotationY": 45,
+			"glow": 120
+		}
+	]
+}

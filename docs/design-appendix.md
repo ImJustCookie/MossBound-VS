@@ -107,7 +107,7 @@ What each mishap does: [writing guide](writing-guide.md#when-it-goes-wrong).
 
 ## D. Forms and behaviours
 
-**Planned (M5).** Until then every cast acts by touch.
+**Partly built.** Seed flies (see [Appendix G](#g-casting)); Ring still acts by touch.
 
 | Form | Effect |
 |---|---|
@@ -165,7 +165,7 @@ nested circle  aim: If [Ground is soil] at There
 |---|---|
 | Inscribe | The server validates the circle and writes it on one medium from the held stack |
 | Cast | Hold right-click at least 1 second to charge, release to cast; releasing earlier cancels |
-| Target | Creature looked at within 5 blocks, else the block looked at, else the caster |
+| Target | Seed: flies from just below the caster's eyes where they look, in its aspect's motion (level and fast; only heavy seeds fall; wobble sways), up to 40 blocks (half again per scale step past 1, at most 6 seconds), and lands on the first creature or solid block, or in water; Wind passes through up to 5 creatures. Other forms: the creature looked at within 5 blocks, else the block looked at, else the caster |
 | Cooldown | 2 seconds per player |
 | Medium | Used up, except in creative mode |
 | Effects | Each aspect has its own particles, sound and effects (from `config/personalities.json`, see [spell system](spell-system.md)): Ember burns, sets on fire (a wider patch of ground with more strength) and melts ice and snow around it; Water puts out fire, pushes lightly and leaves its target wet; Frost hurts, slows and chills, and freezes still water around it into ice; Stone bashes, knocks back and roots its target for a moment; Life heals, cures poison and thickens the grass around it; Rot poisons over time, slows and kills grass and flowers, leaving dead plants; Wind pushes hard, lifts and scatters dropped items; Ward puts a bubble on its target that absorbs damage until it pops or fades; Steam scalds; Rain heals over time and puts out fire; Smoke slows and calms creatures so they stop attacking. Effects react with what the target already carries: Frost on a wet target freezes it in place; Ember on a wet target bursts into scalding steam instead of its own effects; Ember on a chilled target thaws it; Water or Rain on a burning target douses it in steam; Wind on a burning target fans the flames at its feet. Block changes spread outward from where the spell lands over about a second, in a ragged patch, and respect land claims. Every effect varies a little from cast to cast. A rooted or calmed creature stops what it was doing. Strength multiplies every effect. Harmful effects never reach other players; a spell cast at nothing lands on yourself (a push then throws you where you look) |

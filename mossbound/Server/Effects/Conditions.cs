@@ -1,10 +1,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using Mossbound.Core;
-using Vintagestory.API.Common;
 using Vintagestory.API.Common.Entities;
 using Vintagestory.API.Server;
-using Vintagestory.GameContent;
 
 namespace Mossbound.Server;
 
@@ -20,13 +18,11 @@ static class Conditions
 {
     public static string Key(Condition condition) => "mossbound:" + condition.ToString().ToLowerInvariant();
 
-    // What a spell finds on an entity: our own conditions, and the game's fire and poison.
+    // What a spell finds on an entity: our own conditions, and the game's fire.
     public static List<Condition> On(Entity entity)
     {
         var on = new[] { Condition.Wet, Condition.Chilled }.Where(c => entity.WatchedAttributes.GetBool(Key(c))).ToList();
         if (entity.IsOnFire) on.Add(Condition.Burning);
-        if (entity.GetBehavior<EntityBehaviorHealth>()?.ActiveDoTEffects.Any(e => e.EffectType == (int)EnumDamageOverTimeEffectType.Poison && e.TicksLeft > 0) == true)
-            on.Add(Condition.Poisoned);
         return on;
     }
 }

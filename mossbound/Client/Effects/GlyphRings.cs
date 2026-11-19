@@ -7,7 +7,8 @@ using Vintagestory.API.Common;
 
 namespace Mossbound.Client;
 
-// The glyph rings of every caster this client renders, started and ended from each held medium's cast state.
+// The glyph rings of every caster this client renders, started and ended from each held medium's cast state, with
+// the cast's sounds.
 sealed class GlyphRings : IRenderer
 {
     const int MaxEnding = 16;
@@ -19,6 +20,7 @@ sealed class GlyphRings : IRenderer
     readonly ICoreClientAPI capi;
     readonly GlyphSprites sprites;
     readonly GlyphQuads quads;
+    readonly CastSounds sounds;
     readonly Dictionary<long, CastRings> live = new();
     readonly List<CastRings> ending = new();
     readonly List<CastRings> stale = new();
@@ -31,6 +33,7 @@ sealed class GlyphRings : IRenderer
         this.capi = capi;
         sprites = new GlyphSprites(capi);
         quads = new GlyphQuads(capi);
+        sounds = new CastSounds(capi);
         capi.Event.RegisterRenderer(this, EnumRenderStage.Opaque, "mossbound-glyph-rings");
     }
 
@@ -58,6 +61,7 @@ sealed class GlyphRings : IRenderer
         if (sprites.Count + circle.Glyphs.Count > GlyphSprites.MaxCached) ClearAll();
 
         var groups = Capped(CircleStructure.CastGroups(circle, CastRings.MaxRings), style.GlyphMax);
+        sounds.Start(holder, style);
         return live[holder.EntityId] = new CastRings(holder, groups, style, castSeconds, sprites);
     }
 
@@ -78,6 +82,7 @@ sealed class GlyphRings : IRenderer
     {
         live.Remove(rings.Holder.EntityId);
         rings.End(how);
+        sounds.End(rings.Holder, how == RingsEnding.Release);
         if (ending.Count >= MaxEnding) ending.RemoveAt(0);
         ending.Add(rings);
     }
@@ -89,7 +94,11 @@ sealed class GlyphRings : IRenderer
         ending.RemoveAll(r => r.Finished);
 
         quads.Begin();
-        foreach (var rings in live.Values) rings.Draw(quads, CasterAnchors.Feet(capi.World, rings.Holder), dt);
+        foreach (var rings in live.Values)
+        {
+            rings.Draw(quads, CasterAnchors.Feet(capi.World, rings.Holder), dt);
+            sounds.Follow(rings.Holder);
+        }
         foreach (var rings in ending) rings.Draw(quads, CasterAnchors.Feet(capi.World, rings.Holder), dt);
         quads.End();
     }
@@ -107,6 +116,7 @@ sealed class GlyphRings : IRenderer
     {
         live.Clear();
         ending.Clear();
+        sounds.StopAll();
         sprites.Clear();
     }
 

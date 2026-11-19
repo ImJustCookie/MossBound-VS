@@ -257,7 +257,7 @@ sequenceDiagram
   - render style: solid, glow, or particles only (Wind, Steam, Smoke, Spore);
   - textures for the slots every archetype model uses (`#core`, `#edge`, `#glow`);
   - particle presets, a motion flavour (flicker, heavy, sway, ooze) and light;
-  - sounds, by role: `sound` once when the spell lands; `loopSound` while something of it lasts (a seed in flight, a trace, a cloud, the Ward bubble), played and stopped by each client; `endSound` once when that ends (the bubble popping). The form decides which roles it uses. Built: `sound` and `endSound`.
+  - sounds, by role: `sound` once when the spell lands; `loopSound` while something of it lasts (a seed in flight, a trace, a cloud, the Ward bubble), played and stopped by each client; `endSound` once when that ends (the bubble popping). The form decides which roles it uses. Built: `sound`, `endSound`, and `loopSound` for a Seed in flight. The cast itself hums while it charges and sounds once on release (`CastStyle`), for everyone nearby.
 - **Projectiles** are server entities, one entity type with a variant per aspect (textures filled from the aspect code), synced by the game.
 - **Areas and instant effects** are one small server message (cell, scale, position, start time, seed); every client animates them locally with the same result.
 - **Hand-made spells** have their own models and animations.
@@ -275,7 +275,7 @@ sequenceDiagram
 
 ## What changes in built behaviour
 
-The heart rules below, the form glyphs Seed and Ring, and the tier limits are built (`Core/Spells/SpellReading.cs`), and so are the personalities' payloads and kits (`config/personalities.json`, `Server/Effects/`); every spell still acts by touch until the deliveries exist.
+The heart rules below, the form glyphs Seed and Ring, and the tier limits are built (`Core/Spells/SpellReading.cs`), and so are the personalities' payloads and kits (`config/personalities.json`, `Server/Effects/`); Seed is built as a projectile entity (`Entities/EntitySeed.cs`, `entities/seed.json`): its flight comes from the aspect's motion (`Core/Spells/SeedFlight.cs`), its range from scale, and it lands on the first creature or solid block, or in water (Wind passes through creatures). Ring still acts by touch until its delivery exists.
 
 | Built today ([Appendix C](design-appendix.md#c-elements-and-mixing)) | Becomes |
 |---|---|
@@ -283,7 +283,7 @@ The heart rules below, the form glyphs Seed and Ring, and the tier limits are bu
 | Mixes tried in table order, leftovers stay pure: one heart can give several aspects | one heart gives exactly one aspect, or fails |
 | A mix's intensity is the smaller count of its elements | strength is the sum of the heart's glyph sizes, capped per tier |
 | Overload: more than 3 of one element | over the tier's strength, scale or spell cap |
-| Every cast acts by touch | the form decides; no form is Touch |
+| Ring acts by touch | the form decides; no form is Touch (Seed is built) |
 
 ## Open items
 

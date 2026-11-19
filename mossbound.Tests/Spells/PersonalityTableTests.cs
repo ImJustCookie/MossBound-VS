@@ -6,27 +6,21 @@ namespace Mossbound.Tests;
 // The shipped personalities.json: it loads, and every aspect a heart can become has a personality.
 public class PersonalityTableTests
 {
-    static readonly PersonalityTable table = PersonalityTable.Parse(File.ReadAllText(FindFile()));
-
-    static string FindFile()
-    {
-        var dir = new DirectoryInfo(AppContext.BaseDirectory);
-        while (!File.Exists(Path.Combine(dir.FullName, "mossbound.sln"))) dir = dir.Parent!;
-        return Path.Combine(dir.FullName, "mossbound/assets/mossbound/config/personalities.json");
-    }
+    static readonly PersonalityTable table = PersonalityTable.Parse(File.ReadAllText(Path.Combine(TestAssets.Mod, "config/personalities.json")));
 
     [Fact]
     public void EveryCastableAspectHasAPersonality() =>
         Assert.All(Recipes.CastableAspects, aspect => Assert.True(table.Aspects.ContainsKey(aspect), $"{aspect} has no personality"));
 
     [Fact]
-    public void EveryPersonalityDoesSomethingAndLooksLikeSomething()
+    public void EveryPersonalityDoesSomethingLooksAndSoundsLikeSomething()
     {
         foreach (var (aspect, p) in table.Aspects)
         {
             Assert.True(p.Payload.Count > 0, $"{aspect} has no payload");
             Assert.True(p.Kit.Colours.Count > 0 && p.Kit.Colours.All(c => Regex.IsMatch(c, "^#[0-9a-fA-F]{6}$")), $"{aspect} colours");
             Assert.StartsWith("game:sounds/", p.Kit.Sound);
+            Assert.StartsWith("game:sounds/", p.Kit.LoopSound ?? $"{aspect} has no travel loop");
         }
     }
 

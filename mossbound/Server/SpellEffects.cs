@@ -4,7 +4,6 @@ using System.Linq;
 using Mossbound.Core;
 using Vintagestory.API.Common;
 using Vintagestory.API.Common.Entities;
-using Vintagestory.API.MathTools;
 using Vintagestory.API.Server;
 
 namespace Mossbound.Server;
@@ -56,11 +55,13 @@ class SpellEffects
         if (missing.Count > 0) throw new InvalidOperationException("[mossbound] effects with no class: " + string.Join(", ", missing));
     }
 
+    public Personality? PersonalityOf(Aspect aspect) => personalities.Aspects.GetValueOrDefault(aspect);
+
     public void Apply(IServerPlayer caster, SpellTarget target, SpellCell cell)
     {
-        if (!personalities.Aspects.TryGetValue(cell.Aspect, out var personality)) return;
+        if (PersonalityOf(cell.Aspect) is not { } personality) return;
         var hit = new SpellHit(sapi, caster, target.Entity, target.Position, personality.Kit);
-        Show(personality.Kit, target.Position, cell.Strength);
+        KitParticles.Show(sapi.World, personality.Kit, target.Position, cell.Strength);
 
         var reactions = target.Entity is { } entity ? Reactions.For(Conditions.On(entity), cell.Aspect) : new List<Reaction>();
         foreach (var reaction in reactions) React(reaction, hit, target.Entity!, cell.Strength);
@@ -78,15 +79,15 @@ class SpellEffects
             case Reaction.Frozen:
                 wet.End(target);
                 root.Apply(hit with { Kit = KitOf(Aspect.Frost) }, 1, 2f * strength);
-                Show(KitOf(Aspect.Frost), hit.Position, strength + 1);
+                KitParticles.Show(sapi.World, KitOf(Aspect.Frost), hit.Position, strength + 1);
                 break;
             case Reaction.SteamBurst:
                 wet.End(target);
-                Show(KitOf(Aspect.Steam), hit.Position, strength + 1);
+                KitParticles.Show(sapi.World, KitOf(Aspect.Steam), hit.Position, strength + 1);
                 effects[EffectKind.Burn].Apply(hit with { Kit = KitOf(Aspect.Steam) }, strength, 0);
                 break;
             case Reaction.Doused:
-                Show(KitOf(Aspect.Steam), hit.Position, 1);
+                KitParticles.Show(sapi.World, KitOf(Aspect.Steam), hit.Position, 1);
                 break;
             case Reaction.Fanned:
                 effects[EffectKind.Ignite].Apply(hit with { Entity = null, Position = target.Pos.XYZ }, strength, 0);
@@ -98,11 +99,11 @@ class SpellEffects
         }
     }
 
-    Kit KitOf(Aspect aspect) => personalities.Aspects.TryGetValue(aspect, out var p) ? p.Kit : personalities.Mishap;
+    Kit KitOf(Aspect aspect) => PersonalityOf(aspect)?.Kit ?? personalities.Mishap;
 
     public void ApplyMishap(IServerPlayer caster, IReadOnlyList<Mishap> mishaps, SpellLimits limits)
     {
-        Show(personalities.Mishap, caster.Entity.Pos.XYZ.Add(0, 1, 0), 2);
+        KitParticles.Show(sapi.World, personalities.Mishap, caster.Entity.Pos.XYZ.Add(0, 1, 0), 2);
         if (mishaps.Any(m => m.Backfires()))
         {
             caster.Entity.ReceiveDamage(new DamageSource { Source = EnumDamageSource.Internal, Type = EnumDamageType.Injury }, 1);
@@ -115,11 +116,5 @@ class SpellEffects
         // A hint per mishap, so players learn the grammar. It never names a glyph: the script stays secret.
         foreach (var mishap in mishaps)
             caster.Tell("mishap-hint-" + mishap.ToString().ToLowerInvariant(), limits.Strength, limits.Scale, limits.Spells);
-    }
-
-    void Show(Kit kit, Vec3d at, int strength)
-    {
-        KitParticles.Burst(sapi.World, kit, at, strength);
-        sapi.World.PlaySoundAt(new AssetLocation(kit.Sound), at.X, at.Y, at.Z, null, true, 24);
     }
 }

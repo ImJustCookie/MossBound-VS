@@ -2,7 +2,7 @@ using Vintagestory.API.MathTools;
 
 namespace Mossbound.Items;
 
-// How a cast looks. One per spell look, picked by ItemCircleMedium.CastStyleFor. Rates are per second at full charge.
+// How a cast looks and sounds. One per spell look, picked by ItemCircleMedium.CastStyleFor. Rates are per second at full charge.
 public sealed record CastStyle(
     int[] Colours,
     float TwinkleRate = 6,      // sparkles blinking around the medium
@@ -15,7 +15,9 @@ public sealed record CastStyle(
     int ReleaseBurst = 30,
     int GlyphMax = 24,          // glyphs rising around the caster: one per glyph of each cast, at most this many
     float GlyphSpin = 0.12f,    // glyph ring turns per second once ready
-    byte Glow = 160)
+    byte Glow = 160,
+    string ChargeSound = "game:sounds/effect/rift",            // looped at the caster while the cast charges
+    string ReleaseSound = "game:sounds/block/teleporter")      // once, when it is released
 {
     public static readonly CastStyle Default = new(new[]
     {
