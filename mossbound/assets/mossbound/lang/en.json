@@ -6,10 +6,8 @@
     "item-parchmentsigil": "Parchment sigil",
     "itemdesc-parchmentsigil": "A scraped, stretched sheet of hide. Room for a full circle with its aim ring. Right-click to write on it, hold right-click then release to cast it, sneak + right-click to edit it.",
     "item-devbook": "Spellwright's ledger (dev)",
-    "itemdesc-devbook": "Creative-mode tool for server operators. Right-click to write a circle from named glyphs, on any medium, without drawing it.",
+    "itemdesc-devbook": "Creative-mode tool for server operators. Right-click to write a circle on it from named glyphs, for any tier, without drawing; hold right-click then release to cast it like a sigil.",
     "devbook-title": "Spellwright's ledger",
-    "devbook-write": "Write medium",
-    "devbook-written": "Written: {0}.",
     "medium-blank": "Blank.",
     "medium-inscribed": "Inscribed with {0} glyph(s).",
 

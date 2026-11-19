@@ -46,7 +46,7 @@ public class DevBookOpen
 {
 }
 
-// Client → server: "give me a medium of this tier with this circle on it", from the dev book.
+// Client → server: "write this circle, for this tier, on the dev book I'm holding".
 [ProtoContract]
 public class DevBookWrite
 {

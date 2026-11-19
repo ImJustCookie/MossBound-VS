@@ -43,14 +43,15 @@ static class AdminCommands
 
         var stack = ((IServerPlayer)args.Caller.Player).InventoryManager.ActiveHotbarSlot?.Itemstack;
         if (stack?.Collectible is not ItemCircleMedium medium) return TextCommandResult.Error(Say("error-hold-medium"));
+        var tier = medium.TierOf(stack);
         var circle = ItemCircleMedium.ReadCircle(stack);
-        if (circle == null) return TextCommandResult.Success(Say("inspect-blank", stack.GetName(), medium.Tier.Level));
+        if (circle == null) return TextCommandResult.Success(Say("inspect-blank", stack.GetName(), tier.Level));
 
         var lines = new List<string>
         {
-            Say("inspect-header", stack.GetName(), medium.Tier.Level, circle.Glyphs.Count, circle.Links.Count, Say("source-" + Lower(circle.Source))),
+            Say("inspect-header", stack.GetName(), tier.Level, circle.Glyphs.Count, circle.Links.Count, Say("source-" + Lower(circle.Source))),
         };
-        if (!CircleValidation.FitsTier(circle, medium.Tier))
+        if (!CircleValidation.FitsTier(circle, tier))
         {
             lines.Add(Say("inspect-out-of-bounds"));
             return TextCommandResult.Success(string.Join("\n", lines));
@@ -62,7 +63,7 @@ static class AdminCommands
         foreach (var g in circle.Glyphs) lines.Add(Say("inspect-glyph", SlotName(g), GlyphName(g), g.EffectiveSize));
         foreach (var l in circle.Links) lines.Add(Say("inspect-link", SlotName(circle.Glyphs[l.From]), SlotName(circle.Glyphs[l.To])));
 
-        var plan = SpellReading.Read(circle, script!, medium.Tier);
+        var plan = SpellReading.Read(circle, script!, tier);
         lines.Add(plan.Fizzles
             ? Say("inspect-mishaps", string.Join(", ", plan.Mishaps.Select(MishapName)))
             : Say("inspect-spells", string.Join(", ", plan.Cells.Select(SpellName))));

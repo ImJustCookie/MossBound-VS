@@ -56,8 +56,15 @@ public class MossboundModSystem : ModSystem
     public override void StartClientSide(ICoreClientAPI api)
     {
         clientChannel = api.Network.GetChannel(ChannelName)
-            .SetMessageHandler<GlyphAtlas>(atlas => (atlas.ForDevBook ? new GuiDialogDevBook(api, atlas, CircleTier.Parchment, null) : (GuiDialog)new GuiDialogGlyphAtlas(api, atlas)).TryOpen());
+            .SetMessageHandler<GlyphAtlas>(atlas => OnGlyphAtlas(api, atlas));
         Glyphs = new GlyphRings(api);
+    }
+
+    // The world's glyphs, sent to an admin: for the atlas window, or for the dev book's ledger.
+    static void OnGlyphAtlas(ICoreClientAPI api, GlyphAtlas atlas)
+    {
+        if (atlas.ForDevBook) ItemDevBook.OpenLedger(api, atlas);
+        else new GuiDialogGlyphAtlas(api, atlas).TryOpen();
     }
 
     // The mod's only Harmony patches: the Ward bubble cancels absorbed hits, and slows scale walking. Applied once per

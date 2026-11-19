@@ -9,9 +9,9 @@ using Vintagestory.API.Common;
 
 namespace Mossbound.Client;
 
-// The dev book: the inscription canvas with a choice of medium, and the world's glyphs by name to click instead of
-// drawing them. Links, sizes, the source and drawing by hand are the canvas's own. Write asks the server for a fresh
-// medium of the chosen tier with the circle on it, and stays open for the next one.
+// The dev book's ledger: the inscription canvas with a choice of tier, and the world's glyphs by name to click instead
+// of drawing them. Links, sizes, the source and drawing by hand are the canvas's own. Inscribe writes the circle and
+// its tier on the book in hand.
 public sealed class GuiDialogDevBook(ICoreClientAPI clientApi, GlyphAtlas atlas, CircleTier tier, Circle? circle)
     : GuiDialogCircleCanvas(clientApi, circle, tier)
 {
@@ -25,10 +25,9 @@ public sealed class GuiDialogDevBook(ICoreClientAPI clientApi, GlyphAtlas atlas,
     double cellWidth, cellHeight;
 
     protected override string TitleKey => "devbook-title";
-    protected override string InscribeKey => "devbook-write";
 
-    // Media the game has, one per tier: the medium picker's buttons.
-    static List<(CircleTier, string)> MediaOf(ICoreClientAPI capi) => capi.World.Items.OfType<ItemCircleMedium>()
+    // Media the game has, one per tier: the tier picker's buttons.
+    static List<(CircleTier, string)> MediaOf(ICoreClientAPI capi) => capi.World.Items.OfType<ItemCircleMedium>().Where(medium => medium is not ItemDevBook)
         .GroupBy(medium => medium.Tier).Select(g => (g.Key, new ItemStack(g.First()).GetName())).OrderBy(m => m.Key.Level).ToList();
 
     static string KeyOf(CircleTier tier) => "tier-" + tier.Level;
@@ -107,8 +106,11 @@ public sealed class GuiDialogDevBook(ICoreClientAPI clientApi, GlyphAtlas atlas,
         SingleComposer.GetCustomDraw("palette")?.Redraw();
     }
 
-    protected override void Inscribe(Circle circle) =>
+    protected override void Inscribe(Circle circle)
+    {
         capi.ModLoader.GetModSystem<MossboundModSystem>().Send(new DevBookWrite { Circle = circle, TierLevel = layout.Tier.Level });
+        TryClose();
+    }
 
     // The glyph in the selected slot is lit, so you see what you're overwriting.
     void DrawPalette(Context ctx, ImageSurface surface, ElementBounds bounds)

@@ -37,7 +37,8 @@ class SpellCaster
         var worldScript = script();
         var circle = ItemCircleMedium.ReadCircle(slot.Itemstack);
         if (worldScript == null || circle == null || slot.Itemstack?.Collectible is not ItemCircleMedium medium
-            || !CircleValidation.FitsTier(circle, medium.Tier)) return;
+            || !CircleValidation.FitsTier(circle, medium.TierOf(slot.Itemstack))) return;
+        var tier = medium.TierOf(slot.Itemstack);
 
         long now = sapi.World.ElapsedMilliseconds;
         if (lastCastMs.TryGetValue(player.PlayerUID, out long last) && now - last < CooldownMs)
@@ -55,11 +56,11 @@ class SpellCaster
             slot.MarkDirty();
         }
 
-        var plan = SpellReading.Read(circle, worldScript, medium.Tier);
+        var plan = SpellReading.Read(circle, worldScript, tier);
         var target = ResolveTouch(player, entitySel, blockSel);
         if (plan.Fizzles)
         {
-            effects.ApplyMishap(player, plan.Mishaps, medium.Tier.Limits);
+            effects.ApplyMishap(player, plan.Mishaps, tier.Limits);
             return;
         }
         // shortcut: every spell acts by touch whatever its form; deliveries come with the spell framework.

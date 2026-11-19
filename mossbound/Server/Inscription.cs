@@ -20,8 +20,9 @@ class Inscription
             player.Tell("inscribe-no-medium");
             return;
         }
-        if (msg.Circle is not { Glyphs.Count: > 0 } circle || !CircleValidation.FitsTier(circle, medium.Tier)
-            || !CircleValidation.LinksFollowTheGrammar(circle, medium.Tier))
+        var tier = medium.TierOf(slot.Itemstack);
+        if (msg.Circle is not { Glyphs.Count: > 0 } circle || !CircleValidation.FitsTier(circle, tier)
+            || !CircleValidation.LinksFollowTheGrammar(circle, tier))
         {
             sapi.Logger.Warning("[mossbound] rejected malformed inscription from {0}", player.PlayerName);
             return;

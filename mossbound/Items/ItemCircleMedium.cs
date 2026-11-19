@@ -32,6 +32,9 @@ public class ItemCircleMedium : Item
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0060", Justification = "Per-spell cast times will read the stack")]
     public float CastSecondsFor(ItemStack? stack) => castSeconds;
 
+    // The rings and limits this stack's circle is written for.
+    public virtual CircleTier TierOf(ItemStack? stack) => Tier;
+
     public static Circle? ReadCircle(ItemStack? stack)
     {
         byte[]? bytes = stack?.Attributes.GetBytes(CircleAttribute);
@@ -113,11 +116,11 @@ public class ItemCircleMedium : Item
 
         bool editing = IsEditing(slot, byEntity);
         byEntity.Attributes.SetBool(EditingAttribute, editing);
-        if (editing && byEntity.World.Api is ICoreClientAPI capi && byEntity == capi.World.Player.Entity)
-        {
-            new GuiDialogCircleCanvas(capi, ReadCircle(slot.Itemstack), Tier).TryOpen();
-        }
+        if (editing && byEntity.World.Api is ICoreClientAPI capi && byEntity == capi.World.Player.Entity) OpenEditor(capi, slot);
     }
+
+    protected virtual void OpenEditor(ICoreClientAPI capi, ItemSlot slot) =>
+        new GuiDialogCircleCanvas(capi, ReadCircle(slot.Itemstack), TierOf(slot.Itemstack)).TryOpen();
 
     // Fires on release once charged, like a bow: firing at full charge emptied the hand mid-hold, and the game
     // then played its empty-hand reach animation.

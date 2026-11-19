@@ -2,7 +2,8 @@
 	code: "devbook",
 	class: "mossbound.ItemDevBook",
 	maxstacksize: 1,
-	// Dev tool, creative only: writes circles from named glyphs. Vanilla book shape, temporal-gear cover and glow.
+	// Dev medium, creative only: written from named glyphs on any tier, cast like a sigil. Vanilla book shape,
+	// temporal-gear cover and glow.
 	shape: { base: "mossbound:item/devbook" },
 	creativeinventory: { "general": ["*"], "items": ["*"] },
 	lightHsv: [32, 5, 2],
@@ -13,10 +14,11 @@
 		scaleXyz: { x: -4.04, y: 4.04, z: 4.04 }
 	},
 	tpHandTransform: {
-		translation: { x: -0.79, y: -0.36, z: -0.73 },
-		rotation: { x: 0, y: -84, z: 7 },
-		origin: { x: 0.5, y: 0.1, z: 0.5 },
-		scale: 0.84
+		// Upright above the palm in the mossbound-hold pose, centred like the bark sigil (tools/pose-preview).
+		translation: { x: -1.063, y: -0.192, z: -0.675 },
+		rotation: { x: -90, y: 0, z: -90 },
+		origin: { x: 0.5, y: 0.19, z: 0.51 },
+		scale: 0.7
 	},
 	groundTransform: {
 		translation: { x: 0, y: 0, z: 0 },
