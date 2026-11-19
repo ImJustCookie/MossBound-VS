@@ -50,6 +50,7 @@ class SpellEffects
             [EffectKind.Lift] = new Lift(),
             [EffectKind.Scatter] = new Scatter(),
             [EffectKind.Calm] = new Calms(sapi),
+            [EffectKind.Melt] = new Melt(),
         };
         var missing = Enum.GetValues<EffectKind>().Where(kind => !effects.ContainsKey(kind)).ToList();
         if (missing.Count > 0) throw new InvalidOperationException("[mossbound] effects with no class: " + string.Join(", ", missing));

@@ -15,7 +15,7 @@ public enum Trace { None, Patch, Cloud }
 public enum EffectKind
 {
     Burn, Freeze, Bash, Heal, Push, Ignite, Extinguish, Slow, Shield,
-    Soak, Chill, FreezeWater, Root, Regrow, Cure, PoisonOverTime, HealOverTime, Wither, Lift, Scatter, Calm,
+    Soak, Chill, FreezeWater, Root, Regrow, Cure, PoisonOverTime, HealOverTime, Wither, Lift, Scatter, Calm, Melt,
 }
 
 // How an aspect's particles move: each aspect has its own, so spells read apart by motion, not only colour.

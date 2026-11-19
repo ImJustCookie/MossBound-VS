@@ -6,8 +6,8 @@ using Vintagestory.GameContent;
 namespace Mossbound.Server;
 
 // Sets what was hit on fire, or the ground looked at: fire placed on top of blocks the way vanilla lights one, so the
-// game decides what catches (flammability, reinforcement). Strength widens the patch: one block at 1, a ragged patch
-// spreading outward above that. Only where the caster may build.
+// game decides what catches (flammability, reinforcement). The patch spreads outward like every block effect, wider
+// with strength. Only where the caster may build.
 sealed class Ignite : ISpellEffect
 {
     public void Apply(SpellHit hit, float amount, float seconds)
@@ -20,7 +20,7 @@ sealed class Ignite : ISpellEffect
         var world = hit.Sapi.World;
         if (world.GetBlock(new AssetLocation("game:fire")) is not { } fire) return;
         var centre = hit.Position.AsBlockPos;
-        foreach (var (x, z, distance) in Around.Disc(world.Rand, Math.Clamp(amount - 1, 0, 2.5)))
+        foreach (var (x, z, distance) in Around.Disc(world.Rand, Around.Radius(amount)))
             Around.Later(hit, distance, () =>
             {
                 if (FireSpot(world, centre.AddCopy(x, 0, z)) is { } firePos && hit.CanChange(firePos)) Light(world, fire, firePos, hit.Caster.PlayerUID);

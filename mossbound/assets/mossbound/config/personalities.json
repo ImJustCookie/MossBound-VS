@@ -7,7 +7,7 @@
 		},
 		"ember": {
 			"motion": "Straight", "impact": "Burst", "trace": "Patch",
-			"payload": [ { "effect": "Burn", "amount": 1.5 }, { "effect": "Ignite", "amount": 1 } ],
+			"payload": [ { "effect": "Burn", "amount": 1.5 }, { "effect": "Melt", "amount": 1 }, { "effect": "Ignite", "amount": 1 } ],
 			"kit": { "colours": [ "#f0782a", "#ffd04a" ], "particles": "Flame", "sound": "game:sounds/held/torch-attack" }
 		},
 		"frost": {

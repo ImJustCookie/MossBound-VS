@@ -55,6 +55,29 @@ sealed class FreezeWater : ISpellEffect
     }
 }
 
+// Ice around the spot melts back into water, snow melts away, and snow-covered plants come out from under it.
+sealed class Melt : ISpellEffect
+{
+    public void Apply(SpellHit hit, float amount, float seconds)
+    {
+        var blocks = hit.Sapi.World.BlockAccessor;
+        if (hit.Sapi.World.GetBlock(new AssetLocation("game:water-still-7")) is not { } water) return;
+        Around.Change(hit, amount, pos =>
+        {
+            var block = blocks.GetBlock(pos);
+            string path = block.Code?.Path ?? "";
+            if (path.StartsWith("lakeice"))
+            {
+                blocks.SetBlock(0, pos);
+                blocks.SetBlock(water.BlockId, pos, BlockLayersAccess.Fluid);
+            }
+            else if (path.StartsWith("snowlayer") || path.StartsWith("snowblock")) blocks.SetBlock(0, pos);
+            else if (block.GetSnowLevel(pos) > 0 && block.GetSnowCoveredVariant(pos, 0) is { } bare && bare.BlockId != block.BlockId)
+                blocks.SetBlock(bare.BlockId, pos);
+        });
+    }
+}
+
 // Grass coverage on soil, from bare to full; Life moves it a step up, Rot a step down.
 static class Grass
 {
